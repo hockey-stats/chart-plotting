@@ -3,66 +3,63 @@ on:
   workflow_dispatch:
 
 jobs:
-  scrape_tables:
+  scrape-tables:
     runs-on: ubuntu-latest
-
+    ###
     steps:
       - name: Run Scraping Script
         run: |
           mkdir ./results;
-          docker run -v ${{ github.workspace }}/results:/tables sohraub/hockey-stats:scraper-1.0.1;
-
+          docker run -v ${{ github.workspace }}/results:/tables sohraub/hockey-stats-web-scraper:1.0.0;
+      #
       - name: Save Tables as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: team-tables
           path: ${{ github.workspace }}/results/*csv
           retention-days: 1
+     ###
 
   plot_graphs:
     runs-on: ubuntu-latest
     needs: scrape_tables
-    
+    env: 
+      PYTHONPATH: ${{ github.workspace }}
+    ###
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      #
       - name: Setup Python
         uses: actions/setup-python@v4
         with: 
           python-version: '3.10'
           cache: 'pip'
-
+      #
       - name: Install Requirements
         run: |
           pip install -r requirements.txt;
-
+      #
       - name: Download Tables
         uses: actions/download-artifact@v3
         with:
           name: team-tables
-
+      #
       - name: Process Tables
-        env: 
-          PYTHONPATH: ${{ github.workspace }}
         run: |
           mkdir data;
           mv *csv data/;
-          ls;
-          echo $PYTHONPATH;
           python3 processing/process_team_tables.py;
-
+      #
       - name: Generate Charts
-        env: 
-          PYTHONPATH: ${{ github.workspace }}
         run: |
           ls;  
           python3 plotting/team_plots/plot_ratios.py
-
+      #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: team-plots
           path: ./*png
           retention_days: 1
-
+      ###
