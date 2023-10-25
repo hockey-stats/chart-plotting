@@ -1,0 +1,41 @@
+nst_team_mapping = {
+    "Minnesota Wild": "MIN",
+    "Vegas Golden Knights": "VGK",
+    "Ottawa Senators": "OTT",
+    "Carolina Hurricanes": "CAR",
+    "Columbus Blue Jackets": "CBJ",
+    "Florida Panthers": "FLA",
+    "Los Angeles Kings": "LAK",
+    "New Jersey Devils": "NJD",
+    "Montreal Canadiens": "MTL",
+    "Colorado Avalanche": "COL",
+    "Washington Capitals": "WSH",
+    "Detroit Red Wings": "DET",
+    "Tampa Bay Lightning": "TBL",
+    "Vancouver Canucks": "VAN",
+    "Dallas Stars": "DAL",
+    "New York Rangers": "NYR",
+    "Buffalo Sabres": "BUF",
+    "Philadelphia Flyers": "PHI",
+    "Edmonton Oilers": "EDM",
+    "St Louis Blues": "STL",
+    "Seattle Kraken": "SEA",
+    "Toronto Maple Leafs": "TOR",
+    "San Jose Sharks": "SJS",
+    "Pittsburgh Penguins": "PIT",
+    "Winnipeg Jets": "WPG",
+    "Calgary Flames": "CGY",
+    "Boston Bruins": "BOS",
+    "Nashville Predators": "NSH",
+    "Anaheim Ducks": "ANA",
+    "Chicago Blackhawks": "CHI",
+    "Arizona Coyotes": "ARI",
+    "New York Islanders": "NYI"
+}
+
+eh_team_mapping = {
+    'S.J': 'SJS',
+    'T.B': 'TBL',
+    'N.J': 'NJD',
+    'L.A': 'LAK'
+}
