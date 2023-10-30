@@ -1,8 +1,6 @@
 import os
 import argparse
 import pandas as pd
-from util.team_maps import nst_team_mapping, eh_team_mapping
-
 
 """
 Script to read in the three team tables and compile them all into a single table 

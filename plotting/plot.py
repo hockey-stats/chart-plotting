@@ -32,9 +32,9 @@ class Plot:
         self.size = size
 
 
-class TeamPlot(Plot):
+class RatioScatterPlot(Plot):
     """
-    Class for plotting values for each team in the league against each other.
+    Class for plotting ratio values as a scatter plot.
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='', y_label='', ratio_lines=False, 
                  invert_y=False, plot_x_mean=False, plot_y_mean=False, quadrant_labels=None, size=(10,8), 
