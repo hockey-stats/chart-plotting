@@ -59,7 +59,6 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          ls;  
           python3 plotting/team_plots/plot_ratios.py
       #
       - name: Save Charts as Artifacts
