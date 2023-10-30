@@ -8,7 +8,7 @@ from util.team_maps import nst_team_mapping
 
 def get_logo_marker(team_name):
     """ Quick function to return the team logo as a matplotlib marker object. """
-    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'))
+    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=0.8)
 
 
 class Plot:
