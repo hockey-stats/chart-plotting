@@ -14,7 +14,7 @@ jobs:
       - name: Run Scraping Script
         run: |
           mkdir ./results;
-          docker run -v ${{ github.workspace }}/results:/tables sohraub/hockey-stats-web-scraper:1.0.0;
+          docker run -v ${{ github.workspace }}/results:/tables sohraub/hockey-stats-web-scraper:1.0.2;
       #
       - name: Save Tables as Artifact
         uses: actions/upload-artifact@v3
