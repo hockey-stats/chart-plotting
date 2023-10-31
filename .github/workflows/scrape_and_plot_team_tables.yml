@@ -53,13 +53,13 @@ jobs:
         run: |
           mkdir data;
           mv *csv data/;
-          python3 processing/process_team_tables.py;
+          python3 processing/for_ratio_scatter_plot/process_team_tables.py;
       #
       - name: Generate Charts
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 plotting/team_plots/plot_ratios.py
+          python3 plotting/team_plots/plot_team_ratios.py
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v3
