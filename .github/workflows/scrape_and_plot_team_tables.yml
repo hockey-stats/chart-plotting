@@ -67,4 +67,4 @@ jobs:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png
           retention-days: 1
-      ###
+    ###

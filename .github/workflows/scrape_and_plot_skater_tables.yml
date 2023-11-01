@@ -1,0 +1,64 @@
+name: Scrape and Plot Skater Tables
+on:
+  workflow_dispatch:
+    inputs:
+      team:
+        description: Team to plot statistics for, defaults to ALL
+        type: string
+        default: 'ALL'
+      minimum_icetime:
+        description: Minimum icetime cutoff to use on included players
+        type: number
+        default: 50
+    
+env: 
+  TABLES_ARTIFACT_NAME: 'skater-tables'
+  PLOTS_ARTIFACT_NAME: 'skater-plots'
+
+jobs:
+  scrape-tables:
+    runs-on: ubuntu-latest
+
+  plot-graphs:
+    runs-on: ubuntu-latest
+    needs: scrape-tables
+    ###
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      #
+      - name: Download Raw Data
+        run: |
+          mkdir ./data;
+          wget -O ./data/mp_skater_table.csv \ 
+            https://moneypuck.com/moneypuck/playerData/seasonSummary/2023/regular/skaters.csv;
+      #
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      # 
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+      #
+      - name: Process Tables
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python3 processing/for_ratio_scatter_plot/proccess_skater_tables.py
+      #
+      - name: Generate Charts
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python3 plotting/player_plots/plot_skater_ratios.py \
+            --team ${{ inputs.team }} \
+            --min_icetime ${{ inputs.minimum_icetime }};
+      #
+      - name: Save Charts as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+    ###

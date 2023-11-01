@@ -13,7 +13,7 @@ def main(team, min_icetime):
   xg_filename = f'{team}_player_xg_ratios.png' if team is not None else 'player_xg_ratios.png'
   g_filename = f'{team}_player_g_ratios.png' if team is not None else 'player_g_ratios.png'
 
-  if team:
+  if team != "ALL":
     base_df = base_df[base_df['team'] == team]
   # Apply minimum icetime
   base_df = base_df[base_df['icetime'] >= (min_icetime * 60)]
@@ -35,8 +35,8 @@ def main(team, min_icetime):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('-t', '--team', type=str, default=None,
-                      help='Team to get stats for, defaults to None (all teams).')
+  parser.add_argument('-t', '--team', type=str, default='ALL',
+                      help='Team to get stats for, defaults to ALL.')
   parser.add_argument('-i', '--min_icetime', type=int, default=0,
                       help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
   args = parser.parse_args()

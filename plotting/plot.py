@@ -98,7 +98,7 @@ class RatioScatterPlot(Plot):
 
         if self.ratio_lines:
             # Plot diagonal lines to show each percentage breakpoint
-            for x in np.arange(0.3, 0.8, 0.01):
+            for x in np.arange(0.1, 0.9, 0.01):
                 if round(x ,3) == 0.50:  # Already have a line indicating 50%, so skip here
                     continue
                 # p1 and p2 are the endpoints of the diagonal
