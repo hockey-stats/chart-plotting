@@ -1,6 +1,7 @@
 name: Scrape and Plot Team Tables
 on:
   workflow_dispatch:
+  workflow_call:
 
 env:
   TABLES_ARTIFACT_NAME: 'team-tables'

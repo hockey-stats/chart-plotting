@@ -1,5 +1,15 @@
 name: Scrape and Plot Skater Tables
 on:
+  workflow_call:
+    inputs:
+      team:
+        description: Team to plot statistics for, defaults to ALL
+        type: string
+        default: 'ALL'
+      minimum_icetime:
+        description: Minimum icetime cutoff to use on included players
+        type: number
+        default: 50
   workflow_dispatch:
     inputs:
       team:
