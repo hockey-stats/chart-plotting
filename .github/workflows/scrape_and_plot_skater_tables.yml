@@ -10,6 +10,9 @@ on:
         description: Minimum icetime cutoff to use on included players
         type: number
         default: 50
+    outputs:
+      plot_artifact_name: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+
   workflow_dispatch:
     inputs:
       team:
@@ -27,6 +30,8 @@ env:
 jobs:
   plot-graphs:
     runs-on: ubuntu-latest
+    outputs:
+      plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
     ###
     steps:
       - name: Checkout
@@ -63,4 +68,8 @@ jobs:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png
           retention-days: 1
+      #
+      - name: Set Output for Artifact Name 
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
     ###
