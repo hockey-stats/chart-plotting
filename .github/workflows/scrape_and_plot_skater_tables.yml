@@ -40,7 +40,7 @@ jobs:
       - name: Process Tables
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python3 processing/for_ratio_scatter_plot/proccess_skater_tables.py
+        run: python3 processing/for_ratio_scatter_plot/process_skater_tables.py
       #
       - name: Generate Charts
         env:
