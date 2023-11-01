@@ -18,7 +18,6 @@ env:
 jobs:
   plot-graphs:
     runs-on: ubuntu-latest
-    needs: scrape-tables
     ###
     steps:
       - name: Checkout
