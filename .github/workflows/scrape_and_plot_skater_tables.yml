@@ -16,9 +16,6 @@ env:
   PLOTS_ARTIFACT_NAME: 'skater-plots'
 
 jobs:
-  scrape-tables:
-    runs-on: ubuntu-latest
-
   plot-graphs:
     runs-on: ubuntu-latest
     needs: scrape-tables
