@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
       #
       - name: Download Raw Data
         run: |
