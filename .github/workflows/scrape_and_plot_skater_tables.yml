@@ -22,7 +22,6 @@ on:
         default: 50
     
 env: 
-  TABLES_ARTIFACT_NAME: 'skater-tables'
   PLOTS_ARTIFACT_NAME: 'skater-plots'
 
 jobs:
