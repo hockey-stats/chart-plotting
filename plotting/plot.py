@@ -7,9 +7,40 @@ from util.team_maps import nst_team_mapping
 from util.color_maps import label_colors
 
 
-def get_logo_marker(team_name, zoom=1):
-    """ Quick function to return the team logo as a matplotlib marker object. """
-    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=0.8, zoom=zoom)
+def get_logo_marker(team_name, alpha=1):
+    """
+    Quick function to return the team logo as a matplotlib marker object. 
+    """
+    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=1)
+
+
+def add_team_logo(row, x, y, axis, label=None, opacity_scale=None, opacity_max=None):
+    """
+    Function used with DataFrame.map() that adds a team logo to an axis object.
+    :param pandas.Series row: Row of the dataframe being applied on
+    :param str x: Row entry to be used for x-coordinate
+    :param str y: Row entry to be used for y-coordinate
+    :param matplotlib.pyplot.Axis: Axis object the icon is being added to
+    :param str label: Row entry to be used as a label. If not supplied, don't label
+    :param str opacity_scal: Row entry used to scale opacity, if desired
+    :param int opacity_max: Max value to compare against for opacity scale
+    """
+    opacity = 1  # Default opacity if scaling isn't used 
+    if opacity_scale:
+        # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
+        # the value on this scale (e.g., icetime)
+        opacity = row[opacity_scale] / opacity_max
+
+    # Assumes the team value is under row['team']
+    artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity),
+                                xy=(row[x], row[y]), frameon=False)
+    axis.add_artist(artist_box)
+
+    if label:
+        # Split the label entry by ' ' and use last entry. Makes no difference for one-word
+        # labels, but for names uses last name only.
+        axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1], horizontalalignment='center',
+                  verticalalignment='top', fontsize=10)
 
 
 class Plot:
@@ -65,32 +96,23 @@ class RatioScatterPlot(Plot):
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
 
-        # Replace each blank marker with the team logos
-        if self.scale == 'team':
-            for team in set(self.df['team']):
-                team_df = self.df[self.df['team'] == team]
-                ab = AnnotationBbox(get_logo_marker(team), 
-                                    (team_df[self.x_col].values[0], team_df[self.y_col].values[0]), 
-                                    frameon=False)
-                ax.add_artist(ab)
-        elif self.scale == 'player':
+        # Add team logos, slightly different based on team- or player-scale
+        if self.scale == 'player':
             max_icetime = self.df.icetime.max()
-            #for player_id in set(self.df['playerId']):
-            #    player_df = self.df[self.df['playerId'] == player_id]
-            #    # Scale icon size based on icetime
-            #    icetime = player_df.icetime.values[0]
-            #    zoom = (icetime / max_icetime) + 0.5
-            #    ab = AnnotationBbox(get_logo_marker(player_df.team.values[0], zoom=zoom), 
-            #                        (player_df[self.x_col].values[0], player_df[self.y_col].values[0]),
-            #                        frameon=False)
-            #    ax.add_artist(ab)
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, ax, label='name',
+                                                    opacity_scale='icetime', opacity_max=max_icetime), 
+                         axis=1)
 
-            # For player scale, label each logo with the player's name
-            self.df.apply(lambda row: ax.text(row[self.x_col], row[self.y_col], row['name'].split(' ')[1],
-                                              horizontalalignment='center', fontsize=10, 
-                                              backgroundcolor=label_colors[row['team']]['bg'],
-                                              color=label_colors[row['team']]['text'],
-                                              verticalalignment='center'), axis=1)            
+        elif self.scale =='team':
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, ax), axis=1)
+
+        # Code for name labels, TODO: make use of or get rid of
+        # For player scale, label each logo with the player's name
+        #self.df.apply(lambda row: ax.text(row[self.x_col], row[self.y_col], row['name'].split(' ')[1],
+        #                                  horizontalalignment='center', fontsize=10, 
+        #                                  backgroundcolor=label_colors[row['team']]['bg'],
+        #                                  color=label_colors[row['team']]['text'],
+        #                                  verticalalignment='center'), axis=1)            
 
         if self.break_even_line:
             # Plot the line to display break-even
