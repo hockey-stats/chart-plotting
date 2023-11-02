@@ -153,6 +153,9 @@ class RatioScatterPlot(Plot):
 
         if self.invert_y:
             ax.invert_yaxis()
+
+        plt.figtext(0.5, 0.01, "All data from MoneyPuck.com", ha="center", 
+                    bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
         plt.savefig(self.filename, dpi=100)
 
 
