@@ -25,7 +25,7 @@ def add_team_logo(row, x, y, axis, label=None, opacity_scale=None, opacity_max=N
     :param str opacity_scal: Row entry used to scale opacity, if desired
     :param int opacity_max: Max value to compare against for opacity scale
     """
-    opacity = 1  # Default opacity if scaling isn't used 
+    opacity = 0.6  # Default opacity if scaling isn't used 
     if opacity_scale:
         # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
         # the value on this scale (e.g., icetime)
