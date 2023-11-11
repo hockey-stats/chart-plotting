@@ -1,13 +1,16 @@
 name: Scrape and Plot Team Tables
 on:
-  workflow_dispatch:
   workflow_call:
+    outputs:
+      plot_artifact_name: 
+        value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+
+  workflow_dispatch:
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-plots'
 
 jobs:
-
   plot-graphs:
     runs-on: ubuntu-latest
     ###
@@ -48,4 +51,8 @@ jobs:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png
           retention-days: 1
+      #
+      - name: Set Output for Artifact Name 
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
     ###
