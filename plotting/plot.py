@@ -25,7 +25,7 @@ def add_team_logo(row, x, y, axis, label=None, opacity_scale=None, opacity_max=N
     :param str opacity_scal: Row entry used to scale opacity, if desired
     :param int opacity_max: Max value to compare against for opacity scale
     """
-    opacity = 0.6  # Default opacity if scaling isn't used 
+    opacity = 0.8  # Default opacity if scaling isn't used 
     if opacity_scale:
         # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
         # the value on this scale (e.g., icetime)
@@ -70,10 +70,11 @@ class RatioScatterPlot(Plot):
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='', y_label='', ratio_lines=False, 
                  invert_y=False, plot_x_mean=False, plot_y_mean=False, quadrant_labels=None, size=(10,8), 
-                 break_even_line=True, scale='team'):
+                 break_even_line=True, plot_league_average=0, scale='team'):
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label, ratio_lines, invert_y,
                          plot_x_mean, plot_y_mean, quadrant_labels)
         self.break_even_line = break_even_line
+        self.plot_league_average = plot_league_average
         if scale not in {'team', 'player'}:
             raise Exception("'scale' value must be one of 'player' or 'team'")
         self.scale = scale
@@ -117,6 +118,17 @@ class RatioScatterPlot(Plot):
         if self.break_even_line:
             # Plot the line to display break-even
             ax.axline((2, 2), slope=1, color='r')
+
+        if self.plot_league_average and self.x_col == 'xGFph':
+            start = 0.1
+            end = 0.9
+            ax.axvline(self.plot_league_average, color='k', label='NHL Average', 
+                       ymin=start, ymax=end)
+            ax.axhline(self.plot_league_average, color='k', label='NHL Average',
+                       xmin=start, xmax=end)
+            ax.text(x=self.plot_league_average, y=self.plot_league_average, s="NHL\nAvg",
+                    backgroundcolor='red', color='white', ha='center', va='center',
+                    size='small', weight='bold')
 
         if self.ratio_lines:
             # Plot diagonal lines to show each percentage breakpoint

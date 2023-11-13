@@ -11,23 +11,28 @@ Script used to plot on-ice ratios for individual players.
 def main(team, min_icetime):
   base_df = pd.read_csv(os.path.join('data', 'player_ratios.csv'))
 
-  if team != "ALL":
-    base_df = base_df[base_df['team'] == team]
   # Apply minimum icetime
   base_df = base_df[base_df['icetime'] >= (min_icetime * 60)]
+
+  # Calculate league averages for plot
+  league_avg_xg = base_df['xGFph'].mean()
+  league_avg_g = base_df['GFph'].mean()
+
+  if team != "ALL":
+    base_df = base_df[base_df['team'] == team]
 
   xg_plot = RatioScatterPlot(dataframe=base_df, filename=f'{team}_skater_xg_ratios.png', x_column='xGFph', y_column='xGAph',
                              title=f'{team} Player xG Rates (5v5, minimum {min_icetime} minutes)', scale='player',
                              x_label='Expected Goals For per hour', y_label='Expected Goals Against per hour (inverted)',
-                             ratio_lines=True, invert_y=True, plot_x_mean=False, plot_y_mean=False,
-                             quadrant_labels=(('DULL', 'GOOD'), ('BAD', 'FUN')))
+                             ratio_lines=True, invert_y=True, plot_x_mean=False, plot_y_mean=False, 
+                             plot_league_average=league_avg_xg, quadrant_labels=(('DULL', 'GOOD'), ('BAD', 'FUN')))
   xg_plot.make_plot()
 
   g_plot = RatioScatterPlot(dataframe=base_df, filename=f'{team}_skater_g_ratios.png', x_column='GFph', y_column='GAph',
                             title=f'{team} Player G Rates (5v5, minimum {min_icetime} minutes)', scale='player',
                             x_label='Goals For per hour', y_label='Goals Against per hour (inverted)',
                             ratio_lines=True, invert_y=True, plot_x_mean=False, plot_y_mean=False,
-                            quadrant_labels=(('DULL', 'GOOD'), ('BAD', 'FUN')))
+                            plot_league_average=league_avg_g, quadrant_labels=(('DULL', 'GOOD'), ('BAD', 'FUN')))
   g_plot.make_plot()
 
 
