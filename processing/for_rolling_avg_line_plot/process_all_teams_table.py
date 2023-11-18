@@ -1,10 +1,9 @@
 import os
 import argparse
-import pandas as pd
 
 from datetime import datetime
-from processing.processing_util import convert_raw_to_ph
 
+import pandas as pd
 
 def main(path, year, window, column):
   """
@@ -31,7 +30,7 @@ def main(path, year, window, column):
   df = pd.read_csv(os.path.join(path, 'mp_all_team_games.csv'))
   df = df[(df['season'] == year) & (df['situation'] == '5on5')][['team', 'gameId', column]]
 
-  output_dfs = list()
+  output_dfs = []
   for team in set(df['team']):
     team_df = df[df['team'] == team].sort_values(by='gameId').reset_index()
     del team_df['index']
