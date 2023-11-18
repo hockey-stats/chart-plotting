@@ -103,16 +103,6 @@ class RatioScatterPlot(Plot):
         if self.quadrant_labels:
             self.add_quadrant_labels()
 
-        # Add team logos, slightly different based on team- or player-scale
-        if self.scale == 'player':
-            max_icetime = self.df.icetime.max()
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis, label='name',
-                                                    opacity_scale='icetime', opacity_max=max_icetime), 
-                         axis=1)
-
-        elif self.scale =='team':
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis), axis=1)
-
         # Code for name labels, TODO: make use of or get rid of
         # For player scale, label each logo with the player's name
         #self.df.apply(lambda row: ax.text(row[self.x_col], row[self.y_col], row['name'].split(' ')[1],
@@ -160,6 +150,16 @@ class RatioScatterPlot(Plot):
         if self.plot_y_mean:
             avg_y = self.df[self.y_col].mean()
             self.axis.axhline(avg_y, color='k', label='NHL Average')
+
+        # Add team logos, slightly different based on team- or player-scale
+        if self.scale == 'player':
+            max_icetime = self.df.icetime.max()
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis, label='name',
+                                                    opacity_scale='icetime', opacity_max=max_icetime), 
+                         axis=1)
+
+        elif self.scale =='team':
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()
