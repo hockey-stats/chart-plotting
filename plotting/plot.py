@@ -74,7 +74,7 @@ class RatioScatterPlot(Plot):
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='', y_label='', ratio_lines=False, 
                  invert_y=False, plot_x_mean=False, plot_y_mean=False, quadrant_labels='default', size=(10,8), 
-                 break_even_line=True, plot_league_average=0, scale='team'):
+                 break_even_line=True, plot_league_average=0, scale='team', scale_to_extreme=True):
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label, ratio_lines, invert_y,
                          plot_x_mean, plot_y_mean, quadrant_labels)
         self.break_even_line = break_even_line
@@ -84,6 +84,7 @@ class RatioScatterPlot(Plot):
         self.scale = scale
         self.fig = plt.figure(figsize=self.size)
         self.axis = self.fig.add_subplot(111)
+        self.scale_to_extreme = scale_to_extreme
 
 
     def make_plot(self):
@@ -93,12 +94,8 @@ class RatioScatterPlot(Plot):
         plt.title(self.title)
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
-        x_min = self.df[self.x_col].min() - 0.1
-        x_max = self.df[self.x_col].max() + 0.1
-        y_min = self.df[self.y_col].min() - 0.1
-        y_max = self.df[self.y_col].max() + 0.1
-        self.axis.set_xlim(x_min, x_max)
-        self.axis.set_ylim(y_min, y_max)
+
+        self.set_scaling()
 
         if self.quadrant_labels:
             self.add_quadrant_labels()
@@ -169,6 +166,34 @@ class RatioScatterPlot(Plot):
                     bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
         plt.savefig(self.filename, dpi=100)
 
+    def set_scaling(self):
+        """
+        Method to set the xy-scaling of a scatter plot.
+
+        If self.set_scale_to_extreme is True, the x-scale will equal the y-scale, and the scale will
+        correspond to whichever of the x-ranges or y-ranges is larger.
+
+        If self.set_scale_to_extrems is False, the x- and y-scale will be set independently of each-
+        other, both being set to just contain there corresponding extrema.
+        """
+        x_min = self.df[self.x_col].min() - 0.1
+        x_max = self.df[self.x_col].max() + 0.1
+        y_min = self.df[self.y_col].min() - 0.1
+        y_max = self.df[self.y_col].max() + 0.1
+
+        if self.set_scale_to_extreme:
+            if (x_max - x_min) >= (y_max - y_min):
+                y_max = x_max
+                y_min = x_min
+            else:
+                x_max = y_max
+                x_min = y_min
+
+        self.axis.set_xlim(x_min, x_max)
+        self.axis.set_ylim(y_min, y_max)
+
+        return None
+
 
     def add_quadrant_labels(self):
         """
@@ -210,4 +235,4 @@ class RatioScatterPlot(Plot):
                            color='black', fontweight='bold', va='center', ha='center')  # Botom-right
         self.axis.annotate(self.quadrant_labels[0][1], xy=(1 - offset, 1 - offset), xycoords='axes fraction',
                            color='black', fontweight='bold', va='center', ha='center')  # Top-right
-        return
+        return None
