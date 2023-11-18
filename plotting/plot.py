@@ -62,6 +62,10 @@ class Plot:
         self.plot_y_mean = plot_y_mean
         self.quadrant_labels = quadrant_labels
         self.size = size
+        self.fig = None
+        self.axis = None
+
+
 
 
 class RatioScatterPlot(Plot):
@@ -69,7 +73,7 @@ class RatioScatterPlot(Plot):
     Class for plotting ratio values as a scatter plot.
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='', y_label='', ratio_lines=False, 
-                 invert_y=False, plot_x_mean=False, plot_y_mean=False, quadrant_labels=None, size=(10,8), 
+                 invert_y=False, plot_x_mean=False, plot_y_mean=False, quadrant_labels='default', size=(10,8), 
                  break_even_line=True, plot_league_average=0, scale='team'):
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label, ratio_lines, invert_y,
                          plot_x_mean, plot_y_mean, quadrant_labels)
@@ -78,34 +82,36 @@ class RatioScatterPlot(Plot):
         if scale not in {'team', 'player'}:
             raise Exception("'scale' value must be one of 'player' or 'team'")
         self.scale = scale
+        self.fig = plt.figure(figsize=self.size)
+        self.axis = self.fig.add_subplot(111)
 
 
     def make_plot(self):
-        fig = plt.figure(figsize=self.size)
-        ax = fig.add_subplot(111)
-
         # First plot the actual values 
-        ax.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
+        self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
         plt.title(self.title)
-        ax.set_xlabel(self.x_label)
-        ax.set_ylabel(self.y_label)
+        self.axis.set_xlabel(self.x_label)
+        self.axis.set_ylabel(self.y_label)
         x_min = self.df[self.x_col].min() - 0.1
         x_max = self.df[self.x_col].max() + 0.1
         y_min = self.df[self.y_col].min() - 0.1
         y_max = self.df[self.y_col].max() + 0.1
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
+        self.axis.set_xlim(x_min, x_max)
+        self.axis.set_ylim(y_min, y_max)
+
+        if self.quadrant_labels:
+            self.add_quadrant_labels()
 
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
             max_icetime = self.df.icetime.max()
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, ax, label='name',
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis, label='name',
                                                     opacity_scale='icetime', opacity_max=max_icetime), 
                          axis=1)
 
         elif self.scale =='team':
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, ax), axis=1)
+            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis), axis=1)
 
         # Code for name labels, TODO: make use of or get rid of
         # For player scale, label each logo with the player's name
@@ -117,16 +123,16 @@ class RatioScatterPlot(Plot):
 
         if self.break_even_line:
             # Plot the line to display break-even
-            ax.axline((2, 2), slope=1, color='r')
+            self.axis.axline((2, 2), slope=1, color='r')
 
         if self.plot_league_average and self.x_col == 'xGFph':
             start = 0.1
             end = 0.9
-            ax.axvline(self.plot_league_average, color='k', label='NHL Average', 
+            self.axis.axvline(self.plot_league_average, color='k', label='NHL Average', 
                        ymin=start, ymax=end)
-            ax.axhline(self.plot_league_average, color='k', label='NHL Average',
+            self.axis.axhline(self.plot_league_average, color='k', label='NHL Average',
                        xmin=start, xmax=end)
-            ax.text(x=self.plot_league_average, y=self.plot_league_average, s="NHL\nAvg",
+            self.axis.text(x=self.plot_league_average, y=self.plot_league_average, s="NHL\nAvg",
                     backgroundcolor='red', color='white', ha='center', va='center',
                     size='small', weight='bold')
 
@@ -144,30 +150,64 @@ class RatioScatterPlot(Plot):
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
-                    ax.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
-                ax.axline(p1, p2, color=color)
+                    self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
+                self.axis.axline(p1, p2, color=color)
 
         # Calculate and plot the average for each value
         if self.plot_x_mean:
             avg_x = self.df[self.x_col].mean()
-            ax.axvline(avg_x, color='k', label='NHL Average')
+            self.axis.axvline(avg_x, color='k', label='NHL Average')
         if self.plot_y_mean:
             avg_y = self.df[self.y_col].mean()
-            ax.axhline(avg_y, color='k', label='NHL Average')
-
-        if self.quadrant_labels:
-            # Add quadrant labels
-            offset = 0.15
-            ax.annotate(self.quadrant_labels[0][0], xy=(x_min + offset, y_min + offset), color='k')  # Top-left
-            ax.annotate(self.quadrant_labels[1][0], xy=(x_min + offset, y_max - offset), color='k')  # Bottom-left
-            ax.annotate(self.quadrant_labels[1][1], xy=(x_max - offset, y_max - offset), color='k')  # Bottom-right
-            ax.annotate(self.quadrant_labels[0][1], xy=(x_max - offset, y_min + offset), color='k')  # Top-right
+            self.axis.axhline(avg_y, color='k', label='NHL Average')
 
         if self.invert_y:
-            ax.invert_yaxis()
+            self.axis.invert_yaxis()
 
+        # Add data disclaimer
         plt.figtext(0.5, 0.01, "All data from MoneyPuck.com", ha="center", 
                     bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
         plt.savefig(self.filename, dpi=100)
 
 
+    def add_quadrant_labels(self):
+        """
+        Method to add labels to each quadrant in a scatter plot. 
+        Default behaviour is to add the '+/- OFFENSE/DEFENSE' labels depending on the quadrant.
+
+        If a 2x2 list of strings is provided as 'self.quadrant_labels', then add those labels to 
+        the corresponding quadrants.
+        """
+        offset = 0.08
+        if self.quadrant_labels == 'default':
+            # Top-left
+            self.axis.annotate('- OFFENSE', xy=(0 + offset, 1 - offset), xycoords='axes fraction',  
+                               color='red', va='bottom', ha='center', fontweight='bold')                                                 
+            self.axis.annotate('+ DEFENSE', xy=(0 + offset, 1 - offset), xycoords='axes fraction',                 
+                               color='green', va='top', ha='center', fontweight='bold')                                 
+            # Bottom-left
+            self.axis.annotate('- OFFENSE', xy=(0 + offset, 0 + offset), xycoords='axes fraction', 
+                               color='red', va='bottom', ha='center', fontweight='bold')                                                 
+            self.axis.annotate('- DEFENSE', xy=(0 + offset, 0 + offset), xycoords='axes fraction',                 
+                               color='red', va='top', ha='center', fontweight='bold')                                     
+            # Bottom-right
+            self.axis.annotate('+ OFFENSE', xy=(1 - offset, 0 + offset), xycoords='axes fraction',  
+                               color='green', va='bottom', ha='center', fontweight='bold')                                               
+            self.axis.annotate('- DEFENSE', xy=(1 - offset, 0 + offset), xycoords='axes fraction',                 
+                               color='red', va='top', ha='center', fontweight='bold')                                    
+            # Top-right
+            self.axis.annotate('+ OFFENSE', xy=(1 - offset, 1 - offset), xycoords='axes fraction', 
+                               color='green', va='bottom', ha='center', fontweight='bold')                                               
+            self.axis.annotate('+ DEFENSE', xy=(1 - offset, 1 - offset), xycoords='axes fraction',                 
+                               color='green', va='top', ha='center', fontweight='bold')                                   
+            return
+
+        self.axis.annotate(self.quadrant_labels[0][0], xy=(0 + offset, 1 - offset), xycoords='axes fraction',
+                           color='black', fontweight='bold', va='center', ha='center')  # Top-left
+        self.axis.annotate(self.quadrant_labels[1][0], xy=(0 + offset, 0 + offset), xycoords='axes fraction',
+                           color='black', fontweight='bold', va='center', ha='center')  # Bottom-left
+        self.axis.annotate(self.quadrant_labels[1][1], xy=(1 - offset, 0 + offset), xycoords='axes fraction',
+                           color='black', fontweight='bold', va='center', ha='center')  # Botom-right
+        self.axis.annotate(self.quadrant_labels[0][1], xy=(1 - offset, 1 - offset), xycoords='axes fraction',
+                           color='black', fontweight='bold', va='center', ha='center')  # Top-right
+        return
