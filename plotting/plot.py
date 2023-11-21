@@ -25,7 +25,7 @@ def add_team_logo(row, x, y, axis, label=None, opacity_scale=None, opacity_max=N
     :param str opacity_scal: Row entry used to scale opacity, if desired
     :param int opacity_max: Max value to compare against for opacity scale
     """
-    opacity = 0.8  # Default opacity if scaling isn't used 
+    opacity = 0.6  # Default opacity if scaling isn't used 
     if opacity_scale:
         # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
         # the value on this scale (e.g., icetime)
@@ -95,6 +95,7 @@ class RatioScatterPlot(Plot):
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
 
+        # Set the scaling of the plot
         x_min, x_max, y_min, y_max = self.set_scaling()
 
         if self.quadrant_labels:
@@ -142,11 +143,9 @@ class RatioScatterPlot(Plot):
 
         # Calculate and plot the average for each value
         if self.plot_x_mean:
-            avg_x = self.df[self.x_col].mean()
-            self.axis.axvline(avg_x, color='k', label='NHL Average')
+            self.axis.axvline(self.plot_league_average, color='k', label='NHL Average')
         if self.plot_y_mean:
-            avg_y = self.df[self.y_col].mean()
-            self.axis.axhline(avg_y, color='k', label='NHL Average')
+            self.axis.axhline(self.plot_league_average, color='k', label='NHL Average')
 
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
@@ -185,13 +184,25 @@ class RatioScatterPlot(Plot):
         y_max = self.df[self.y_col].max() + 0.1
 
         if self.scale_to_extreme:
-            if (x_max - x_min) >= (y_max - y_min):
-                y_max = x_max
-                y_min = x_min
-            else:
-                x_max = y_max
-                x_min = y_min
+            if not self.plot_league_average:
+                raise AttributeError("self.scale_to_extreme set to True but self.plot_league_average not provided.")
+            max_diff = 0
+            for val in [x_min, x_max, y_min, y_max]:
+                if abs(self.plot_league_average - val) > max_diff:
+                    max_diff = abs(self.plot_league_average - val)
 
+            x_max = self.plot_league_average + max_diff
+            y_max = x_max
+            x_min = self.plot_league_average - max_diff
+            y_min = x_min
+
+#            if (x_max - x_min) >= (y_max - y_min):
+#                y_max = x_max
+#                y_min = x_min
+#            else:
+#                x_max = y_max
+#                x_min = y_min
+#
         self.axis.set_xlim(x_min, x_max)
         self.axis.set_ylim(y_min, y_max)
 
