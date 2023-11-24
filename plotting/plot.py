@@ -14,34 +14,6 @@ def get_logo_marker(team_name, alpha=1):
     return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=1)
 
 
-def add_team_logo(row, x, y, axis, label=None, opacity_scale=None, opacity_max=None):
-    """
-    Function used with DataFrame.map() that adds a team logo to an axis object.
-    :param pandas.Series row: Row of the dataframe being applied on
-    :param str x: Row entry to be used for x-coordinate
-    :param str y: Row entry to be used for y-coordinate
-    :param matplotlib.pyplot.Axis: Axis object the icon is being added to
-    :param str label: Row entry to be used as a label. If not supplied, don't label
-    :param str opacity_scal: Row entry used to scale opacity, if desired
-    :param int opacity_max: Max value to compare against for opacity scale
-    """
-    opacity = 0.6  # Default opacity if scaling isn't used 
-    if opacity_scale:
-        # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
-        # the value on this scale (e.g., icetime)
-        opacity = row[opacity_scale] / opacity_max
-
-    # Assumes the team value is under row['team']
-    artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity),
-                                xy=(row[x], row[y]), frameon=False)
-    axis.add_artist(artist_box)
-
-    if label:
-        # Split the label entry by ' ' and use last entry. Makes no difference for one-word
-        # labels, but for names uses last name only.
-        axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1], horizontalalignment='center',
-                  verticalalignment='top', fontsize=10)
-
 
 class Plot:
     """
@@ -64,6 +36,34 @@ class Plot:
         self.size = size
         self.fig = None
         self.axis = None
+
+    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None):
+        """
+        Function used with DataFrame.map() that adds a team logo to an axis object.
+        :param pandas.Series row: Row of the dataframe being applied on
+        :param str x: Row entry to be used for x-coordinate
+        :param str y: Row entry to be used for y-coordinate
+        :param matplotlib.pyplot.Axis: Axis object the icon is being added to
+        :param str label: Row entry to be used as a label. If not supplied, don't label
+        :param str opacity_scal: Row entry used to scale opacity, if desired
+        :param int opacity_max: Max value to compare against for opacity scale
+        """
+        opacity = 0.6  # Default opacity if scaling isn't used 
+        if opacity_scale:
+            # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
+            # the value on this scale (e.g., icetime)
+            opacity = row[opacity_scale] / opacity_max
+
+        # Assumes the team value is under row['team']
+        artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity),
+                                    xy=(row[x], row[y]), frameon=False)
+        self.axis.add_artist(artist_box)
+
+        if label:
+            # Split the label entry by ' ' and use last entry. Makes no difference for one-word
+            # labels, but for names uses last name only.
+            self.axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1], horizontalalignment='center',
+                           verticalalignment='top', fontsize=10)
 
 
 
@@ -150,12 +150,12 @@ class RatioScatterPlot(Plot):
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
             max_icetime = self.df.icetime.max()
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis, label='name',
-                                                    opacity_scale='icetime', opacity_max=max_icetime), 
+            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
+                                                         opacity_scale='icetime', opacity_max=max_icetime), 
                          axis=1)
 
         elif self.scale =='team':
-            self.df.apply(lambda row: add_team_logo(row, self.x_col, self.y_col, self.axis), axis=1)
+            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()
