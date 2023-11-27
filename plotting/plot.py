@@ -37,7 +37,9 @@ class Plot:
         # Add data disclaimer
         plt.figtext(0.5, 0.01, "All data from MoneyPuck.com", ha="center",
                     bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
-        plt.savefig(self.filename, dpi=100)
+        # If self.filename is empty, then this is for a multiplot so don't save as a file
+        if self.filename:
+            plt.savefig(self.filename, dpi=100)
 
     def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None):
         """
