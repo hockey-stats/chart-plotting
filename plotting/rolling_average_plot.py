@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 from plotting.plot import Plot, get_logo_marker
-
+from util.color_maps import label_colors
 
 class RollingAveragePlot(Plot):
     """
@@ -13,16 +13,17 @@ class RollingAveragePlot(Plot):
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
                  y_label='', y_midpoint=50, size=(10, 8), multiline_key=None,
-                 add_team_logos=False):
+                 add_team_logos=False, figure=None, axis=None, is_subplot=False):
 
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
                          size)
 
-        self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111)
+        self.fig = plt.figure(figsize=self.size) if figure is None else figure
+        self.axis = self.fig.add_subplot(111) if axis is None else axis
         self.y_midpoint = y_midpoint
         self.multiline_key = multiline_key
         self.add_team_logos = add_team_logos
+        self.is_subplot = is_subplot
 
     def make_plot(self):
         """
@@ -38,13 +39,13 @@ class RollingAveragePlot(Plot):
         if self.add_team_logos:
             self.handle_team_logos()
 
-        plt.title(self.title)
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
 
         self.set_scaling()
         self.add_x_axis()
 
+        self.axis.set_title(self.title)
         self.save_plot()
 
 
@@ -70,7 +71,11 @@ class RollingAveragePlot(Plot):
         keys = set(self.df[self.multiline_key])
         for key in keys:
             individual_df = self.df[self.df[self.multiline_key] == key]
-            self.axis.plot(individual_df[self.x_col], individual_df[self.y_col])
+            color = 'black'
+            if self.add_team_logos:  # If we're adding team logos, color the lines by team color
+                color = label_colors[key]['bg']
+            self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color, 
+                           linewidth=3)
 
 
     def add_x_axis(self):
@@ -86,20 +91,10 @@ class RollingAveragePlot(Plot):
         and y-scaling to have the maximum and minimum be equal, based on the most 
         extreme y-value.
         """
-        y_min = self.df[self.y_col].min()
-        y_max = self.df[self.y_col].max()
+        #y_min = self.df[self.y_col].min()
+        #y_max = self.df[self.y_col].max()
 
-        y_scale = max(abs(self.y_midpoint - y_max), abs(self.y_midpoint - y_min)) * 1.1
+        #y_scale = max(abs(self.y_midpoint - y_max), abs(self.y_midpoint - y_min)) * 1.1
 
-        self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
-
-
-if __name__ == '__main__':
-    df = pd.read_csv('data/xGoalsPercentage_rolling_avg.csv')
-    tor_df = df[df['team'].isin(['TOR', 'BOS', 'VAN'])]
-    tor_df['xGoalsPercentageRollingAvg'] = tor_df.apply(lambda row: round(row['xGoalsPercentageRollingAvg'] * 100, 2), 1)
-
-    plot = RollingAveragePlot(tor_df, 'x.png', 'gameNumber', 'xGoalsPercentageRollingAvg',
-                              '10-game rolling xG% avg', x_label='Game #', y_label='10-game avg xg%',
-                              multiline_key='team', add_team_logos=True)
-    plot.make_plot()
+        #self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
+        self.axis.set_ylim(38, 62)

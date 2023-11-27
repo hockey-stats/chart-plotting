@@ -20,7 +20,7 @@ class Plot:
     Base class to be used for all plots. Will only ever be called via super() for a base class
     """
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
-                 y_label='', size=(10, 8)):
+                 y_label='', size=(10, 8), figure=None, axis=None):
 
         self.df = dataframe
         self.filename = filename
@@ -30,8 +30,8 @@ class Plot:
         self.x_label = x_label
         self.y_label = y_label
         self.size = size
-        self.fig = None
-        self.axis = None
+        self.fig = figure
+        self.axis = axis
 
     def save_plot(self):
         # Add data disclaimer
@@ -76,10 +76,10 @@ class RatioScatterPlot(Plot):
                  y_label='', ratio_lines=False, invert_y=False, plot_x_mean=False,
                  plot_y_mean=False, quadrant_labels='default', size=(10,8),
                  break_even_line=True, plot_league_average=0, scale='team',
-                 scale_to_extreme=True):
+                 scale_to_extreme=True, figure=None, axis=None):
 
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
-                         size)
+                         size, figure, axis)
 
         self.break_even_line = break_even_line
         self.plot_league_average = plot_league_average
@@ -91,8 +91,8 @@ class RatioScatterPlot(Plot):
         self.plot_x_mean = plot_x_mean
         self.plot_y_mean = plot_y_mean
         self.quadrant_labels = quadrant_labels
-        self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111)
+        self.fig = plt.figure(figsize=self.size) if figure is None else figure
+        self.axis = self.fig.add_subplot(111) if axis is None else axis
         self.scale_to_extreme = scale_to_extreme
 
 
