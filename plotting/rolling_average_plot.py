@@ -57,8 +57,8 @@ class RollingAveragePlot(Plot):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(get_logo_marker(team),
-                                        xy=(x_last, y_last), frameon=False)
+            artist_box = AnnotationBbox(get_logo_marker(team), xy=(x_last, y_last), 
+                                        frameon=False, alpha=0.7)
             self.axis.add_artist(artist_box)
 
 
@@ -73,7 +73,7 @@ class RollingAveragePlot(Plot):
             individual_df = self.df[self.df[self.multiline_key] == key]
             color = 'black'
             if self.add_team_logos:  # If we're adding team logos, color the lines by team color
-                color = label_colors[key]['bg']
+                color = label_colors[key]['line']
             self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color, 
                            linewidth=3)
 

@@ -1,130 +1,162 @@
 label_colors = {
   "MIN": {
 		"bg": "darkgreen",
-		"text": "red"
-	},
+		"text": "red",
+		"line": "firebrick",
+  },
   "VGK": {
 		"bg": "goldenrod",
-		"text": "black"
-	},
+		"text": "black",
+		"line": "darkkhaki",
+  },
   "OTT": {
 		"bg": "black",
-		"text": "red"
-	},
+		"text": "red",
+		"line": "lightpink",
+  },
   "CAR": {
 		"bg": "red",
-		"text": "black"
-	},
+		"text": "black",
+		"line": "darkviolet",
+  },
   "CBJ": {
 		"bg": "navy",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "lightsteelblue",
+  },
   "FLA": {
 		"bg": "red",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "gold",
+  },
   "LAK": {
 		"bg": "gray",
-		"text": "black"
-	},
+		"text": "black",
+		"line": "gray",
+  },
   "NJD": {
 		"bg": "red",
-		"text": "darkgreen"
-	},
+		"text": "darkgreen",
+		"line": "forestgreen",
+  },
   "MTL": {
 		"bg": "blue",
-		"text": "red"
-	},
+		"text": "red",
+		"line": "lightsteelblue",
+  },
   "COL": {
 		"bg": "saddlebrown",
-		"text": "darkturquoise"
-	},
+		"text": "darkturquoise",
+		"line": "teal",
+  },
   "WSH": {
 		"bg": "red",
-		"text": "darkslateblue"
-	},
+		"text": "darkslateblue",
+		"line": "red",
+  },
   "DET": {
 		"bg": "red",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "red",
+  },
   "TBL": {
 		"bg": "blueviolet",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "blueviolet",
+  },
   "VAN": {
 		"bg": "springgreen",
-		"text": "blue"
-	},
+		"text": "blue",
+		"line": "springgreen",
+  },
   "DAL": {
 		"bg": "green",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "green",
+  },
   "NYR": {
 		"bg": "royalblue",
-		"text": "red"
-	},
+		"text": "red",
+		"line": "royalblue",
+  },
   "BUF": {
 		"bg": "navy",
-		"text": "gold"
-	},
+		"text": "gold",
+		"line": "forestgreen",
+  },
   "PHI": {
 		"bg": "darkorange",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "darkorange",
+  },
   "EDM": {
 		"bg": "darkorange",
-		"text": "cornflowerblue"
-	},
+		"text": "cornflowerblue",
+		"line": "darkorange",
+  },
   "STL": {
 		"bg": "mediumblue",
-		"text": "yellow"
-	},
+		"text": "yellow",
+		"line": "mediumblue",
+  },
   "SEA": {
 		"bg": "lightseagreen",
-		"text": "salmon"
-	},
+		"text": "salmon",
+		"line": "lightpink",
+  },
   "TOR": {
 		"bg": "royalblue",
-		"text": "oldlace"
-	},
+		"text": "oldlace",
+		"line": "royalblue",
+  },
   "SJS": {
 		"bg": "teal",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "teal",
+  },
   "PIT": {
 		"bg": "black",
-		"text": "gold"
-	},
+		"text": "gold",
+		"line": "black",
+  },
   "WPG": {
 		"bg": "lightsteelblue",
-		"text": "crimson"
-	},
+		"text": "crimson",
+		"line": "lightsteelblue",
+  },
   "CGY": {
 		"bg": "firebrick",
-		"text": "yellow"
-	},
+		"text": "yellow",
+		"line": "firebrick",
+  },
   "BOS": {
 		"bg": "black",
-		"text": "yellow"
-	},
+		"text": "yellow",
+		"line": "palegoldenrod",
+  },
   "NSH": {
 		"bg": "khaki",
-		"text": "navy"
-	},
+		"text": "navy",
+		"line": "khaki",
+  },
   "ANA": {
 		"bg": "black",
-		"text": "orange"
-	},
+		"text": "orange",
+		"line": "black",
+  },
   "CHI": {
 		"bg": "tomato",
-		"text": "lightyellow"
-	},
+		"text": "lightyellow",
+		"line": "tomato",
+  },
   "ARI": {
 		"bg": "saddlebrown",
-		"text": "white"
-	},
+		"text": "white",
+		"line": "saddlebrown",
+  },
   "NYI": {
 		"bg": "dodgerblue",
-		"text": "orange"
-	},
+		"text": "orange",
+		"line": "hotpink",
+  },
 }
