@@ -58,7 +58,7 @@ class RollingAveragePlot(Plot):
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
             artist_box = AnnotationBbox(get_logo_marker(team), xy=(x_last, y_last), 
-                                        frameon=False, alpha=0.7)
+                                        frameon=False, alpha=0.5)
             self.axis.add_artist(artist_box)
 
 
