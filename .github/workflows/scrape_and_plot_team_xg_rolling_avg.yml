@@ -12,6 +12,11 @@ on:
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
 
   workflow_dispatch:
+    inputs:
+      year:
+        type: string
+        description: Season for which to gather data
+        default: 2023
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-rolling-avg-plots'
