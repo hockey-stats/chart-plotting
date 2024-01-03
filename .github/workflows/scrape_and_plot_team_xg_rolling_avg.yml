@@ -5,7 +5,8 @@ on:
       year:
         type: string
         description: Season for which to gather data
-        required: True
+        default: 2023
+
     outputs:
       plot_artifact_name: 
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
