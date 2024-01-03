@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--path', default=os.path.join(os.getcwd(), 'data'), 
                         help='Path to base folder of repo')
-    parser.add_argument('-y', '--year', default=datetime.now().year,
+    parser.add_argument('-y', '--year', default=datetime.now().year, type=int,
                         help='Year of data to analyze, defaults to current year.')
     parser.add_argument('-w', '--window', default=10,
                         help='Size of window to calculate rolling averages, defaults to 10')
