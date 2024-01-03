@@ -1,6 +1,11 @@
 name: Scrape and Plot Team xG Rolling Average
 on:
   workflow_call:
+    inputs:
+      year:
+        type: string
+        description: Season for which to gather data
+        required: True
     outputs:
       plot_artifact_name: 
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
@@ -39,7 +44,7 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 processing/for_rolling_avg_line_plot/process_all_teams_table.py;
+          python3 processing/for_rolling_avg_line_plot/process_all_teams_table.py -y ${{ inputs.year }};
       #
       - name: Generate Charts
         env: 
