@@ -26,7 +26,7 @@ def main(team, min_icetime):
         base_df = base_df[base_df['team'] == team]
 
     xg_plot = RatioScatterPlot(dataframe=base_df,
-                               ilename=f'{team}_skater_xg_ratios.png',
+                               filename=f'{team}_skater_xg_ratios.png',
                                x_column='xGFph', y_column='xGAph',
                                title=f'{team} Player xG Rates (5v5, minimum {min_icetime} minutes)',
                                scale='player', x_label='Expected Goals For per hour',
