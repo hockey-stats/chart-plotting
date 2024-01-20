@@ -77,12 +77,13 @@ class RatioScatterPlot(Plot):
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
                  y_label='', ratio_lines=False, invert_y=False, plot_x_mean=False,
                  plot_y_mean=False, quadrant_labels='default', size=(10,8),
-                 break_even_line=True, plot_league_average=0, scale='team',
+                 percentiles=None, break_even_line=True, plot_league_average=0, scale='team',
                  scale_to_extreme=True, figure=None, axis=None):
 
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
                          size, figure, axis)
 
+        self.percentiles = percentiles
         self.break_even_line = break_even_line
         self.plot_league_average = plot_league_average
         if scale not in {'team', 'player'}:
@@ -111,6 +112,9 @@ class RatioScatterPlot(Plot):
 
         if self.quadrant_labels:
             self.add_quadrant_labels()
+
+        if self.percenitles:
+            self.add_percentiles()
 
         # Code for name labels, TODO: make use of or get rid of
         # For player scale, label each logo with the player's name
@@ -210,6 +214,36 @@ class RatioScatterPlot(Plot):
         self.axis.set_ylim(y_min, y_max)
 
         return x_min, x_max, y_min, y_max
+
+    
+    def add_percentiles(self):
+        """
+        Method to label percentiles in a scatter plot.
+        Argument is to be given in the dict format, looking like the following:
+        {
+            "vertical": [a, b, c],
+            "horizontal": [x, y, z]
+        },
+        where vertical/horizontal will determine what orientation the percentile label will have,
+        and the value will be a list of floats denoting the breakpoint for each percentile. Thus,
+        the number of percentiles to label will be the length of the list + 1. E.g, to label quarter-
+        percentiles, 3 values will be given which denote the 25th, 50th, and 75th percentile cut-offs
+        respectively.
+        """
+        
+        #TODO: Not done! this hasn't been tested yet
+
+        if self.percentiles.get('vertical', None):
+            iterator = int(100.0 / len(self.percentiles['vertical'] + 1))
+            for index, value in enumerate(self.percentiles['vertical']):
+                self.axis.axvline(value, color='k',
+                                  label=f'{iterator * (index + 1)}th Percentile')
+
+        if self.percentiles.get('horizontal', None):
+            iterator = int(100.0 / len(self.percentiles['horizontal'] + 1))
+            for index, value in enumerate(self.percentiles['horizontal']):
+                self.axis.axhline(value, color='k',
+                                  label=f'{iterator * (index + 1)}th Percentile')
 
 
     def add_quadrant_labels(self):
