@@ -9,12 +9,8 @@ import pandas as pd
 
 from plotting.plot import RatioScatterPlot
 
-##############################################
-########## TODO: This ain't done #############
-##############################################
 
-
-def construct_plot(df, team, min_icetime_minutes, output_filename):
+def construct_plot(df, team, output_filename, plot_title):
     """
     Given the dataframe, create the skater points ratio plot with the given
     output filename.
@@ -28,18 +24,18 @@ def construct_plot(df, team, min_icetime_minutes, output_filename):
     if team != "ALL":
         df = df[df['team'] == team]
 
-    #TODO: Got to about here, working on percentile method for RatioScatterPlot
     xg_plot = RatioScatterPlot(dataframe=df,
-                               filename=f'{team}_skater_xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
-                               title=f'{team} Player xG Rates (5v5, minimum {min_icetime_minutes} minutes)',
-                               scale='player', x_label='Expected Goals For per hour',
-                               y_label='Expected Goals Against per hour (inverted)',
-                               ratio_lines=True,
-                               invert_y=True,
+                               filename=output_filename,
+                               x_column='avgTOI',
+                               y_column='pointsPerHour',
+                               title=plot_title,
+                               scale='player',
+                               x_label='Average Time on Ice per Game',
+                               y_label='Points per Hour',
+                               percentiles={'horizontal': pph_percentiles},
+                               quadrant_labels=['OPPORTUNITY', 'PRODUCTION'],
                                plot_x_mean=False,
-                               plot_y_mean=False,
-                               plot_league_average=league_avg_xg)
+                               plot_y_mean=False)
     xg_plot.make_plot()
 
 
@@ -55,51 +51,28 @@ def main(team, min_icetime_minutes, situation):
     df = df[(df['icetime'] >= (min_icetime_minutes * 60)) & \
             (df['situation'] == situation)]
 
+    # Generate columns for points per hour and average TOI
     df['pointsPerHour'] = df.apply(lambda row:
-                                   row['I_F_points'] / (row['icetime'] * 60 * 60), axis=1)
+                                   round(row['I_F_points'] / (row['icetime'] / 3600), 3),
+                                   axis=1)
+    df['avgTOI'] = df.apply(lambda row:
+                            round(row['icetime'] / (row['games_played'] * 60), 3),
+                            axis=1)
 
     # Create separate DataFrames for forwards and defensemen
     df_f = df[df['position'].isin({'C', 'R', 'L'})]
     df_d = df[df['position'] == 'D']
     del df
 
-    # Calculate league averages for plot
-    avg_pph_f = df_f['pointsPerHour'].mean()
-    league_avg_xg = df['xGFph'].mean()
-    league_avg_g = df['GFph'].mean()
+    construct_plot(df_f, team,
+                   output_filename=f'{team}_F_{situation}_scoring_rates.png',
+                   plot_title=f'{team} Forward Scoring Rates ({situation}, '\
+                              f'at least {min_icetime_minutes} minutes)')
 
-    if team != "ALL":
-        df = df[df['team'] == team]
-
-    xg_plot = RatioScatterPlot(dataframe=df,
-                               ilename=f'{team}_skater_xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
-                               title=f'{team} Player xG Rates (5v5, minimum {min_icetime_minutes} minutes)',
-                               scale='player', x_label='Expected Goals For per hour',
-                               y_label='Expected Goals Against per hour (inverted)',
-                               ratio_lines=True,
-                               invert_y=True,
-                               plot_x_mean=False,
-                               plot_y_mean=False,
-                               plot_league_average=league_avg_xg)
-    xg_plot.make_plot()
-
-    g_plot = RatioScatterPlot(dataframe=df,
-                              filename=f'{team}_skater_g_ratios.png',
-                              x_column='GFph',
-                              y_column='GAph',
-                              title=f'{team} Player G Rates (5v5, minimum {min_icetime_minutes} minutes)',
-                              scale='player',
-                              x_label='Goals For per hour',
-                              y_label='Goals Against per hour (inverted)',
-                              ratio_lines=True,
-                              invert_y=True,
-                              plot_x_mean=False,
-                              plot_y_mean=False,
-                              plot_league_average=league_avg_g)
-    g_plot.make_plot()
-
-
+    construct_plot(df_d, team,
+                   output_filename=f'{team}_D_{situation}_scoring_rates.png',
+                   plot_title=f'{team} Defenseman Scoring Rates ({situation}, '\
+                              f'at least {min_icetime_minutes} minutes)')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -109,7 +82,7 @@ if __name__ == '__main__':
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
     parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
                         choices=['5on5', '4on5', '5on4', 'other'],
-                        help='Game state to measure points for.')  #TODO: Add support for 'ALL'
+                        help='Game state to measure points for. Defaults to 5on5.')  #TODO: Add support for 'ALL'
     args = parser.parse_args()
 
     main(team=args.team, min_icetime_minutes=args.min_icetime, situation=args.situation)
