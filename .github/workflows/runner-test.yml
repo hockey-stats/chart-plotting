@@ -1,0 +1,14 @@
+name: Test Runner
+
+on: 
+  push:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v3
+    - name: Echo Statement
+      run: echo Hello World!
