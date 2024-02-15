@@ -18,7 +18,7 @@ pd.options.mode.chained_assignment = None
 def read_mp_table(path):
   df = pd.read_csv(os.path.join(path, 'mp_team_table.csv'), 
                   usecols=['team', 'situation', 'iceTime', 'goalsFor', 
-                           'goalsAgainst', 'xGoalsFor', 'xGoalsAgainst'])
+                           'goalsAgainst', 'flurryScoreVenueAdjustedxGoalsFor', 'flurryScoreVenueAdjustedxGoalsAgainst'])
   df = df[df['situation'] == '5on5'].sort_values(by=['team'])
   df.index = df.team
   return df
@@ -35,10 +35,10 @@ def main(path):
                                                               row['goalsAgainst']), 
                                                               axis=1))
   df['xGFph'] = list(mp_df.apply(lambda row: convert_raw_to_ph(row['iceTime'] / 60.0, 
-                                                                row['xGoalsFor']), 
+                                                                row['flurryScoreVenueAdjustedxGoalsFor']), 
                                                                 axis=1))
   df['xGAph'] = list(mp_df.apply(lambda row: convert_raw_to_ph(row['iceTime'] / 60.0, 
-                                                                row['xGoalsAgainst']),
+                                                                row['flurryScoreVenueAdjustedxGoalsAgainst']),
                                                                 axis=1))
 
   df.to_csv(os.path.join(path, 'team_ratios.csv'), columns=['team', 'GFph', 'GAph', 'xGFph', 'xGAph'])

@@ -40,7 +40,7 @@ def xg_by_division_multiplot():
                          [plots[2], plots[3]]])
 
     multiplot = MultiPlot(plot_matrix=plot_matrix, filename='xg_rolling_avg_by_division',
-                          title='5v5 Expected Goal Share 10-Game Rolling Average')
+                          title='5v5 Expected Goal Share 10-Game Rolling Average (flurry-, score-, and venue-adjusted)')
 
     multiplot.make_multiplot()
 

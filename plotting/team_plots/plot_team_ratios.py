@@ -17,8 +17,9 @@ def main():
 
   # Plot Team xG ratios
   xg_plot = RatioScatterPlot(dataframe=base_df, filename='xg_ratios.png', x_column='xGFph', y_column='xGAph', 
-                              title='Team xG Rates', scale='team',
-                              x_label='Expected Goals For per hour (5v5)', y_label='Expected Goals Against per hour (5v5, inverted)',
+                              title='Team xG Rates (5v5, flurry-, score-, and venue-adjusted)', scale='team',
+                              x_label='Expected Goals For per hour', 
+															y_label='Expected Goals Against per hour (inverted)',
                               ratio_lines=True, invert_y=True, plot_x_mean=True, plot_y_mean=True,
                               plot_league_average=league_avg_xg)
   xg_plot.make_plot()

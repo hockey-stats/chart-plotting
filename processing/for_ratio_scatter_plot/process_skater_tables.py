@@ -26,7 +26,9 @@ def read_player_table(path, state='5on5'):
   :param str state: Game state to filter on, defaults to '5on5'
   """
   df = pd.read_csv(os.path.join(path, 'mp_skater_table.csv'),
-                   usecols=['name', 'playerId', 'team', 'situation', 'icetime', 'OnIce_F_xGoals', 'OnIce_A_xGoals',
+                   usecols=['name', 'playerId', 'team', 'situation', 'icetime', 
+									 					'OnIce_F_flurryScoreVenueAdjustedxGoals', 
+														'OnIce_A_flurryScoreVenueAdjustedxGoals',
                             'OnIce_F_goals', 'OnIce_A_goals'])
 
   df = df[df['situation'] == state].sort_values(by=['playerId'])
@@ -48,10 +50,10 @@ def main(path, state):
                                                               row['OnIce_A_goals']), 
                                                               axis=1))
   df['xGFph'] = list(mp_df.apply(lambda row: convert_raw_to_ph(row['icetime'] / 60.0, 
-                                                              row['OnIce_F_xGoals']), 
+                                                              row['OnIce_F_flurryScoreVenueAdjustedxGoals']), 
                                                               axis=1))
   df['xGAph'] = list(mp_df.apply(lambda row: convert_raw_to_ph(row['icetime'] / 60.0, 
-                                                              row['OnIce_A_xGoals']),
+                                                              row['OnIce_A_flurryScoreVenueAdjustedxGoals']),
                                                               axis=1))
 
   filename = 'player_ratios.csv'
