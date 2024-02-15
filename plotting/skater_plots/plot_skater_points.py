@@ -4,15 +4,42 @@ Module for plotting points against ice-time for skaters.
 
 import os
 import argparse
+import numpy as np
 import pandas as pd
 
 from plotting.plot import RatioScatterPlot
 
-##############################################
-########## TODO: This ain't done #############
-##############################################
 
-def main(team, min_icetime_minutes):
+def construct_plot(df, team, output_filename, plot_title):
+    """
+    Given the dataframe, create the skater points ratio plot with the given
+    output filename.
+    """
+
+    # Calculate the percentiles for points per hour
+    pph_percentiles = []
+    for percentile in [25, 50, 75]:
+        pph_percentiles.append(np.percentile(df['pointsPerHour'], percentile))
+
+    if team != "ALL":
+        df = df[df['team'] == team]
+
+    xg_plot = RatioScatterPlot(dataframe=df,
+                               filename=output_filename,
+                               x_column='avgTOI',
+                               y_column='pointsPerHour',
+                               title=plot_title,
+                               scale='player',
+                               x_label='Average Time on Ice per Game',
+                               y_label='Points per Hour',
+                               percentiles={'horizontal': pph_percentiles},
+                               quadrant_labels=['OPPORTUNITY', 'PRODUCTION'],
+                               plot_x_mean=False,
+                               plot_y_mean=False)
+    xg_plot.make_plot()
+
+
+def main(team, min_icetime_minutes, situation):
     """
     Main function to create the plot and save as a png file.
     """
@@ -21,58 +48,31 @@ def main(team, min_icetime_minutes):
                           usecols=['season', 'name', 'team', 'position', 'situation',
                                    'games_played', 'icetime', 'I_F_points'])
 
-    # Apply minimum icetime, which is given in seconds, as well as
-    # non-5on5 scoring
-    df.drop(df[(df.icetime >= (min_icetime_minutes * 60)) & \
-               (df.situation != '5on5')])
+    df = df[(df['icetime'] >= (min_icetime_minutes * 60)) & \
+            (df['situation'] == situation)]
 
-    df.rename(column={'I_F_points': 'points'})
-
-
+    # Generate columns for points per hour and average TOI
     df['pointsPerHour'] = df.apply(lambda row:
-                                   row['points'] / (row['icetime'] * 60 * 60))
+                                   round(row['I_F_points'] / (row['icetime'] / 3600), 3),
+                                   axis=1)
+    df['avgTOI'] = df.apply(lambda row:
+                            round(row['icetime'] / (row['games_played'] * 60), 3),
+                            axis=1)
 
+    # Create separate DataFrames for forwards and defensemen
+    df_f = df[df['position'].isin({'C', 'R', 'L'})]
+    df_d = df[df['position'] == 'D']
+    del df
 
-    ##############################################
-    ########## TODO: Stopped around here #########
-    ##############################################
+    construct_plot(df_f, team,
+                   output_filename=f'{team}_F_{situation}_scoring_rates.png',
+                   plot_title=f'{team} Forward Scoring Rates ({situation}, '\
+                              f'at least {min_icetime_minutes} minutes)')
 
-    # Calculate league averages for plot
-    league_avg_xg = df['xGFph'].mean()
-    league_avg_g = df['GFph'].mean()
-
-    if team != "ALL":
-        df = df[df['team'] == team]
-
-    xg_plot = RatioScatterPlot(dataframe=df,
-                               ilename=f'{team}_skater_xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
-                               title=f'{team} Player xG Rates (5v5, minimum {min_icetime_minutes} minutes)',
-                               scale='player', x_label='Expected Goals For per hour',
-                               y_label='Expected Goals Against per hour (inverted)',
-                               ratio_lines=True,
-                               invert_y=True,
-                               plot_x_mean=False,
-                               plot_y_mean=False,
-                               plot_league_average=league_avg_xg)
-    xg_plot.make_plot()
-
-    g_plot = RatioScatterPlot(dataframe=df,
-                              filename=f'{team}_skater_g_ratios.png',
-                              x_column='GFph',
-                              y_column='GAph',
-                              title=f'{team} Player G Rates (5v5, minimum {min_icetime_minutes} minutes)',
-                              scale='player',
-                              x_label='Goals For per hour',
-                              y_label='Goals Against per hour (inverted)',
-                              ratio_lines=True,
-                              invert_y=True,
-                              plot_x_mean=False,
-                              plot_y_mean=False,
-                              plot_league_average=league_avg_g)
-    g_plot.make_plot()
-
-
+    construct_plot(df_d, team,
+                   output_filename=f'{team}_D_{situation}_scoring_rates.png',
+                   plot_title=f'{team} Defenseman Scoring Rates ({situation}, '\
+                              f'at least {min_icetime_minutes} minutes)')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -80,6 +80,9 @@ if __name__ == '__main__':
                         help='Team to get stats for, defaults to ALL.')
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
+    parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
+                        choices=['5on5', '4on5', '5on4', 'other'],
+                        help='Game state to measure points for. Defaults to 5on5.')  #TODO: Add support for 'ALL'
     args = parser.parse_args()
 
-    main(team=args.team, min_icetime_minutes=args.min_icetime)
+    main(team=args.team, min_icetime_minutes=args.min_icetime, situation=args.situation)

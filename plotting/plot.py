@@ -64,10 +64,21 @@ class Plot:
         self.axis.add_artist(artist_box)
 
         if label:
+            # Check if plot is using an inverted y-axis. If so, add label to top of logo.
+            # Else, add label to the bottom.
+            try:
+                verticalalignment = 'top' if self.invert_y else 'bottom'
+            except AttributeError:
+                # AttributeError here implies that the plot doesn't have the 'invert_y' attribute,
+                # i.e. it isn't a plot type that would every invert the y-axis, so set vertical
+                # alignment to be 'bottom'
+                verticalalignment = 'bottom'
             # Split the label entry by ' ' and use last entry. Makes no difference for one-word
             # labels, but for names uses last name only.
-            self.axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1], 
-                           horizontalalignment='center', verticalalignment='top', fontsize=10)
+            self.axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1],
+                           horizontalalignment='center',
+                           verticalalignment=verticalalignment,
+                           fontsize=10)
 
 
 class RatioScatterPlot(Plot):
@@ -77,12 +88,13 @@ class RatioScatterPlot(Plot):
     def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
                  y_label='', ratio_lines=False, invert_y=False, plot_x_mean=False,
                  plot_y_mean=False, quadrant_labels='default', size=(10,8),
-                 break_even_line=True, plot_league_average=0, scale='team',
-                 scale_to_extreme=True, figure=None, axis=None):
+                 percentiles=None, break_even_line=True, plot_league_average=0, scale='team',
+                 scale_to_extreme=False, figure=None, axis=None):
 
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
                          size, figure, axis)
 
+        self.percentiles = percentiles
         self.break_even_line = break_even_line
         self.plot_league_average = plot_league_average
         if scale not in {'team', 'player'}:
@@ -111,6 +123,9 @@ class RatioScatterPlot(Plot):
 
         if self.quadrant_labels:
             self.add_quadrant_labels()
+
+        if self.percentiles:
+            self.add_percentiles(x_min=x_min)
 
         # Code for name labels, TODO: make use of or get rid of
         # For player scale, label each logo with the player's name
@@ -211,6 +226,39 @@ class RatioScatterPlot(Plot):
 
         return x_min, x_max, y_min, y_max
 
+   
+    def add_percentiles(self, x_min):
+        """
+        Method to label percentiles in a scatter plot.
+        Argument is to be given in the dict format, looking like the following:
+        {
+            "vertical": [a, b, c],
+            "horizontal": [x, y, z]
+        },
+        where vertical/horizontal will determine what orientation the percentile label will have,
+        and the value will be a list of floats denoting the breakpoint for each percentile. Thus,
+        the number of percentiles to label will be the length of the list + 1. E.g, to label 
+        quarter-percentiles, 3 values will be given which denote the 25th, 50th, and 75th 
+        percentile cut-offs respectively.
+        """
+
+        if self.percentiles.get('vertical', None):
+            iterator = int(100.0 / (len(self.percentiles['vertical']) + 1))
+            for index, value in enumerate(self.percentiles['vertical']):
+                self.axis.axvline(value, color='k',
+                                  label=f'{iterator * (index + 1)}th Percentile')
+
+        if self.percentiles.get('horizontal', None):
+            iterator = int(100.0 / (len(self.percentiles['horizontal']) + 1))
+            span_start = 0
+            for index, value in enumerate(self.percentiles['horizontal']):
+                label_xy = (x_min * 1.01, value - 0.05)
+                self.axis.axhspan(span_start, value, alpha=0.1 * (index + 1))
+                self.axis.annotate(f'{iterator * (index + 1)}th Percentile',
+                                   xy=label_xy, color='royalblue')
+                span_start = value
+            self.axis.axhspan(span_start, 100, alpha=0.4)
+
 
     def add_quadrant_labels(self):
         """
@@ -219,41 +267,54 @@ class RatioScatterPlot(Plot):
 
         If a 2x2 list of strings is provided as 'self.quadrant_labels', then add those labels to
         the corresponding quadrants.
+
+        If a list of just two strings was provided, then add them in alternating +/- modes in the
+        style of the default OFFENSE/DEFENSE quadrant labels.
         """
         offset = 0.08
-        if self.quadrant_labels == 'default':
+        if self.quadrant_labels == 'default' or np.array(self.quadrant_labels).shape == (2,):
+            label_a = 'OFFENSE' if self.quadrant_labels == 'default' else self.quadrant_labels[0]
+            label_b = 'DEFENSE' if self.quadrant_labels == 'default' else self.quadrant_labels[1]
+
+            # Make sure both labels are the same length, for neatness
+            if len(label_a) > len(label_b):
+                label_b += ' ' * (len(label_a) - len(label_b))
+            elif len(label_a) < len(label_b):
+                label_a += ' ' * (len(label_b) - len(label_a))
+
             # Top-left
-            self.axis.annotate('- OFFENSE', xy=(0 + offset, 1 - offset), xycoords='axes fraction',
+            self.axis.annotate(f'- {label_a}', xy=(0 + offset, 1 - offset), xycoords='axes fraction',
                                color='red', va='bottom', ha='center', fontweight='bold')
-            self.axis.annotate('+ DEFENSE', xy=(0 + offset, 1 - offset), xycoords='axes fraction',
+            self.axis.annotate(f'+ {label_b}', xy=(0 + offset, 1 - offset), xycoords='axes fraction',
                                color='green', va='top', ha='center', fontweight='bold')
             # Bottom-left
-            self.axis.annotate('- OFFENSE', xy=(0 + offset, 0 + offset), xycoords='axes fraction',
+            self.axis.annotate(f'- {label_a}', xy=(0 + offset, 0 + offset), xycoords='axes fraction',
                                color='red', va='bottom', ha='center', fontweight='bold')
-            self.axis.annotate('- DEFENSE', xy=(0 + offset, 0 + offset), xycoords='axes fraction',
+            self.axis.annotate(f'- {label_b}', xy=(0 + offset, 0 + offset), xycoords='axes fraction',
                                color='red', va='top', ha='center', fontweight='bold')
             # Bottom-right
-            self.axis.annotate('+ OFFENSE', xy=(1 - offset, 0 + offset), xycoords='axes fraction',
+            self.axis.annotate(f'+ {label_a}', xy=(1 - offset, 0 + offset), xycoords='axes fraction',
                                color='green', va='bottom', ha='center', fontweight='bold')
-            self.axis.annotate('- DEFENSE', xy=(1 - offset, 0 + offset), xycoords='axes fraction',
+            self.axis.annotate(f'- {label_b}', xy=(1 - offset, 0 + offset), xycoords='axes fraction',
                                color='red', va='top', ha='center', fontweight='bold')
             # Top-right
-            self.axis.annotate('+ OFFENSE', xy=(1 - offset, 1 - offset), xycoords='axes fraction',
+            self.axis.annotate(f'+ {label_a}', xy=(1 - offset, 1 - offset), xycoords='axes fraction',
                                color='green', va='bottom', ha='center', fontweight='bold')
-            self.axis.annotate('+ DEFENSE', xy=(1 - offset, 1 - offset), xycoords='axes fraction',
+            self.axis.annotate(f'+ {label_b}', xy=(1 - offset, 1 - offset), xycoords='axes fraction',
                                color='green', va='top', ha='center', fontweight='bold')
             return None
 
-        self.axis.annotate(self.quadrant_labels[0][0],  # Top-left
-                           xy=(0 + offset, 1 - offset), xycoords='axes fraction',
-                           color='black', fontweight='bold', va='center', ha='center')
-        self.axis.annotate(self.quadrant_labels[1][0],  # Bottom-left
-                           xy=(0 + offset, 0 + offset), xycoords='axes fraction',
-                           color='black', fontweight='bold', va='center', ha='center')
-        self.axis.annotate(self.quadrant_labels[1][1],  # Bottom-right
-                           xy=(1 - offset, 0 + offset), xycoords='axes fraction',
-                           color='black', fontweight='bold', va='center', ha='center')
-        self.axis.annotate(self.quadrant_labels[0][1],  # Top-right
-                           xy=(1 - offset, 1 - offset), xycoords='axes fraction',
-                           color='black', fontweight='bold', va='center', ha='center')
-        return None
+        if np.array(self.quadrant_labels).shape == (2, 2):
+            self.axis.annotate(self.quadrant_labels[0][0],  # Top-left
+                            xy=(0 + offset, 1 - offset), xycoords='axes fraction',
+                            color='black', fontweight='bold', va='center', ha='center')
+            self.axis.annotate(self.quadrant_labels[1][0],  # Bottom-left
+                            xy=(0 + offset, 0 + offset), xycoords='axes fraction',
+                            color='black', fontweight='bold', va='center', ha='center')
+            self.axis.annotate(self.quadrant_labels[1][1],  # Bottom-right
+                            xy=(1 - offset, 0 + offset), xycoords='axes fraction',
+                            color='black', fontweight='bold', va='center', ha='center')
+            self.axis.annotate(self.quadrant_labels[0][1],  # Top-right
+                            xy=(1 - offset, 1 - offset), xycoords='axes fraction',
+                            color='black', fontweight='bold', va='center', ha='center')
+            return None

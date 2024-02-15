@@ -21,7 +21,7 @@ def main():
                               x_label='Expected Goals For per hour', 
 															y_label='Expected Goals Against per hour (inverted)',
                               ratio_lines=True, invert_y=True, plot_x_mean=True, plot_y_mean=True,
-                              plot_league_average=league_avg_xg)
+                              scale_to_extreme=True, plot_league_average=league_avg_xg)
   xg_plot.make_plot()
 
   # Plot Team Goal ratios
@@ -29,7 +29,7 @@ def main():
                             title='Team Goal Rates (5v5)', scale='team',
                             x_label='Goals For per hour', y_label='Goals Against per hour (inverted)',
                             ratio_lines=True, invert_y=True, plot_x_mean=True, plot_y_mean=True,
-                            plot_league_average=league_avg_g)
+                            scale_to_extreme=True, plot_league_average=league_avg_xg)
   g_plot.make_plot()
 
 

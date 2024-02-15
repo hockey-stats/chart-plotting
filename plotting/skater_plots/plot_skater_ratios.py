@@ -35,6 +35,7 @@ def main(team, min_icetime):
                                invert_y=True,
                                plot_x_mean=False,
                                plot_y_mean=False,
+                               scale_to_extreme=True,
                                plot_league_average=league_avg_xg)
     xg_plot.make_plot()
 
@@ -50,6 +51,7 @@ def main(team, min_icetime):
                               invert_y=True,
                               plot_x_mean=False,
                               plot_y_mean=False,
+                              scale_to_extreme=True,
                               plot_league_average=league_avg_g)
     g_plot.make_plot()
 
