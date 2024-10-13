@@ -23,7 +23,7 @@ jobs:
       - name: Download Raw Data
         run: |
           mkdir ./data;
-          wget -O ./data/mp_team_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2023/regular/teams.csv
+          wget -O ./data/mp_team_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/teams.csv
       #
       - name: Setup Python
         uses: actions/setup-python@v4
