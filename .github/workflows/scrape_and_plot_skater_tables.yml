@@ -44,7 +44,7 @@ jobs:
       - name: Download Raw Data
         run: |
           mkdir ./data;
-          wget -O ./data/mp_skater_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2023/regular/skaters.csv;
+          wget -O ./data/mp_skater_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/skaters.csv;
       #
       - name: Setup Python
         uses: actions/setup-python@v4
