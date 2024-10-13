@@ -5,7 +5,7 @@ on:
       year:
         type: string
         description: Season for which to gather data
-        default: 2023
+        default: 2024
 
     outputs:
       plot_artifact_name: 
@@ -16,7 +16,7 @@ on:
       year:
         type: string
         description: Season for which to gather data
-        default: 2023
+        default: 2024
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-rolling-avg-plots'
