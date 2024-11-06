@@ -23,8 +23,8 @@ on:
         default: 'ALL'
       minimum_icetime:
         description: Minimum icetime cutoff to use on included players
-        type: string
-        default: '50'
+        type: number
+        default: 50
     
 env: 
   PLOTS_ARTIFACT_NAME: 'skater-point-plots'
