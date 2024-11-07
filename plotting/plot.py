@@ -129,7 +129,7 @@ class RatioScatterPlot(Plot):
 
         # Code for name labels, TODO: make use of or get rid of
         # For player scale, label each logo with the player's name
-        #self.df.apply(lambda row: ax.text(row[self.x_col], row[self.y_col], row['name'].split(' ')[1],
+        # self.df.apply(lambda row: ax.text(row[self.x_col], row[self.y_col], row['name'].split(' ')[1],
         #                                  horizontalalignment='center', fontsize=10,
         #                                  backgroundcolor=label_colors[row['team']]['bg'],
         #                                  color=label_colors[row['team']]['text'],
@@ -197,7 +197,7 @@ class RatioScatterPlot(Plot):
         If self.set_scale_to_extreme is True, the x-scale will equal the y-scale, and the scale will
         correspond to whichever of the x-ranges or y-ranges is larger.
 
-        If self.set_scale_to_extrems is False, the x- and y-scale will be set independently of each-
+        If self.set_scale_to_extreme is False, the x- and y-scale will be set independently of each-
         other, both being set to just contain there corresponding extrema.
 
         Returns the max/min x-,y-values to be used,
@@ -209,7 +209,7 @@ class RatioScatterPlot(Plot):
 
         if self.scale_to_extreme:
             if not self.plot_league_average:
-                raise AttributeError("self.scale_to_extreme set to True but"\
+                raise AttributeError("self.scale_to_extreme set to True but "\
                                      "self.plot_league_average not provided.")
             max_diff = 0
             for val in [x_min, x_max, y_min, y_max]:
