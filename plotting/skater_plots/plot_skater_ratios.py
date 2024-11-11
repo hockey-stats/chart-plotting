@@ -6,6 +6,8 @@ import os
 import argparse
 import pandas as pd
 
+from random import randrange
+
 from plotting.plot import RatioScatterPlot
 
 def main(team, min_icetime):
@@ -21,6 +23,12 @@ def main(team, min_icetime):
     # Calculate league averages for plot
     league_avg_xg = base_df['xGFph'].mean()
     league_avg_g = base_df['GFph'].mean()
+
+    # If provided team value is "RANDOM", choose one of the 32 teams randomly.
+    # TODO: Find a more graceful way to do this.
+    if team == 'RANDOM':
+        all_teams = list(set(base_df['teams']))
+        team = all_teams[randrange(32)]
 
     if team != "ALL":
         base_df = base_df[base_df['team'] == team]
@@ -59,7 +67,7 @@ def main(team, min_icetime):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--team', type=str, default='ALL',
-                        help='Team to get stats for, defaults to ALL.')
+                        help='Team to get stats for, defaults to ALL. Also accepts "RANDOM".')
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
     args = parser.parse_args()

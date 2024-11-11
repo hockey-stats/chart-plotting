@@ -7,6 +7,8 @@ import argparse
 import numpy as np
 import pandas as pd
 
+from random import randrange
+
 from plotting.plot import RatioScatterPlot
 
 
@@ -20,6 +22,12 @@ def construct_plot(df, team, output_filename, plot_title):
     pph_percentiles = []
     for percentile in [25, 50, 75]:
         pph_percentiles.append(np.percentile(df['pointsPerHour'], percentile))
+
+    # If provided team value is "RANDOM", choose one of the 32 teams randomly.
+    # TODO: Find a more graceful way to do this.
+    if team == 'RANDOM':
+        all_teams = list(set(df['teams']))
+        team = all_teams[randrange(32)]
 
     if team != "ALL":
         df = df[df['team'] == team]
@@ -77,7 +85,7 @@ def main(team, min_icetime_minutes, situation):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--team', type=str, default='ALL',
-                        help='Team to get stats for, defaults to ALL.')
+                        help='Team to get stats for, defaults to ALL. Also accepts "RANDOM".')
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
     parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
