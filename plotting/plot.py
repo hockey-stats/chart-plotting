@@ -7,11 +7,11 @@ from util.team_maps import nst_team_mapping
 from util.color_maps import label_colors
 
 
-def get_logo_marker(team_name, alpha=1):
+def get_logo_marker(team_name, alpha=1, zoom=1):
     """
     Quick function to return the team logo as a matplotlib marker object.
     """
-    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=1)
+    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=zoom)
 
 
 
@@ -41,7 +41,7 @@ class Plot:
         if self.filename:
             plt.savefig(self.filename, dpi=100)
 
-    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None):
+    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None, zoom=1):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -51,6 +51,7 @@ class Plot:
         :param str label: Row entry to be used as a label. If not supplied, don't label
         :param str opacity_scal: Row entry used to scale opacity, if desired
         :param int opacity_max: Max value to compare against for opacity scale
+        :param int zoom: Zoom level on image. Defaults to 1.
         """
         opacity = 0.6  # Default opacity if scaling isn't used
         if opacity_scale:
@@ -59,7 +60,7 @@ class Plot:
             opacity = row[opacity_scale] / opacity_max
 
         # Assumes the team value is under row['team']
-        artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity),
+        artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity, zoom=zoom),
                                     xy=(row[x], row[y]), frameon=False)
         self.axis.add_artist(artist_box)
 
@@ -79,6 +80,61 @@ class Plot:
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10)
+
+
+class LayeredLollipopPlot(Plot):
+    """
+    Class for plotting two corresponding values as a layered lollipop plot.
+    """
+    def __init__(self, dataframe, filename, value_a, value_b, title='', x_label='',
+                 y_label='', size=(10, 8), figure=None, axis=None,
+                 value_a_label='', value_b_label=''):
+        super().__init__(dataframe, filename, value_a, value_b, title, x_label, y_label,
+                         size, figure, axis)
+        self.value_a = value_a
+        self.value_b = value_b
+        self.value_a_label = value_a_label
+        self.value_b_label = value_b_label
+        self.fig = plt.figure(figsize=self.size) if figure is None else figure
+        self.axis = self.fig.add_subplot(111) if axis is None else axis
+
+
+    def make_plot(self):
+        # First add column denoting the rank of each team in the given dataframe
+        self.df['rank'] = np.arange(len(self.df.index))
+
+        # Then create the plot for value b, and then the plot of value a on top of it.
+        # Then re-plot the final markers of value b sp that they don't have lines going 
+        # through them.
+        stem = self.axis.stem(self.df[self.value_b], linefmt='C1-', label=self.value_b_label)
+        #stem[1].set_linewidth(1)
+        stem = self.axis.stem(self.df[self.value_a], linefmt='C0-', label=self.value_a_label)
+        #stem[1].set_linewidth(1)
+        self.axis.plot(self.df['rank'], self.df[self.value_b], linestyle='',
+                       marker='o', color='C1')
+
+        plt.title(self.title)
+        self.axis.set_xlabel(self.x_label)
+        self.axis.set_ylabel(self.y_label)
+        self.axis.legend()
+
+        # Remove x-labels and ticks
+        plt.tick_params(
+            axis='x',
+            which='both',
+            bottom=False,
+            top=False,
+            labelbottom=False
+        )
+
+        # Add one more column that represents a value slightly higher than max(value_a, value_b)
+        # to provide a point for plotting team logos just above the head of the lollipop
+        self.df['plot_point'] = [x + 0.5 for x in 
+                                 list(self.df[[self.value_a, self.value_b]].max(axis=1))]
+
+        self.df.apply(lambda row: self.add_team_logo(row, 'rank', 'plot_point', zoom=0.4), axis=1)
+
+        self.save_plot()
 
 
 class RatioScatterPlot(Plot):
