@@ -1,0 +1,67 @@
+name: Scrape and Plot Special Teams Tables
+on:
+  workflow_call:
+    inputs:
+      situation:
+        description: Either '5on4' or '4on5'
+        type: string
+        default: '5on4'
+    outputs:
+      plot_artifact_name:
+        value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+        description: Name of plot artifact
+
+  workflow_dispatch:
+
+env:
+  PLOTS_ARTIFACT_NAME: 'special-teams-plots'
+
+jobs:
+  plot-graphs:
+    runs-on: ubuntu-latest
+    ###
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
+      #
+      - name: Download Raw Data
+        run: |
+          mkdir ./data;
+          wget -O ./data/mp_team_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/teams.csv
+      #
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      #
+      - name: Install Requirements
+        run: |
+          pip install -r requirements.txt;
+      #
+      - name: Process Tables
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python3 processing/for_layered_lollipop_plot/process_team_tables.py --situation ${{ inputs.situation }}
+      #
+      - name: Generate Charts
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python3 plotting/team_plots/plot_specials_teams.py --situation ${{ inputs.situation }}
+      #
+      - name: Save Charts as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+      #
+      - name: Set Output for Artifact Name
+        id: set-output
+        run: |
+          echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+    ###
