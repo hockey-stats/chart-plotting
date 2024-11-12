@@ -51,7 +51,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 plotting/team_plots/plot_specials_teams.py --situation ${{ inputs.situation }}
+          python3 plotting/team_plots/plot_special_teams.py --situation ${{ inputs.situation }}
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v3
