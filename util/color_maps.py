@@ -34,7 +34,17 @@ label_colors = {
 		"text": "black",
 		"line": "gray",
   },
+  "LA": {
+		"bg": "gray",
+		"text": "black",
+		"line": "gray",
+  },
   "NJD": {
+		"bg": "red",
+		"text": "darkgreen",
+		"line": "forestgreen",
+  },
+  "NJ": {
 		"bg": "red",
 		"text": "darkgreen",
 		"line": "forestgreen",
@@ -58,6 +68,11 @@ label_colors = {
 		"bg": "red",
 		"text": "white",
 		"line": "red",
+  },
+  "TB": {
+		"bg": "blueviolet",
+		"text": "white",
+		"line": "blueviolet",
   },
   "TBL": {
 		"bg": "blueviolet",
@@ -109,6 +124,11 @@ label_colors = {
 		"text": "oldlace",
 		"line": "royalblue",
   },
+  "SJ": {
+		"bg": "teal",
+		"text": "white",
+		"line": "teal",
+  },
   "SJS": {
 		"bg": "teal",
 		"text": "white",
@@ -153,6 +173,11 @@ label_colors = {
 		"bg": "saddlebrown",
 		"text": "white",
 		"line": "saddlebrown",
+  },
+  "UTA": {
+		"bg": "paleturquoise",
+		"text": "black",
+		"line": "paleturquoise",
   },
   "NYI": {
 		"bg": "dodgerblue",

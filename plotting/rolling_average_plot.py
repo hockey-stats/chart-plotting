@@ -62,7 +62,6 @@ class RollingAveragePlot(Plot):
             self.axis.add_artist(artist_box)
 
 
-
     def plot_multilines(self):
         """
         Give a multiline_key, for each distinct value in the column corresponding to that key,

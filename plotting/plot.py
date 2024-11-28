@@ -14,13 +14,36 @@ def get_logo_marker(team_name, alpha=1, zoom=1):
     return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=zoom)
 
 
+def handle_player_full_names(names):
+    """
+    Generally skater names will be displayed as just their last names. This function will be
+    called in the event that multiple skaters share a last name, and will adjust their last names
+    to also show their first initials (e.g. Nylander -> W. Nylander and A. Nylander).
+
+    :param list names: List of full names.
+    """
+    last_names = [name.split()[-1] for name in names]
+    seen = set()
+    dupes = [name for name in last_names if name in seen or seen.add(name)]
+    final_names = []
+    for name in names:
+        last_name = name.split()[-1]
+        if last_name in dupes:
+            initial = name.split()[0][0]
+            display_name = f'{initial}. {last_name}'
+            final_names.append(display_name)
+        else:
+            final_names.append(last_name)
+    return final_names
+
+
 
 class Plot:
     """
     Base class to be used for all plots. Will only ever be called via super() for a base class
     """
-    def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
-                 y_label='', size=(10, 8), figure=None, axis=None):
+    def __init__(self, dataframe=None, filename='', x_column=None, y_column=None,
+                 title='', x_label='', y_label='', size=(10, 8), figure=None, axis=None):
 
         self.df = dataframe
         self.filename = filename
@@ -74,9 +97,7 @@ class Plot:
                 # i.e. it isn't a plot type that would every invert the y-axis, so set vertical
                 # alignment to be 'bottom'
                 verticalalignment = 'bottom'
-            # Split the label entry by ' ' and use last entry. Makes no difference for one-word
-            # labels, but for names uses last name only.
-            self.axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1],
+            self.axis.text(row[x], row[y] + 0.06, row[label],
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10)
@@ -208,7 +229,7 @@ class RatioScatterPlot(Plot):
 
         if self.ratio_lines:
             # Plot diagonal lines to show each percentage breakpoint
-            for x in np.arange(0.1, 0.9, 0.01):
+            for x in np.arange(0.01, 1.0, 0.01):
                 if round(x ,3) == 0.50:  # Already have a line indicating 50%, so skip here
                     continue
                 # p1 and p2 are the endpoints of the diagonal
@@ -231,8 +252,12 @@ class RatioScatterPlot(Plot):
 
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
+            # Convert full names to just last names, adding first initial in the case of duplicates
+            adjusted_names = handle_player_full_names(list(self.df['name']))
+            self.df['display_name'] = adjusted_names
             max_icetime = self.df.icetime.max()
-            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
+            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, 
+                                                         label='display_name',
                                                          opacity_scale='icetime',
                                                          opacity_max=max_icetime),
                          axis=1)
@@ -264,21 +289,25 @@ class RatioScatterPlot(Plot):
         y_max = self.df[self.y_col].max() + 0.1
 
         if self.scale_to_extreme:
-            if not self.plot_league_average:
-                raise AttributeError("self.scale_to_extreme set to True but "\
-                                     "self.plot_league_average not provided.")
-            max_diff = 0
-            for val in [x_min, x_max, y_min, y_max]:
-                if abs(self.plot_league_average - val) > max_diff:
-                    max_diff = abs(self.plot_league_average - val)
-
-            x_max = self.plot_league_average + max_diff
+            x_max = max(x_max, y_max)
             y_max = x_max
-            x_min = self.plot_league_average - max_diff
+            x_min = min(x_min, y_min)
             y_min = x_min
+            #if not self.plot_league_average:
+            #    raise AttributeError("self.scale_to_extreme set to True but "\
+            #                         "self.plot_league_average not provided.")
+            #max_diff = 0
+            #for val in [x_min, x_max, y_min, y_max]:
+            #    if abs(self.plot_league_average - val) > max_diff:
+            #        max_diff = abs(self.plot_league_average - val)
 
-        self.axis.set_xlim(x_min, x_max)
-        self.axis.set_ylim(y_min, y_max)
+            #x_max = self.plot_league_average + max_diff
+            #y_max = x_max
+            #x_min = self.plot_league_average - max_diff
+            #y_min = x_min
+
+        self.axis.set_xlim(0, x_max)
+        self.axis.set_ylim(0, y_max)
 
         return x_min, x_max, y_min, y_max
 

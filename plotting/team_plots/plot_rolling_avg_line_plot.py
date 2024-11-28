@@ -18,7 +18,7 @@ def xg_by_division_multiplot():
                     'name': 'Metropolitan'}
     pacific = {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
                'name': 'Pacific'}
-    central = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
+    central = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'UTA', 'MIN', 'CHI', 'NSH'},
                'name': 'Central'}
 
     df = pd.read_csv('data/xGoalsPercentage_rolling_avg.csv')
