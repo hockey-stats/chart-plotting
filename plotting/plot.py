@@ -57,6 +57,7 @@ class Plot:
         self.axis = axis
 
     def save_plot(self):
+        plt.title(self.title)
         # Add data disclaimer
         plt.figtext(0.5, 0.01, "All data from MoneyPuck.com", ha="center",
                     bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
@@ -134,7 +135,6 @@ class LayeredLollipopPlot(Plot):
         self.axis.plot(self.df['rank'], self.df[self.value_b], linestyle='',
                        marker='o', color='C1')
 
-        plt.title(self.title)
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
         self.axis.legend()
@@ -191,7 +191,6 @@ class RatioScatterPlot(Plot):
         # First plot the actual values
         self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
-        plt.title(self.title)
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
 

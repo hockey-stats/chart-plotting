@@ -65,7 +65,7 @@ def make_icetime_plot(skater_df):
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a, dataframe_b=df_b, x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1], sort_value='total_toi',
-                                   filename='game_report.png')
+                                   title='Icetime Breakdown by Team', filename='game_report.png')
 
     return icetime_plot
 
