@@ -145,7 +145,7 @@ class RatioScatterPlot(Plot):
                  y_label='', ratio_lines=False, invert_y=False, plot_x_mean=False,
                  plot_y_mean=False, quadrant_labels='default', size=(10,8),
                  percentiles=None, break_even_line=True, plot_league_average=0, scale='team',
-                 scale_to_extreme=False, figure=None, axis=None):
+                 scale_to_extreme=False, y_min_max=None, figure=None, axis=None):
 
         super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
                          size, figure, axis)
@@ -164,6 +164,7 @@ class RatioScatterPlot(Plot):
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
         self.axis = self.fig.add_subplot(111) if axis is None else axis
         self.scale_to_extreme = scale_to_extreme
+        self.y_min_max = y_min_max
 
 
     def make_plot(self):
@@ -253,7 +254,9 @@ class RatioScatterPlot(Plot):
         If self.set_scale_to_extreme is True, the x-scale will equal the y-scale, and the scale will
         correspond to whichever of the x-ranges or y-ranges is larger.
 
-        If self.set_scale_to_extreme is False, the x- and y-scale will be set independently of each-
+        If self.x_min_max or self.y_min_max are provided, those will override these values.
+
+        If neither are set, the x- and y-scale will be set independently of each-
         other, both being set to just contain there corresponding extrema.
 
         Returns the max/min x-,y-values to be used,
@@ -276,6 +279,16 @@ class RatioScatterPlot(Plot):
             y_max = x_max
             x_min = self.plot_league_average - max_diff
             y_min = x_min
+
+        else:
+            #if self.x_min_max:
+            #    x_min = self.x_min_max[0]
+            #    x_max = self.x_min_max[1]
+            # Nothing uses this yet
+            if self.y_min_max:
+                y_min = self.y_min_max[0]
+                y_max = self.y_min_max[1]
+
 
         self.axis.set_xlim(x_min, x_max)
         self.axis.set_ylim(y_min, y_max)

@@ -21,22 +21,25 @@ def construct_plot(df, team, output_filename, plot_title):
     for percentile in [25, 50, 75]:
         pph_percentiles.append(np.percentile(df['pointsPerHour'], percentile))
 
+    max_pph = max(df['pointsPerHour']) + 0.2
+
     if team != "ALL":
         df = df[df['team'] == team]
 
-    xg_plot = RatioScatterPlot(dataframe=df,
-                               filename=output_filename,
-                               x_column='avgTOI',
-                               y_column='pointsPerHour',
-                               title=plot_title,
-                               scale='player',
-                               x_label='Average Time on Ice per Game',
-                               y_label='Points per Hour',
-                               percentiles={'horizontal': pph_percentiles},
-                               quadrant_labels=['OPPORTUNITY', 'PRODUCTION'],
-                               plot_x_mean=False,
-                               plot_y_mean=False)
-    xg_plot.make_plot()
+    pph_plot = RatioScatterPlot(dataframe=df,
+                                filename=output_filename,
+                                x_column='avgTOI',
+                                y_column='pointsPerHour',
+                                title=plot_title,
+                                scale='player',
+                                x_label='Average Time on Ice per Game',
+                                y_label='Points per Hour',
+                                percentiles={'horizontal': pph_percentiles},
+                                quadrant_labels=['OPPORTUNITY', 'PRODUCTION'],
+                                plot_x_mean=False,
+                                plot_y_mean=False,
+                                y_min_max=(0, max_pph))
+    pph_plot.make_plot()
 
 
 def main(team, min_icetime_minutes, situation):
