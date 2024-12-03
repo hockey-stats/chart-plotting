@@ -48,6 +48,7 @@ class RollingAveragePlot(Plot):
         self.set_scaling()
         self.add_x_axis()
 
+        # Make sure x-tick labels are whole numbers
         self.axis.xaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
 
         self.axis.set_title(self.title)
