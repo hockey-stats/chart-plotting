@@ -22,10 +22,16 @@ class MultiPlot:
                                 ncols=self.plot_matrix.shape[1],
                                 figsize=self.figsize)
         
+
+        print(self.plot_matrix.shape)
         for x in range(0, self.plot_matrix.shape[0]):
             for y in range(0, self.plot_matrix.shape[1]):
+                print(x, y)
                 self.plot_matrix[x][y].fig = fig
-                self.plot_matrix[x][y].axis = axs[x, y]
+                if self.plot_matrix.shape[0] == 1:
+                    self.plot_matrix[x][y].axis = axs[y]
+                else:
+                    self.plot_matrix[x][y].axis = axs[x, y]
                 self.plot_matrix[x][y].make_plot()
 
         fig.suptitle(self.title, size='xx-large', weight='heavy')

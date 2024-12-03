@@ -53,8 +53,8 @@ class Plot:
         self.x_label = x_label
         self.y_label = y_label
         self.size = size
-        self.fig = figure
-        self.axis = axis
+        self.fig = plt.figure(figsize=self.size) if figure is None else figure
+        self.axis = self.fig.add_subplot(111) if axis is None else axis
 
     def save_plot(self):
         plt.title(self.title)
