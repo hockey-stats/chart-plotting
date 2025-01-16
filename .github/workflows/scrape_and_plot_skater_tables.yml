@@ -67,7 +67,7 @@ jobs:
           python3 plotting/skater_plots/plot_skater_ratios.py --team ${{ inputs.team }} --min_icetime ${{ inputs.minimum_icetime }};
       #
       - name: Save Charts as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png

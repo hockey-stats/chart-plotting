@@ -48,7 +48,7 @@ jobs:
           python3 plotting/team_plots/plot_team_ratios.py
       #
       - name: Save Charts as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png
