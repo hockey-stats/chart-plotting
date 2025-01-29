@@ -59,7 +59,7 @@ jobs:
           python3 plotting/team_plots/plot_rolling_avg_line_plot.py
       #
       - name: Save Charts as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
           path: ./*png

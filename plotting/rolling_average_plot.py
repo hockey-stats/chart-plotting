@@ -1,8 +1,11 @@
 import os
 import argparse
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.ticker import StrMethodFormatter
+from scipy.interpolate import make_interp_spline
 
 from plotting.plot import Plot, get_logo_marker
 from util.color_maps import label_colors
@@ -45,6 +48,9 @@ class RollingAveragePlot(Plot):
         self.set_scaling()
         self.add_x_axis()
 
+        # Make sure x-tick labels are whole numbers
+        self.axis.xaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+
         self.axis.set_title(self.title)
         self.save_plot()
 
@@ -64,16 +70,25 @@ class RollingAveragePlot(Plot):
 
     def plot_multilines(self):
         """
-        Give a multiline_key, for each distinct value in the column corresponding to that key,
+        Given a multiline_key, for each distinct value in the column corresponding to that key,
         add a single line plot for the dataframe filtered on that value.
         """
         keys = set(self.df[self.multiline_key])
         for key in keys:
             individual_df = self.df[self.df[self.multiline_key] == key]
+        
+            # Add a bit of smoothing
+            x_col = individual_df[self.x_col]
+            y_col = individual_df[self.y_col]
+            new_x = np.linspace(x_col.min(), x_col.max(), 300)
+            spl = make_interp_spline(x_col, y_col, k=3)
+            y_smooth = spl(new_x)
+
             color = 'black'
             if self.add_team_logos:  # If we're adding team logos, color the lines by team color
                 color = label_colors[key]['line']
-            self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color, 
+            #self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color,
+            self.axis.plot(new_x, y_smooth, color=color,
                            linewidth=3)
 
 
