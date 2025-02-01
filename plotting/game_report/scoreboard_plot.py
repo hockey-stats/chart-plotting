@@ -120,14 +120,16 @@ def main(df, g_df):
             # Goal value
             ax.text(x_pos, G_HEIGHT, team_data[team][state]['goals'],
                     size=20,
-                    color=state_settings['color'],
+                    #color=state_settings['color'],
+                    bbox=g_bbox,
                     ha='center',
                     va='center')
         
             # xGoal value
             ax.text(x_pos, XG_HEIGHT, round(team_data[team][state]['xgoals'], 1),
                     size=20,
-                    color=state_settings['color'],
+                    #color=state_settings['color'],
+                    bbox=xg_bbox,
                     ha='center',
                     va='center')
 

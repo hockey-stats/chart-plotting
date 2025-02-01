@@ -13,10 +13,10 @@ import pandas as pd
 def process_skater_data(path):
     """
     Processes raw data for skaters into a single DataFrame containing all the columns
-    needed to create the post-game report. For each team there will be 6 CSVs, one for
-    each of 5v5, PP, and PK statistics in both individual and on-ice formats.
+    needed to create the post-game report. For each team there will be 8 CSVs, one for
+    each of all strengths, 5v5, PP, and PK statistics in both individual and on-ice formats.
 
-    Output DataFrame will have information from all 6, with each player having three rows
+    Output DataFrame will have information from all 8, with each player having four rows
     for each game state that includes both the invididual and on-ice metrics.
 
     :param str path: Filepath to folder containing raw CSVs.
@@ -89,14 +89,14 @@ def process_skater_data(path):
     df = pd.merge(indiv_df, onice_df, left_on=['name', 'state', 'team'],
                   right_on=['name', 'state', 'team'], how='right')\
             .sort_values(by=['name'], ascending=True)
-         
+       
     df.fillna(0, inplace=True)
 
     return df, game_id
 
 def process_goalie_data(path):
     """
-    Raw goalie data is provided as one CSV for each game state, per team. Combines all 6
+    Raw goalie data is provided as one CSV for each game state, per team. Combines all 8
     into one DataFrame and return it.
 
     :param str path: Filepath to folder containing raw CSVs.
