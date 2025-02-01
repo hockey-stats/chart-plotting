@@ -31,7 +31,7 @@ def total_toi_as_timestamp(toi):
     return timestamp
 
 
-def main(df, g_df):
+def make_plot(df, g_df):
     team_a, team_b = set(df['team'])
 
     team_data = {}
@@ -66,11 +66,11 @@ def main(df, g_df):
     _, ax = plot.fig, plot.axis
 
     g_bbox = {
-        "boxstyle": "round",
-        "facecolor": "royalblue"
+        "boxstyle": "round,pad=0.15",
+        "facecolor": "cornflowerblue"
     }
     xg_bbox = {
-        "boxstyle": "round",
+        "boxstyle": "round,pad=0.15",
         "facecolor": "lightblue"
     }
 
@@ -119,7 +119,7 @@ def main(df, g_df):
 
             # Goal value
             ax.text(x_pos, G_HEIGHT, team_data[team][state]['goals'],
-                    size=20,
+                    size=18,
                     #color=state_settings['color'],
                     bbox=g_bbox,
                     ha='center',
@@ -127,7 +127,7 @@ def main(df, g_df):
         
             # xGoal value
             ax.text(x_pos, XG_HEIGHT, round(team_data[team][state]['xgoals'], 1),
-                    size=20,
+                    size=18,
                     #color=state_settings['color'],
                     bbox=xg_bbox,
                     ha='center',
@@ -142,9 +142,13 @@ def main(df, g_df):
     ax.add_artist(logo_a)
     ax.add_artist(logo_b)
 
+    return plot
+
+
+def main(df, g_df):
+    plot = make_plot(df, g_df)
+
     plot.save_plot()
-
-
 
 
 if __name__ == '__main__':

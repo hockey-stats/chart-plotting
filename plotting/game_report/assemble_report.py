@@ -16,6 +16,7 @@ from numpy import array
 
 from plotting.plot import RatioScatterPlot
 from plotting.mirrored_bar_plot import MirroredBarPlot
+from plotting.game_report import scoreboard_plot
 from plotting.multiplot import MultiPlot
 
 
@@ -29,7 +30,7 @@ def make_xg_ratio_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # DataFrame contains info for all states, so filter to 5v5
-    df = skater_df[skater_df['state'] == 'ev']
+    df = skater_df[skater_df['state'] == 'es']
 
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
@@ -62,11 +63,11 @@ def make_icetime_plot(skater_df):
 
     # Also add column for total icetime, to have a value to sort the tables by
     for df in df_a, df_b:
-        df['total_toi'] = df.apply(lambda row: row['ev'] + row['pp'] + row['pk'], axis=1)
+        df['total_toi'] = df.apply(lambda row: row['es'] + row['pp'] + row['pk'], axis=1)
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
-                                   x_column=['ev', 'pp', 'pk'],
+                                   x_column=['es', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
                                    title='Icetime Breakdown by Team',
@@ -74,6 +75,10 @@ def make_icetime_plot(skater_df):
 
     return icetime_plot
 
+
+def make_scoreboard_plot(df, g_df):
+    plot = scoreboard_plot.make_plot(df, g_df)
+    return plot
 
 
 def main():
@@ -83,11 +88,14 @@ def main():
     """
 
     skater_df = pd.read_csv(os.path.join('data', 'skaters.csv'), encoding='utf-8-sig')
+    goalie_df = pd.read_csv(os.path.join('data', 'goalies.csv'), encoding='utf-8-sig')
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 
     icetime_plot = make_icetime_plot(skater_df)
 
-    plot_matrix = array([[icetime_plot, xg_scatter_plot]])
+    scoreboard_plot = make_scoreboard_plot(skater_df, goalie_df)
+
+    plot_matrix = array([[scoreboard_plot, scoreboard_plot], [icetime_plot, xg_scatter_plot]])
 
     game_report = MultiPlot(plot_matrix=plot_matrix,
                             filename='game_report.png',
