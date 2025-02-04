@@ -3,8 +3,8 @@ import argparse
 import pandas as pd
 
 from numpy import array
-from plotting.rolling_average_plot import RollingAveragePlot
-from plotting.multiplot import MultiPlot
+from plotting.base_plots.rolling_average import RollingAveragePlot
+from plotting.base_plots.multiplot import MultiPlot
 
 
 def xg_by_division_multiplot():
@@ -12,20 +12,20 @@ def xg_by_division_multiplot():
     Plot each teams rolling 10-game average, in a 2x2 plot where each plot shows
     all the teams in one division.
     """
-    atlantic = {'teams': {'TOR', 'TBL', 'BOS', 'DET', 'MTL', 'OTT', 'FLA', 'BUF'}, 
-                'name': 'Atlantic'}
-    metropolitan = {'teams': {'NYR', 'NYI', 'NJD', 'CAR', 'CBJ', 'PIT', 'WSH', 'PHI'},
-                    'name': 'Metropolitan'}
-    pacific = {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
-               'name': 'Pacific'}
-    central = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
-               'name': 'Central'}
+    atl = {'teams': {'TOR', 'TBL', 'BOS', 'DET', 'MTL', 'OTT', 'FLA', 'BUF'},
+           'name': 'Atlantic'}
+    met = {'teams': {'NYR', 'NYI', 'NJD', 'CAR', 'CBJ', 'PIT', 'WSH', 'PHI'},
+           'name': 'Metropolitan'}
+    pac = {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
+           'name': 'Pacific'}
+    cen = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
+           'name': 'Central'}
 
     df = pd.read_csv('data/xGoalsPercentage_rolling_avg.csv')
     df['xGoalsPercentageRollingAvg'] = df.apply(lambda row:
                                                 round(row['xGoalsPercentageRollingAvg'] * 100, 2), 1)
     plots = []
-    for div in [atlantic, metropolitan, pacific, central]:
+    for div in [atl, met, pac, cen]:
         div_df = df[df['team'].isin(div['teams'])]
         div_plot = RollingAveragePlot(dataframe=div_df, filename='',
                                       x_column='gameNumber',
@@ -58,4 +58,3 @@ if __name__ == '__main__':
                         choices=['xg_by_division'])
     args = parser.parse_args()
     main(args.type)
-    
