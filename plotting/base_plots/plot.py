@@ -14,7 +14,7 @@ class Plot:
     Base class to be used for all plots. Will only ever be called via super() for a base class
     """
     def __init__(self,
-                 filename,
+                 filename='',
                  title='',
                  size=(10, 8),
                  figure=None,
@@ -77,7 +77,13 @@ class Plot:
                 verticalalignment = 'bottom'
             # Split the label entry by ' ' and use last entry. Makes no difference for one-word
             # labels, but for names uses last name only.
-            self.axis.text(row[x], row[y] + 0.06, row[label].split(' ')[-1],
+            # If data is from naturalstattrick, the encoding they use has `\xa0` as a whitespace 
+            # instead of a regular space, so check for that as well.
+            if '\xa0' in row[label]:
+                name = row[label].split('\xa0')[-1]
+            else:
+                name = row[label].split(' ')[-1]
+            self.axis.text(row[x], row[y] + 0.06, name,
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10)

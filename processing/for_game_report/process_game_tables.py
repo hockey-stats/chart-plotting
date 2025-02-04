@@ -112,8 +112,8 @@ def process_goalie_data(path):
     }
 
     for filename in glob.glob(os.path.join(path, '*goalies.csv')):
-        _, team, state, _ = os.path.basename(filename).split('_')
         print(os.path.basename(filename))
+        _, team, state, _ = os.path.basename(filename).split('_')
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:

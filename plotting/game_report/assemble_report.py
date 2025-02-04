@@ -14,10 +14,10 @@ import argparse
 import pandas as pd
 from numpy import array
 
-from plotting.plot import RatioScatterPlot
-from plotting.mirrored_bar_plot import MirroredBarPlot
-from plotting.game_report import scoreboard_plot
-from plotting.multiplot import MultiPlot
+from plotting.base_plots.ratio_scatter import RatioScatterPlot
+from plotting.base_plots.mirrored_bar import MirroredBarPlot
+from plotting.base_plots.scoreboard import ScoreBoardPlot
+from plotting.base_plots.multiplot import MultiPlot
 
 
 # Disable an annoying warning
@@ -30,7 +30,7 @@ def make_xg_ratio_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # DataFrame contains info for all states, so filter to 5v5
-    df = skater_df[skater_df['state'] == 'es']
+    df = skater_df[skater_df['state'] == 'ev']
 
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
@@ -41,7 +41,7 @@ def make_xg_ratio_plot(skater_df):
                                ratio_lines=True, invert_y=True,
                                plot_x_mean=False,
                                plot_y_mean=False,
-                               scale_to_extreme=True)
+                               scale_to_extreme=False)
 
     return xg_plot
 
@@ -63,11 +63,11 @@ def make_icetime_plot(skater_df):
 
     # Also add column for total icetime, to have a value to sort the tables by
     for df in df_a, df_b:
-        df['total_toi'] = df.apply(lambda row: row['es'] + row['pp'] + row['pk'], axis=1)
+        df['total_toi'] = df.apply(lambda row: row['ev'] + row['pp'] + row['pk'], axis=1)
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
-                                   x_column=['es', 'pp', 'pk'],
+                                   x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
                                    title='Icetime Breakdown by Team',
@@ -77,7 +77,7 @@ def make_icetime_plot(skater_df):
 
 
 def make_scoreboard_plot(df, g_df):
-    plot = scoreboard_plot.make_plot(df, g_df)
+    plot = ScoreBoardPlot(filename='', skater_df=df, goalie_df=g_df)
     return plot
 
 
@@ -87,8 +87,8 @@ def main():
     methods.
     """
 
-    skater_df = pd.read_csv(os.path.join('data', 'skaters.csv'), encoding='utf-8-sig')
-    goalie_df = pd.read_csv(os.path.join('data', 'goalies.csv'), encoding='utf-8-sig')
+    skater_df = pd.read_csv(os.path.join('data', '20844_skaters.csv'), encoding='utf-8-sig')
+    goalie_df = pd.read_csv(os.path.join('data', '20844_goalies.csv'), encoding='utf-8-sig')
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 
     icetime_plot = make_icetime_plot(skater_df)
