@@ -7,7 +7,7 @@ import os
 import argparse
 import pandas as pd
 
-from plotting.plot import LayeredLollipopPlot
+from plotting.base_plots.layered_lollipop import LayeredLollipopPlot
 
 
 def make_5on4_plot(base_df):

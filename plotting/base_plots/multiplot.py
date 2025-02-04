@@ -1,7 +1,4 @@
 import matplotlib.pyplot as plt
-from numpy import array
-import pandas as pd
-from plotting.rolling_average_plot import RollingAveragePlot
 
 class MultiPlot:
     """

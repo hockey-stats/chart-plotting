@@ -1,32 +1,41 @@
-import os
-import argparse
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.ticker import StrMethodFormatter
+from matplotlib.offsetbox import AnnotationBbox
 from scipy.interpolate import make_interp_spline
 
-from plotting.plot import Plot, get_logo_marker
+from plotting.base_plots.plot import Plot, get_logo_marker
 from util.color_maps import label_colors
 
 class RollingAveragePlot(Plot):
     """
     Sub-class of Plot to create rolling average line plots.
     """
-    def __init__(self, dataframe, filename, x_column, y_column, title='', x_label='',
-                 y_label='', y_midpoint=50, size=(10, 8), multiline_key=None,
-                 add_team_logos=False, figure=None, axis=None, is_subplot=False):
+    def __init__(self,
+                 filename,
+                 dataframe,
+                 x_column='',
+                 y_column='',
+                 title='',
+                 x_label='',
+                 y_label='',
+                 y_midpoint=50,
+                 size=(10, 8),
+                 multiline_key=None,
+                 add_team_logos=False):
 
-        super().__init__(dataframe, filename, x_column, y_column, title, x_label, y_label,
-                         size)
+        super().__init__(filename, title, size)
 
-        self.fig = plt.figure(figsize=self.size) if figure is None else figure
-        self.axis = self.fig.add_subplot(111) if axis is None else axis
+        self.df = dataframe
+        self.x_col = x_column
+        self.y_col = y_column
+        self.x_label = x_label
+        self.y_label = y_label
+        self.fig = plt.figure(figsize=self.size)
+        self.axis = self.fig.add_subplot(111)
         self.y_midpoint = y_midpoint
         self.multiline_key = multiline_key
         self.add_team_logos = add_team_logos
-        self.is_subplot = is_subplot
 
     def make_plot(self):
         """
@@ -63,7 +72,7 @@ class RollingAveragePlot(Plot):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(get_logo_marker(team), xy=(x_last, y_last), 
+            artist_box = AnnotationBbox(get_logo_marker(team), xy=(x_last, y_last),
                                         frameon=False, alpha=0.5)
             self.axis.add_artist(artist_box)
 
@@ -76,7 +85,7 @@ class RollingAveragePlot(Plot):
         keys = set(self.df[self.multiline_key])
         for key in keys:
             individual_df = self.df[self.df[self.multiline_key] == key]
-        
+
             # Add a bit of smoothing
             x_col = individual_df[self.x_col]
             y_col = individual_df[self.y_col]

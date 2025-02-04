@@ -6,7 +6,7 @@ import os
 import argparse
 import pandas as pd
 
-from plotting.plot import RatioScatterPlot
+from plotting.base_plots.ratio_scatter import RatioScatterPlot
 
 def main(team, min_icetime):
     """
