@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from plotting.plot import RatioScatterPlot
+from plotting.base_plots.ratio_scatter import RatioScatterPlot
 
 
 def construct_plot(df, team, output_filename, plot_title):
