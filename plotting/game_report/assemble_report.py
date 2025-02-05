@@ -18,7 +18,8 @@ from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from plotting.base_plots.mirrored_bar import MirroredBarPlot
 from plotting.base_plots.scoreboard import ScoreBoardPlot
 from plotting.base_plots.multiplot import MultiPlot
-
+from plotting.base_plots.pie import PiePlot
+from util.helpers import total_toi_as_timestamp
 
 # Disable an annoying warning
 pd.options.mode.chained_assignment = None
@@ -77,8 +78,45 @@ def make_icetime_plot(skater_df):
 
 
 def make_scoreboard_plot(df, g_df):
+    """
+    Draw scoreboard plot based on skater/goalie dataframes.
+    """
     plot = ScoreBoardPlot(filename='', skater_df=df, goalie_df=g_df)
     return plot
+
+
+def make_pp_icetime_distribution(g_df):
+    """
+    Create a Pie Plot visualizing the distribution of PP time for each time.
+    """
+    team_a, team_b = set(g_df['team'])
+    team_a_pp_toi = g_df[(g_df['team'] == team_a) & (g_df['state'] == 'pp')]['icetime'].sum()
+    team_b_pp_toi = g_df[(g_df['team'] == team_b) & (g_df['state'] == 'pp')]['icetime'].sum()
+    es_toi = 60 - float(team_a_pp_toi) - float(team_b_pp_toi)
+
+    values = [es_toi, team_a_pp_toi, team_b_pp_toi]
+
+    team_a_pp_toi = total_toi_as_timestamp(team_a_pp_toi)
+    team_b_pp_toi = total_toi_as_timestamp(team_b_pp_toi)
+    es_toi = total_toi_as_timestamp(es_toi)
+
+    labels = [
+              f"Even Strength ({es_toi})",
+              f"{team_a} PP ({team_a_pp_toi})",
+              f"{team_b} PP ({team_b_pp_toi})"
+             ]
+ 
+    plot = PiePlot("", values=values, labels=labels, radius=0.5)
+
+    return plot
+
+
+def assemble_multiplot(icetime, xg_scatter, scoreboard):
+    """
+    Function which takes the various plots which constitute the game report and assembles them
+    into a single multiplot.
+    """
+
 
 
 def main():
@@ -95,9 +133,35 @@ def main():
 
     scoreboard_plot = make_scoreboard_plot(skater_df, goalie_df)
 
-    plot_matrix = array([[scoreboard_plot, scoreboard_plot], [icetime_plot, xg_scatter_plot]])
+    pp_distribution_plot = make_pp_icetime_distribution(goalie_df)
 
-    game_report = MultiPlot(plot_matrix=plot_matrix,
+    arrangement = {
+        "dimensions": (2, 4),
+        "plots": [
+            {
+                "plot": scoreboard_plot,
+                "position": (0, 2),
+                "colspan": 2
+            },
+            {
+                "plot": pp_distribution_plot,
+                "position": (0, 0),
+            },
+            {
+                "plot": icetime_plot,
+                "position": (1, 0),
+                "colspan": 2,
+            },
+            {
+                "plot": xg_scatter_plot,
+                "position": (1, 2),
+                "colspan": 2,
+            }
+        ]
+    }
+
+    game_report = MultiPlot(arrangement=arrangement,
+                            figsize=(20, 14),
                             filename='game_report.png',
                             title='Game Report')
 
