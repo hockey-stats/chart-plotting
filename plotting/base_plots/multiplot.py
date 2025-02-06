@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 
-class MultiPlot:
+from plotting.base_plots.plot import Plot
+
+class MultiPlot(Plot):
     """
     Wrapper class to take a 2D matrix of Plot objects and put them together into a multi-
     plot.
@@ -21,11 +23,14 @@ class MultiPlot:
         ]
     }
     """
-    def __init__(self, arrangement, filename, title='', figsize=(14, 14)):
+    def __init__(self, arrangement, filename, title='', figsize=(14, 14), data_disclaimer='moneypuck'):
         self.arrangement = arrangement
         self.filename = filename
         self.title = title
         self.figsize = figsize
+        super().__init__(title=self.title,
+                         filename=self.filename,
+                         data_disclaimer=data_disclaimer)
 
     def make_multiplot(self):
         """
@@ -41,22 +46,6 @@ class MultiPlot:
             plot["plot"].axis = ax
             plot["plot"].make_plot()
 
-        #fig.suptitle(self.title, size='xx-large', weight='heavy')
-
-        #fig, axs = plt.subplots(nrows=self.plot_matrix.shape[0],
-        #                        ncols=self.plot_matrix.shape[1],
-        #                        figsize=self.figsize)
-
-        #for x in range(0, self.plot_matrix.shape[0]):
-        #    for y in range(0, self.plot_matrix.shape[1]):
-        #        print(x, y)
-        #        self.plot_matrix[x][y].fig = fig
-        #        if self.plot_matrix.shape[0] == 1:
-        #            self.plot_matrix[x][y].axis = axs[y]
-        #        else:
-        #            self.plot_matrix[x][y].axis = axs[x, y]
-        #        self.plot_matrix[x][y].make_plot()
-
-        fig.suptitle(self.title, size='xx-large', weight='heavy')
-        plt.savefig(self.filename)
+        fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
+        self.save_plot()
 

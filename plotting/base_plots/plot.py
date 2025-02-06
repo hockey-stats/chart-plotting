@@ -34,9 +34,20 @@ class Plot:
         Saves the plot as a png file and adds the appropriate data disclaimer.
         """
         # Add data disclaimer
-        if self.data_disclaimer == 'moneypuck':
-            plt.figtext(0.5, 0.01, "All data from MoneyPuck.com", ha="center",
-                        bbox={"facecolor": "cyan", "alpha" :0.5, "pad": 5})
+        if self.data_disclaimer is not None:
+            if self.data_disclaimer == 'nst':
+                text = "All data from NaturalStatTrick.com"
+                textcolor = 'whitesmoke'
+                facecolor = 'maroon'
+            else:  # Default is moneypuck
+                text = "All data from MoneyPuck.com"
+                textcolor = 'black'
+                facecolor = 'cyan'
+            plt.figtext(0.5, 0.01, text, ha="center", color=textcolor,
+                        bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
+
+        if self.fig:
+            self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
             plt.savefig(self.filename, dpi=100)
@@ -77,7 +88,7 @@ class Plot:
                 verticalalignment = 'bottom'
             # Split the label entry by ' ' and use last entry. Makes no difference for one-word
             # labels, but for names uses last name only.
-            # If data is from naturalstattrick, the encoding they use has `\xa0` as a whitespace 
+            # If data is from naturalstattrick, the encoding they use has `\xa0` as a whitespace
             # instead of a regular space, so check for that as well.
             if '\xa0' in row[label]:
                 name = row[label].split('\xa0')[-1]

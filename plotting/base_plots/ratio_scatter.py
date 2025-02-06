@@ -26,9 +26,10 @@ class RatioScatterPlot(Plot):
                  plot_league_average=0,
                  scale='team',
                  scale_to_extreme=False,
-                 y_min_max=None):
+                 y_min_max=None,
+                 data_disclaimer='moneypuck'):
 
-        super().__init__(filename, title, size)
+        super().__init__(filename, title, size, data_disclaimer=data_disclaimer)
 
         self.df = dataframe
         self.x_col = x_column

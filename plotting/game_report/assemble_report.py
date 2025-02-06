@@ -42,7 +42,8 @@ def make_xg_ratio_plot(skater_df):
                                ratio_lines=True, invert_y=True,
                                plot_x_mean=False,
                                plot_y_mean=False,
-                               scale_to_extreme=False)
+                               scale_to_extreme=False,
+                               data_disclaimer=None)
 
     return xg_plot
 
@@ -62,17 +63,30 @@ def make_icetime_plot(skater_df):
     df_a = icetime_df[icetime_df['team'] == teams[0]]
     df_b = icetime_df[icetime_df['team'] == teams[1]]
 
-    # Also add column for total icetime, to have a value to sort the tables by
+    # Add column for total icetime, to have a value to sort the tables by
     for df in df_a, df_b:
         df['total_toi'] = df.apply(lambda row: row['ev'] + row['pp'] + row['pk'], axis=1)
+
+    # Add columns for total goals and assists
+    df_a_scoring = skater_df[(skater_df['team'] == teams[0]) & (skater_df['state'] == 'all')]\
+                   [['name', 'goals', 'primary_assists', 'secondary_assists']]
+    df_b_scoring = skater_df[(skater_df['team'] == teams[1]) & (skater_df['state'] == 'all')]\
+                   [['name', 'goals', 'primary_assists', 'secondary_assists']]
+
+    # Merge dataframe with scoring stats into icetime dataframe
+    df_a = df_a.merge(df_a_scoring, on='name')\
+            .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
+    df_b = df_b.merge(df_b_scoring, on='name')\
+            .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
                                    x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
-                                   title='Icetime Breakdown by Team',
-                                   filename='')
+                                   title='Icetime Breakdownsss by Team',
+                                   filename='',
+                                   data_disclaimer=None)
 
     return icetime_plot
 
@@ -81,33 +95,7 @@ def make_scoreboard_plot(df, g_df):
     """
     Draw scoreboard plot based on skater/goalie dataframes.
     """
-    plot = ScoreBoardPlot(filename='', skater_df=df, goalie_df=g_df)
-    return plot
-
-
-def make_pp_icetime_distribution(g_df):
-    """
-    Create a Pie Plot visualizing the distribution of PP time for each time.
-    """
-    team_a, team_b = set(g_df['team'])
-    team_a_pp_toi = g_df[(g_df['team'] == team_a) & (g_df['state'] == 'pp')]['icetime'].sum()
-    team_b_pp_toi = g_df[(g_df['team'] == team_b) & (g_df['state'] == 'pp')]['icetime'].sum()
-    es_toi = 60 - float(team_a_pp_toi) - float(team_b_pp_toi)
-
-    values = [es_toi, team_a_pp_toi, team_b_pp_toi]
-
-    team_a_pp_toi = total_toi_as_timestamp(team_a_pp_toi)
-    team_b_pp_toi = total_toi_as_timestamp(team_b_pp_toi)
-    es_toi = total_toi_as_timestamp(es_toi)
-
-    labels = [
-              f"Even Strength ({es_toi})",
-              f"{team_a} PP ({team_a_pp_toi})",
-              f"{team_b} PP ({team_b_pp_toi})"
-             ]
- 
-    plot = PiePlot("", values=values, labels=labels, radius=0.5)
-
+    plot = ScoreBoardPlot(filename='', skater_df=df, goalie_df=g_df, data_disclaimer=None)
     return plot
 
 
@@ -116,7 +104,6 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard):
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
     """
-
 
 
 def main():
@@ -133,29 +120,28 @@ def main():
 
     scoreboard_plot = make_scoreboard_plot(skater_df, goalie_df)
 
-    pp_distribution_plot = make_pp_icetime_distribution(goalie_df)
+    team_a, team_b = set(skater_df['team'])
 
     arrangement = {
-        "dimensions": (2, 4),
+        "dimensions": (13, 6),
         "plots": [
             {
                 "plot": scoreboard_plot,
-                "position": (0, 2),
-                "colspan": 2
-            },
-            {
-                "plot": pp_distribution_plot,
-                "position": (0, 0),
+                "position": (0, 1),
+                "colspan": 4,
+                "rowspan": 6
             },
             {
                 "plot": icetime_plot,
-                "position": (1, 0),
-                "colspan": 2,
+                "position": (6, 0),
+                "colspan": 3,
+                "rowspan": 6
             },
             {
                 "plot": xg_scatter_plot,
-                "position": (1, 2),
-                "colspan": 2,
+                "position": (6, 3),
+                "colspan": 3,
+                "rowspan": 6
             }
         ]
     }
@@ -163,7 +149,8 @@ def main():
     game_report = MultiPlot(arrangement=arrangement,
                             figsize=(20, 14),
                             filename='game_report.png',
-                            title='Game Report')
+                            title=f'Game Report - {team_a} vs {team_b}',
+                            data_disclaimer='nst')
 
     game_report.make_multiplot()
 
