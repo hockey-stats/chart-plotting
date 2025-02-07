@@ -31,8 +31,11 @@ class Plot:
 
     def save_plot(self):
         """
-        Saves the plot as a png file and adds the appropriate data disclaimer.
+        Adds the plot title, the data disclaimer, and saves the plot to a PNG file.
         """
+        # Add title
+        plt.title(self.title)
+
         # Add data disclaimer
         if self.data_disclaimer is not None:
             if self.data_disclaimer == 'nst':

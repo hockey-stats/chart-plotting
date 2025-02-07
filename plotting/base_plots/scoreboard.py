@@ -25,10 +25,14 @@ class ScoreBoardPlot(Plot):
                  filename,
                  skater_df,
                  goalie_df,
+                 title='',
                  size=(14, 8),
                  data_disclaimer='moneypuck'):
 
-        super().__init__(filename, size, data_disclaimer=data_disclaimer)
+        super().__init__(title=title,
+                         filename=filename,
+                         size=size,
+                         data_disclaimer=data_disclaimer)
 
         self.df = skater_df
         self.g_df = goalie_df

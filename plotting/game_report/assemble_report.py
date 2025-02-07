@@ -10,16 +10,14 @@ The report will consist of many plots assembed into a multi-plot, including:
 """
 
 import os
+import glob
 import argparse
 import pandas as pd
-from numpy import array
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from plotting.base_plots.mirrored_bar import MirroredBarPlot
 from plotting.base_plots.scoreboard import ScoreBoardPlot
 from plotting.base_plots.multiplot import MultiPlot
-from plotting.base_plots.pie import PiePlot
-from util.helpers import total_toi_as_timestamp
 
 # Disable an annoying warning
 pd.options.mode.chained_assignment = None
@@ -99,46 +97,28 @@ def make_scoreboard_plot(df, g_df):
     return plot
 
 
-def assemble_multiplot(icetime, xg_scatter, scoreboard):
+def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b):
     """
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
     """
-
-
-def main():
-    """
-    Main function that reads the CSV files into DataFrames and calls the appropriate plotting
-    methods.
-    """
-
-    skater_df = pd.read_csv(os.path.join('data', '20844_skaters.csv'), encoding='utf-8-sig')
-    goalie_df = pd.read_csv(os.path.join('data', '20844_goalies.csv'), encoding='utf-8-sig')
-    xg_scatter_plot = make_xg_ratio_plot(skater_df)
-
-    icetime_plot = make_icetime_plot(skater_df)
-
-    scoreboard_plot = make_scoreboard_plot(skater_df, goalie_df)
-
-    team_a, team_b = set(skater_df['team'])
-
     arrangement = {
         "dimensions": (13, 6),
         "plots": [
             {
-                "plot": scoreboard_plot,
+                "plot": scoreboard,
                 "position": (0, 1),
                 "colspan": 4,
                 "rowspan": 6
             },
             {
-                "plot": icetime_plot,
+                "plot": icetime,
                 "position": (6, 0),
                 "colspan": 3,
                 "rowspan": 6
             },
             {
-                "plot": xg_scatter_plot,
+                "plot": xg_scatter,
                 "position": (6, 3),
                 "colspan": 3,
                 "rowspan": 6
@@ -155,5 +135,39 @@ def main():
     game_report.make_multiplot()
 
 
+def main(game_id):
+    """
+    Given a GameID (corresponding to a game on NST), find CSVs corresponding to that game ID 
+    and create the Game Report plot.
+    """
+
+    try:
+        skater_csv = glob.glob(os.path.join('data', f'{game_id}*skaters.csv'))[0]
+        goalie_csv = glob.glob(os.path.join('data', f'{game_id}*goalies.csv'))[0]
+    except IndexError as e:
+        print(f"One or more CSVs for game ID {game_id} are missing. Contents of data directory"\
+              f" are {os.listdir('data')}")
+        raise e
+
+    skater_df = pd.read_csv(skater_csv, encoding='utf-8-sig')
+    goalie_df = pd.read_csv(goalie_csv, encoding='utf-8-sig')
+
+    xg_scatter_plot = make_xg_ratio_plot(skater_df)
+
+    icetime_plot = make_icetime_plot(skater_df)
+
+    scoreboard_plot = make_scoreboard_plot(skater_df, goalie_df)
+
+    team_a, team_b = set(skater_df['team'])
+
+    assemble_multiplot(icetime=icetime_plot, xg_scatter=xg_scatter_plot, scoreboard=scoreboard_plot,
+                       team_a=team_a, team_b=team_b)
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-g', '--game_id',
+                        help="Game ID (via NST) to create a game report for.")
+    args = parser.parse_args()
+
+    main(args.game_id)
