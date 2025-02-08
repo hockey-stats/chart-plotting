@@ -10,7 +10,7 @@ import argparse
 import pandas as pd
 
 
-def process_skater_data(path):
+def process_skater_data(path, game_id):
     """
     Processes raw data for skaters into a single DataFrame containing all the columns
     needed to create the post-game report. For each team there will be 8 CSVs, one for
@@ -20,6 +20,7 @@ def process_skater_data(path):
     for each game state that includes both the invididual and on-ice metrics.
 
     :param str path: Filepath to folder containing raw CSVs.
+    :param str game_id: Game ID
     """
 
     # Initialize empty dicts to hold data from the CSVs, each dict taking all the data
@@ -48,12 +49,13 @@ def process_skater_data(path):
         "xGA": [],
     }
 
-    for filename in glob.glob(os.path.join(path, '*st.csv')):
+    for filename in glob.glob(os.path.join(path, f'*{game_id}*st.csv')):
         # Filename will be in the format
-        #   gameID_team_state_(oi/st).csv
+        #   date_gameID_team_state_(oi/st).csv
         # We only want the team name and state from this for the dataframe,
-        # and then also get the game_id to use for the output filename.
-        game_id, team, state, _ = os.path.basename(filename).split('_')
+        # and then also get the date to use for the output filename.
+        date, _, team, state, _ = os.path.basename(filename).split('_')
+        
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -67,7 +69,7 @@ def process_skater_data(path):
                 indiv_data['shots'].append(row['Shots'])
                 indiv_data['ixG'].append(row['ixG'])
 
-    for filename in glob.glob(os.path.join(path, '*oi.csv')):
+    for filename in glob.glob(os.path.join(path, f'*{game_id}*oi.csv')):
         _, team, state, _ = os.path.basename(filename).split('_')
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
@@ -89,17 +91,18 @@ def process_skater_data(path):
     df = pd.merge(indiv_df, onice_df, left_on=['name', 'state', 'team'],
                   right_on=['name', 'state', 'team'], how='right')\
             .sort_values(by=['name'], ascending=True)
-       
+
     df.fillna(0, inplace=True)
 
-    return df, game_id
+    return df, date
 
-def process_goalie_data(path):
+def process_goalie_data(path, game_id):
     """
     Raw goalie data is provided as one CSV for each game state, per team. Combines all 8
     into one DataFrame and return it.
 
     :param str path: Filepath to folder containing raw CSVs.
+    :param str game_id: Game ID
     """
     goalie_data = {
         'name': [],
@@ -111,7 +114,7 @@ def process_goalie_data(path):
         'xGA': []
     }
 
-    for filename in glob.glob(os.path.join(path, '*goalies.csv')):
+    for filename in glob.glob(os.path.join(path, f'*{game_id}*goalies.csv')):
         print(os.path.basename(filename))
         _, team, state, _ = os.path.basename(filename).split('_')
         with open(filename, 'r', encoding='utf-8-sig') as f:
@@ -130,24 +133,27 @@ def process_goalie_data(path):
     return df
 
 
-def main(path):
+def main(path, game_id):
     """
     Opens the CSV files containing raw game data from NaturalStatTrick, combines into two 
     dataframes (one for skaters, one for goalies), and saves them to CSVs to be used
     for plotting.
     :param str path: Path to directory containing raw CSV files.
+    :param str game_id: ID for game that will be processed.
     """
-    skater_df, game_id = process_skater_data(path)
-    goalie_df = process_goalie_data(path)
+    skater_df, date = process_skater_data(path, game_id)
+    goalie_df = process_goalie_data(path, game_id)
 
-    skater_df.to_csv(os.path.join(path, f'{game_id}_skaters.csv'), index=False)
-    goalie_df.to_csv(os.path.join(path, f'{game_id}_goalies.csv'), index=False)
+    skater_df.to_csv(os.path.join(path, f'{date}_{game_id}_skaters.csv'), index=False)
+    goalie_df.to_csv(os.path.join(path, f'{date}_{game_id}_goalies.csv'), index=False)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--path', default=os.path.join(os.getcwd(), 'data'),
                         help='Path to folder containing CSV data.')
+    parser.add_argument('-g', '--game_id', required=True,
+                        help='Game ID for which tables should be processed.')
     args = parser.parse_args()
 
-    main(path=args.path)
+    main(path=args.path, game_id=args.game_id)

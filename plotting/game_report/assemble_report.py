@@ -97,7 +97,7 @@ def make_scoreboard_plot(df, g_df):
     return plot
 
 
-def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b):
+def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
     """
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
@@ -126,10 +126,16 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b):
         ]
     }
 
+    # Date will be given in YYYYMMDD format, parse it out here for the plot title
+    year = date[:4]
+    month = date[5:6]
+    day = date[7:]
+    game_report_title = f"Game Report - {team_a} vs {team_b}\n{day}-{month}-{year}"
+
     game_report = MultiPlot(arrangement=arrangement,
                             figsize=(20, 14),
                             filename='game_report.png',
-                            title=f'Game Report - {team_a} vs {team_b}',
+                            title=game_report_title,
                             data_disclaimer='nst')
 
     game_report.make_multiplot()
@@ -142,8 +148,8 @@ def main(game_id):
     """
 
     try:
-        skater_csv = glob.glob(os.path.join('data', f'{game_id}*skaters.csv'))[0]
-        goalie_csv = glob.glob(os.path.join('data', f'{game_id}*goalies.csv'))[0]
+        skater_csv = glob.glob(os.path.join('data', f'*{game_id}*skaters.csv'))[0]
+        goalie_csv = glob.glob(os.path.join('data', f'*{game_id}*goalies.csv'))[0]
     except IndexError as e:
         print(f"One or more CSVs for game ID {game_id} are missing. Contents of data directory"\
               f" are {os.listdir('data')}")
@@ -151,6 +157,9 @@ def main(game_id):
 
     skater_df = pd.read_csv(skater_csv, encoding='utf-8-sig')
     goalie_df = pd.read_csv(goalie_csv, encoding='utf-8-sig')
+
+    # Get the date of the game from the CSV file handle.
+    date = skater_csv.split('_')[0]
 
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 
@@ -161,7 +170,7 @@ def main(game_id):
     team_a, team_b = set(skater_df['team'])
 
     assemble_multiplot(icetime=icetime_plot, xg_scatter=xg_scatter_plot, scoreboard=scoreboard_plot,
-                       team_a=team_a, team_b=team_b)
+                       team_a=team_a, team_b=team_b, date=date)
 
 
 if __name__ == '__main__':
