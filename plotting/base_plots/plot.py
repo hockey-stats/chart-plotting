@@ -34,7 +34,7 @@ class Plot:
         Adds the plot title, the data disclaimer, and saves the plot to a PNG file.
         """
         # Add title
-        plt.title(self.title)
+        #plt.title(self.title)
 
         # Add data disclaimer
         if self.data_disclaimer is not None:
@@ -49,8 +49,8 @@ class Plot:
             plt.figtext(0.5, 0.01, text, ha="center", color=textcolor,
                         bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
 
-        if self.fig:
-            self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
+        #if self.fig:
+            #self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
             plt.savefig(self.filename, dpi=100)

@@ -51,6 +51,10 @@ class MirroredBarPlot(Plot):
         """
         Generate the actual plot object.
         """
+
+        # Set title
+        plt.title(self.title)
+
         # df_a and df_b correspond to the two sides of the mirrored bar plot.
         if self.sort_value:
             self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
