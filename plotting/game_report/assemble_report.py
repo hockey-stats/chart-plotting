@@ -126,7 +126,7 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
         ]
     }
 
-    # Date will be given in YYYYMMDD format, parse it out here for the plot title
+    # Date will be given in YYYY-MM-DD format, parse it out here for the plot title
     year, month, day = date.split('-')
     game_report_title = f"Game Report - {team_a} vs {team_b}\n{year}-{month}-{day}"
 
