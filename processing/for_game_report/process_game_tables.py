@@ -55,7 +55,7 @@ def process_skater_data(path, game_id):
         # We only want the team name and state from this for the dataframe,
         # and then also get the date to use for the output filename.
         date, _, team, state, _ = os.path.basename(filename).split('_')
-        
+
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -70,7 +70,7 @@ def process_skater_data(path, game_id):
                 indiv_data['ixG'].append(row['ixG'])
 
     for filename in glob.glob(os.path.join(path, f'*{game_id}*oi.csv')):
-        _, team, state, _ = os.path.basename(filename).split('_')
+        _, _, team, state, _ = os.path.basename(filename).split('_')
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -116,7 +116,7 @@ def process_goalie_data(path, game_id):
 
     for filename in glob.glob(os.path.join(path, f'*{game_id}*goalies.csv')):
         print(os.path.basename(filename))
-        _, team, state, _ = os.path.basename(filename).split('_')
+        _, _, team, state, _ = os.path.basename(filename).split('_')
         with open(filename, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:

@@ -169,8 +169,8 @@ class RatioScatterPlot(Plot):
                 y_min = self.y_min_max[0]
                 y_max = self.y_min_max[1]
 
-        self.axis.set_xlim(x_min, x_max)
-        self.axis.set_ylim(y_min, y_max)
+        self.axis.set_xlim(0, x_max)
+        self.axis.set_ylim(0, y_max)
 
         return x_min, x_max, y_min, y_max
 

@@ -127,10 +127,8 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
     }
 
     # Date will be given in YYYYMMDD format, parse it out here for the plot title
-    year = date[:4]
-    month = date[5:6]
-    day = date[7:]
-    game_report_title = f"Game Report - {team_a} vs {team_b}\n{day}-{month}-{year}"
+    year, month, day = date.split('-')
+    game_report_title = f"Game Report - {team_a} vs {team_b}\n{year}-{month}-{day}"
 
     game_report = MultiPlot(arrangement=arrangement,
                             figsize=(20, 14),
@@ -148,8 +146,8 @@ def main(game_id):
     """
 
     try:
-        skater_csv = glob.glob(os.path.join('data', f'*{game_id}*skaters.csv'))[0]
-        goalie_csv = glob.glob(os.path.join('data', f'*{game_id}*goalies.csv'))[0]
+        skater_csv = glob.glob(os.path.join('data', f'*{game_id}_skaters.csv'))[0]
+        goalie_csv = glob.glob(os.path.join('data', f'*{game_id}_goalies.csv'))[0]
     except IndexError as e:
         print(f"One or more CSVs for game ID {game_id} are missing. Contents of data directory"\
               f" are {os.listdir('data')}")
@@ -159,7 +157,7 @@ def main(game_id):
     goalie_df = pd.read_csv(goalie_csv, encoding='utf-8-sig')
 
     # Get the date of the game from the CSV file handle.
-    date = skater_csv.split('_')[0]
+    date = skater_csv.split('_')[0].split('/')[1]
 
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 
