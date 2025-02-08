@@ -174,7 +174,7 @@ class RatioScatterPlot(Plot):
         if self.for_game_report:
             # Since the game reports deal with more extreme values, we want to start at 0
             self.axis.set_xlim(0, x_max)
-            self.axis.set_xlim(0, x_max)
+            self.axis.set_ylim(0, y_max)
         else:
             self.axis.set_xlim(x_min, x_max)
             self.axis.set_ylim(y_min, y_max)
