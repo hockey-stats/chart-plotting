@@ -27,6 +27,7 @@ class RatioScatterPlot(Plot):
                  scale='team',
                  scale_to_extreme=False,
                  y_min_max=None,
+                 for_game_report=False,
                  data_disclaimer='moneypuck'):
 
         super().__init__(filename, title, size, data_disclaimer=data_disclaimer)
@@ -48,6 +49,7 @@ class RatioScatterPlot(Plot):
         self.plot_y_mean = plot_y_mean
         self.quadrant_labels = quadrant_labels
         self.scale_to_extreme = scale_to_extreme
+        self.for_game_report = for_game_report
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
         self.axis = self.fig.add_subplot(111)
@@ -169,8 +171,13 @@ class RatioScatterPlot(Plot):
                 y_min = self.y_min_max[0]
                 y_max = self.y_min_max[1]
 
-        self.axis.set_xlim(0, x_max)
-        self.axis.set_ylim(0, y_max)
+        if self.for_game_report:
+            # Since the game reports deal with more extreme values, we want to start at 0
+            self.axis.set_xlim(0, x_max)
+            self.axis.set_xlim(0, x_max)
+        else:
+            self.axis.set_xlim(x_min, x_max)
+            self.axis.set_ylim(y_min, y_max)
 
         return x_min, x_max, y_min, y_max
 

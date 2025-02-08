@@ -41,6 +41,7 @@ def make_xg_ratio_plot(skater_df):
                                plot_x_mean=False,
                                plot_y_mean=False,
                                scale_to_extreme=False,
+                               for_game_report=True,
                                data_disclaimer=None)
 
     return xg_plot
