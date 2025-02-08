@@ -1,4 +1,3 @@
-import os
 import argparse
 import pandas as pd
 
@@ -36,11 +35,34 @@ def xg_by_division_multiplot():
 
         plots.append(div_plot)
 
+
+    arrangement = {
+        "dimensions": (2, 2),
+        "plots": [
+            {
+                "plot": plots[0],
+                "position": (0, 0)
+            },
+            {
+                "plot": plots[1],
+                "position": (0, 1)
+            },
+            {
+                "plot": plots[2],
+                "position": (1, 0)
+            },
+            {
+                "plot": plots[3],
+                "position": (1, 1)
+            }
+        ]
+    }
     plot_matrix = array([[plots[0], plots[1]],
                          [plots[2], plots[3]]])
 
-    multiplot = MultiPlot(plot_matrix=plot_matrix, filename='xg_rolling_avg_by_division',
-                          title='5v5 Expected Goal Share 10-Game Rolling Average (flurry-, score-, and venue-adjusted)')
+    multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
+                          title='5v5 Expected Goal Share 10-Game Rolling Average '\
+                                '(flurry-, score-, and venue-adjusted)')
 
     multiplot.make_multiplot()
 
