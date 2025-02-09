@@ -1,4 +1,4 @@
-name: Scrape and Plot Artifact Name
+name: Scrape and Plot Game Report
 on:
   workflow_dispatch:
     
