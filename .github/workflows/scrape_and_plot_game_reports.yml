@@ -1,0 +1,117 @@
+name: Scrape and Plot Artifact Name
+on:
+  workflow_dispatch:
+    
+  workflow_call:
+    outputs:
+      plot_artifact_name:
+        value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+
+env: 
+  DATA_ARTIFACT_NAME: 'game-data'
+  PLOTS_ARTIFACT_NAME: 'game-plot'
+
+jobs:
+  scrape-data:
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: sohraub/hockey-stats-web-scraper:main
+      credentials:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    permissions:
+      actions: write
+      contents: read
+      
+    steps: 
+      - name: Check if any new games are available
+        id: check
+        run: |
+          cd /home/scraping
+          python3 check_for_new_games.py -y 2024
+
+      - name: End run if no new games found
+        if: steps.check.outputs.game_id == 'NONE'
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+
+      - name: Scrape game data
+        run: |
+          cd /home/scraping
+          python3 scrape_game_data.py -y 2024 -g ${{ steps.check.outputs.game_id }}
+
+      - name: Save raw game data as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DATA_ARTIFACT_NAME }}
+          path: /home/scraping/tables/*csv
+          retention-days: 1
+
+      - name: Set output for artifact name
+        id: set-output
+        run: echo "data_artifact_name=$DATA_ARTIFACT_NAME" >> "$GITHUB_OUTPUT""
+
+    outputs:
+      game_id: ${{ steps.check.outputs.game_id }}
+#############
+  plot-graphs:
+
+    runs-on: ubuntu-latest
+    needs: scrape-data
+
+    env: 
+      GAME_ID: ${{ needs.scrape-data.outputs.game_id }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
+
+      - name: Download data artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.DATA_ARTIFACT_NAME }}
+          
+      - name: Check file structure
+        run: ls -lrt
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Process raw data
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python3 processing/for_game_report/process_game_tables.py -p ./game-data -g $GAME_ID
+
+      - name: Generate chart
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python3 plotting/game_report/assemble_report.py -g $GAME_ID
+
+      - name: Save chart as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+
+      - name: Set output for artifact name
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
