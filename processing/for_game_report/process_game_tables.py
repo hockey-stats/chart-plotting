@@ -145,7 +145,7 @@ def main(path, game_id):
     goalie_df = process_goalie_data(path, game_id)
 
     if not os.path.isdir('data'):
-        os.makedir('data')
+        os.makedirs('data')
 
     skater_df.to_csv(os.path.join('data', f'{date}_{game_id}_skaters.csv'), index=False)
     goalie_df.to_csv(os.path.join('data', f'{date}_{game_id}_goalies.csv'), index=False)
