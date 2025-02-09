@@ -81,7 +81,8 @@ jobs:
           name: ${{ env.DATA_ARTIFACT_NAME }}
           
       - name: Check file structure
-        run: ls -lrt
+        run: |
+          ls -lrt;
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -96,7 +97,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 processing/for_game_report/process_game_tables.py -p ./game-data -g $GAME_ID
+          python3 processing/for_game_report/process_game_tables.py -p ./ -g $GAME_ID
 
       - name: Generate chart
         env:
