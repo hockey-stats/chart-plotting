@@ -18,9 +18,9 @@ jobs:
 
     container:
       image: sohraub/hockey-stats-web-scraper:main
-      credentials:
-        username: ${{ vars.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      #credentials:
+      #  username: ${{ vars.DOCKERHUB_USERNAME }}
+      #  password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
