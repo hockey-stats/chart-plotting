@@ -122,5 +122,6 @@ jobs:
       - name: Update last game ID org variable
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_UPDATE_VARIABLES }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_UPDATE_VARIABLES }}
         run: gh variable set LAST_GAME_REPORT_ID --body $GAME_ID
 
