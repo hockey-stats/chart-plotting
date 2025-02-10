@@ -1,11 +1,15 @@
 name: Scrape and Plot Game Report
 on:
-  workflow_dispatch:
-    
   workflow_call:
+    inputs:
+      last_game_id:
+        description: The last game reported on.
+        type: string
     outputs:
       plot_artifact_name:
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+      game_id:
+        value: ${{ jobs.scrape-data.outputs.game_id }}
 
 env: 
   DATA_ARTIFACT_NAME: 'game-data'
@@ -18,9 +22,6 @@ jobs:
 
     container:
       image: sohraub/hockey-stats-web-scraper:main
-      #credentials:
-      #  username: ${{ vars.DOCKERHUB_USERNAME }}
-      #  password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +34,7 @@ jobs:
       - name: Check if any new games are available
         id: check
         env:
-          LAST_GAME: ${{ vars.LAST_GAME_REPORT_ID }}
+          LAST_GAME: ${{ inputs.last_game_id }}
         run: |
           cd /home/scraping
           python3 check_for_new_games.py -y 2024 -g $LAST_GAME
@@ -118,10 +119,3 @@ jobs:
       - name: Set output for artifact name
         id: set-output
         run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: Update last game ID org variable
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_UPDATE_VARIABLES }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN_UPDATE_VARIABLES }}
-        run: gh variable set LAST_GAME_REPORT_ID --body $GAME_ID
-
