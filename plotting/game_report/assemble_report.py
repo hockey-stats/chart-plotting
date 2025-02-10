@@ -136,7 +136,7 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
 
     game_report = MultiPlot(arrangement=arrangement,
                             figsize=(20, 14),
-                            filename=f'{team_a}_{team_b}_{year}_{month}_{day}.png',
+                            filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png',
                             title=game_report_title,
                             data_disclaimer='nst')
 
