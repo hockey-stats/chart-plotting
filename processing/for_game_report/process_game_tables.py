@@ -28,6 +28,7 @@ def process_skater_data(path, game_id):
     indiv_data = {
         "name": [],
         "team": [],
+        "position": [],
         "state": [],
         "icetime": [],
         "goals": [],
@@ -40,6 +41,7 @@ def process_skater_data(path, game_id):
     onice_data = {
         "name": [],
         "team": [],
+        "position": [],
         "state": [],
         "CF": [],
         "CA": [],
@@ -62,6 +64,7 @@ def process_skater_data(path, game_id):
                 indiv_data['name'].append(row['Player'])
                 indiv_data['team'].append(team)
                 indiv_data['state'].append(state)
+                indiv_data['position'].append(row['Position'])
                 indiv_data['icetime'].append(row['TOI'])
                 indiv_data['goals'].append(row['Goals'])
                 indiv_data['primary_assists'].append(row['First Assists'])
@@ -77,6 +80,7 @@ def process_skater_data(path, game_id):
                 onice_data['name'].append(row['Player'])
                 onice_data['team'].append(team)
                 onice_data['state'].append(state)
+                onice_data['position'].append(row['Position'])
                 onice_data['CF'].append(row['CF'])
                 onice_data['CA'].append(row['CA'])
                 onice_data['GF'].append(row['GF'])
@@ -88,9 +92,10 @@ def process_skater_data(path, game_id):
     onice_df = pd.DataFrame(data=onice_data)
 
     # Do a right join on the two DataFrames to get output DataFrame
-    df = pd.merge(indiv_df, onice_df, left_on=['name', 'state', 'team'],
-                  right_on=['name', 'state', 'team'], how='right')\
+    df = pd.merge(indiv_df, onice_df, left_on=['name', 'state', 'team', 'position'],
+                  right_on=['name', 'state', 'team', 'position'], how='right')\
             .sort_values(by=['name'], ascending=True)
+
 
     df.fillna(0, inplace=True)
 

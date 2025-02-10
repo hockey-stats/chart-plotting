@@ -55,7 +55,7 @@ def make_icetime_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # Pivot skater_df to have one df showing icetime broken down by state
-    icetime_df = pd.pivot_table(skater_df, values='icetime', index=['name', 'team'],
+    icetime_df = pd.pivot_table(skater_df, values='icetime', index=['name', 'team', 'position'],
                                 columns=['state'])
     icetime_df.reset_index(inplace=True)
     teams = list(set(icetime_df['team']))
@@ -77,6 +77,9 @@ def make_icetime_plot(skater_df):
             .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
     df_b = df_b.merge(df_b_scoring, on='name')\
             .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
+
+    df_a.drop_duplicates(subset=['name', 'position'], inplace=True)
+    df_b.drop_duplicates(subset=['name', 'position'], inplace=True)
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
@@ -158,7 +161,10 @@ def main(game_id):
     goalie_df = pd.read_csv(goalie_csv, encoding='utf-8-sig')
 
     # Get the date of the game from the CSV file handle.
-    date = skater_csv.split('_')[0].split('/')[1]
+    if '/' in skater_csv:
+        date = skater_csv.split('_')[0].split('/')[1]
+    else:
+        date = skater_csv.split('_')[0].split('\\')[1]
 
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 

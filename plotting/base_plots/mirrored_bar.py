@@ -60,9 +60,10 @@ class MirroredBarPlot(Plot):
             self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
             self.df_b = self.df_b.sort_values(by=[self.sort_value], ascending=True)
 
+
         # Add column for display names
-        self.df_a['display_name'] = handle_player_full_names(list(self.df_a['name']))
-        self.df_b['display_name'] = handle_player_full_names(list(self.df_b['name']))
+        self.df_a['display_name'] = handle_player_full_names(self.df_a)
+        self.df_b['display_name'] = handle_player_full_names(self.df_b)
 
         # Set the x-range of the plot based on the largest TOI value from both teams
         x_max = max(list(self.df_a[self.sort_value]) + list(self.df_b[self.sort_value])) + 1
