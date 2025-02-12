@@ -50,7 +50,7 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 processing/for_rolling_avg_line_plot/process_all_teams_table.py -y ${{ inputs.year }};
+          python3 processing/for_rolling_avg_line_plot/process_all_teams_table.py -y ${{ inputs.year }} -n 25;
       #
       - name: Generate Charts
         env: 

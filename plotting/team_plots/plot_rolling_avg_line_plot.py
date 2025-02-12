@@ -37,37 +37,43 @@ def xg_by_division_multiplot():
 
 
     arrangement = {
-        "dimensions": (2, 2),
+        "dimensions": (9, 2),
         "plots": [
             {
                 "plot": plots[0],
-                "position": (0, 0)
+                "position": (0, 0),
+                "rowspan": 4
             },
             {
                 "plot": plots[1],
-                "position": (0, 1)
+                "position": (0, 1),
+                "rowspan": 4
             },
             {
                 "plot": plots[2],
-                "position": (1, 0)
+                "position": (4, 0),
+                "rowspan": 4
             },
             {
                 "plot": plots[3],
-                "position": (1, 1)
+                "position": (4, 1),
+                "rowspan": 4
             }
         ]
     }
-    plot_matrix = array([[plots[0], plots[1]],
-                         [plots[2], plots[3]]])
 
     multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
-                          title='5v5 Expected Goal Share 10-Game Rolling Average '\
-                                '(flurry-, score-, and venue-adjusted)')
+                          title='5v5 Expected Goal Share 10-Game Rolling Average\n'\
+                                'Over the Last 25 Games')
 
     multiplot.make_multiplot()
 
 
 def main(type):
+    """
+    Main function which disambiguates the stat to be plotted, calls the plotting methods
+    and saves the output.
+    """
     if type == 'xg_by_division':
         xg_by_division_multiplot()
 

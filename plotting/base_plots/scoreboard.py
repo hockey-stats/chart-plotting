@@ -215,17 +215,18 @@ class ScoreBoardPlot(Plot):
         team_b_pp_toi = g[(g['team'] == team_b) & (g['state'] == 'pp')]['icetime'].sum()
         es_toi = 60 - float(team_a_pp_toi) - float(team_b_pp_toi)
 
-        values = [es_toi, team_a_pp_toi, team_b_pp_toi]
+        # Start the value/label lists as only containing ES info, and only add the PP toi
+        # for either team if that toi is > 0
+        values = [es_toi]
+        labels = [f"Even Strength ({total_toi_as_timestamp(es_toi)})"]
 
-        team_a_pp_toi = total_toi_as_timestamp(team_a_pp_toi)
-        team_b_pp_toi = total_toi_as_timestamp(team_b_pp_toi)
-        es_toi = total_toi_as_timestamp(es_toi)
-
-        labels = [
-                f"Even Strength ({es_toi})",
-                f"{team_a} PP ({team_a_pp_toi})",
-                f"{team_b} PP ({team_b_pp_toi})"
-                ]
+        # Check that the toi > 0 before adding to the pie chart
+        for team, toi_value in zip([team_a, team_b], [team_a_pp_toi, team_b_pp_toi]):
+            if toi_value == 0:
+                continue
+            values.append(toi_value)
+            label = f"{team} PP ({total_toi_as_timestamp(toi_value)})"
+            labels.append(label)
 
         # Text settings for pie chart labels
         textprops = {
@@ -233,5 +234,6 @@ class ScoreBoardPlot(Plot):
             'weight': 'heavy',
         }
 
+        # Add the chart as an inset axis.
         inset_ax = inset_axes(self.axis, width="60%", height="50%", loc="lower center")
         inset_ax.pie(values, labels=labels, radius=1, textprops=textprops)
