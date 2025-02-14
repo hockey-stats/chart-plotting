@@ -39,12 +39,6 @@ jobs:
           cd /home/scraping
           python3 check_for_new_games.py -y 2024 -g $LAST_GAME
 
-   #   - name: End run if no new games found
-   #     if: steps.check.outputs.game_id == 'NONE'
-   #     run: |
-   #       gh run cancel ${{ github.run_id }}
-   #       gh run watch ${{ github.run_id }}
-
       - name: Scrape game data
         if: steps.check.outputs.game_id != 'NONE'
         run: |
@@ -83,9 +77,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hockey-stats/chart-plotting
-
-      - name: Check output
-        run: echo ${{ needs.scrape-data.outputs.game_id }}
 
       - name: Download data artifact
         uses: actions/download-artifact@v4
