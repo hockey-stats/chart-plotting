@@ -39,18 +39,20 @@ jobs:
           cd /home/scraping
           python3 check_for_new_games.py -y 2024 -g $LAST_GAME
 
-      - name: End run if no new games found
-        if: steps.check.outputs.game_id == 'NONE'
-        run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+   #   - name: End run if no new games found
+   #     if: steps.check.outputs.game_id == 'NONE'
+   #     run: |
+   #       gh run cancel ${{ github.run_id }}
+   #       gh run watch ${{ github.run_id }}
 
       - name: Scrape game data
+        if: steps.check.outputs.game_id != 'NONE'
         run: |
           cd /home/scraping
           python3 scrape_game_data.py -y 2024 -g ${{ steps.check.outputs.game_id }}
 
       - name: Save raw game data as artifact
+        if: steps.check.outputs.game_id != 'NONE'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DATA_ARTIFACT_NAME }}
@@ -58,6 +60,7 @@ jobs:
           retention-days: 1
 
       - name: Set output for artifact name
+        if: steps.check.outputs.game_id != 'NONE'
         id: set-output
         run: echo "data_artifact_name=$DATA_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
@@ -69,6 +72,8 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: scrape-data
+
+    if: needs.scape-data.outputs.game_id != 'NONE'
 
     env: 
       GAME_ID: ${{ needs.scrape-data.outputs.game_id }}
