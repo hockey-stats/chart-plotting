@@ -48,4 +48,3 @@ class MultiPlot(Plot):
 
         fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         self.save_plot()
-

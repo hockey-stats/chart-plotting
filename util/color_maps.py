@@ -15,7 +15,7 @@ label_colors = {
 		"line": "lightpink",
   },
   "CAR": {
-		"bg": "red",
+		"bg": "salmon",
 		"text": "black",
 		"line": "darkviolet",
   },
@@ -25,7 +25,7 @@ label_colors = {
 		"line": "lightsteelblue",
   },
   "FLA": {
-		"bg": "red",
+		"bg": "lightcoral",
 		"text": "white",
 		"line": "gold",
   },
@@ -60,13 +60,12 @@ label_colors = {
 		"line": "teal",
   },
   "WSH": {
-		"bg": "red",
-
+		"bg": "indianred",
 		"text": "darkslateblue",
 		"line": "red",
   },
   "DET": {
-		"bg": "red",
+		"bg": "orangered",
 		"text": "white",
 		"line": "red",
   },
@@ -91,12 +90,12 @@ label_colors = {
 		"line": "green",
   },
   "NYR": {
-		"bg": "royalblue",
+		"bg": "cornflowerblue",
 		"text": "red",
 		"line": "royalblue",
   },
   "BUF": {
-		"bg": "navy",
+		"bg": "slateblue",
 		"text": "gold",
 		"line": "forestgreen",
   },
@@ -106,7 +105,7 @@ label_colors = {
 		"line": "darkorange",
   },
   "EDM": {
-		"bg": "darkorange",
+		"bg": "peru",
 		"text": "cornflowerblue",
 		"line": "darkorange",
   },
@@ -136,7 +135,7 @@ label_colors = {
 		"line": "teal",
   },
   "PIT": {
-		"bg": "black",
+		"bg": "darkgrey",
 		"text": "gold",
 		"line": "black",
   },
@@ -151,7 +150,7 @@ label_colors = {
 		"line": "firebrick",
   },
   "BOS": {
-		"bg": "black",
+		"bg": "dimgray",
 		"text": "yellow",
 		"line": "palegoldenrod",
   },
@@ -161,7 +160,7 @@ label_colors = {
 		"line": "khaki",
   },
   "ANA": {
-		"bg": "black",
+		"bg": "tan",
 		"text": "orange",
 		"line": "black",
   },

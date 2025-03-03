@@ -122,24 +122,26 @@ class MirroredBarPlot(Plot):
                 prev_column = self.x_col[index - 1]
                 left_b += self.df_b[prev_column]
                 left_a += self.df_a[prev_column]
+
                 # Have to assign specific portions for pp/pk bars to specific variables for
                 # creating the legend with just these two elements.
                 if index == 1:
                     bar_pp = self.axis.barh(y_range, self.df_b[column], left=left_b,
-                                color=color_map[column],
-                                label=label_map[column],
-                                zorder=zorder,
-                                alpha=0.5)
+                                            color=color_map[column],
+                                            label=label_map[column],
+                                            zorder=zorder,
+                                            alpha=0.5)
                 else:
                     bar_pk = self.axis.barh(y_range, self.df_b[column], left=left_b,
-                                color=color_map[column],
-                                label=label_map[column],
-                                alpha=0.5)
+                                            color=color_map[column],
+                                            label=label_map[column],
+                                            alpha=0.5)
+
                 ax2.barh(y_range, self.df_a[column], left=left_a,
-                        color=color_map[column],
-                        label=label_map[column],
-                        zorder=zorder,
-                        alpha=0.5)
+                         color=color_map[column],
+                         label=label_map[column],
+                         zorder=zorder,
+                         alpha=0.5)
 
         self.add_scoring_summary(ax2)
 
@@ -210,7 +212,7 @@ class MirroredBarPlot(Plot):
                                     color=fontcolor,
                                     zorder=zorder,
                                     bbox=g_bbox)
-                        
+
                     horizontal_offset += horizontal_offset_increment
                 for _ in range(0, row['a1'] + row['a2']):
                     if i == 0:
