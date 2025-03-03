@@ -61,6 +61,7 @@ label_colors = {
   },
   "WSH": {
 		"bg": "red",
+
 		"text": "darkslateblue",
 		"line": "red",
   },

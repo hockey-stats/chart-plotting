@@ -49,5 +49,4 @@ def handle_player_full_names(df):
             final_names.append(display_name)
         else:
             final_names.append(last_name)
-    print(final_names)
     return final_names
