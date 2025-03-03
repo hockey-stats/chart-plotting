@@ -101,7 +101,7 @@ def make_scoreboard_plot(df, g_df):
     return plot
 
 
-def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
+def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, filename):
     """
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
@@ -134,16 +134,19 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date):
     year, month, day = date.split('-')
     game_report_title = f"Game Report - {team_a} vs {team_b}\n{year}-{month}-{day}"
 
+    if filename is None:
+        filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png'
+
     game_report = MultiPlot(arrangement=arrangement,
                             figsize=(20, 14),
-                            filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png',
+                            filename=filename,
                             title=game_report_title,
                             data_disclaimer='nst')
 
     game_report.make_multiplot()
 
 
-def main(game_id):
+def main(game_id, filename):
     """
     Given a GameID (corresponding to a game on NST), find CSVs corresponding to that game ID 
     and create the Game Report plot.
@@ -175,13 +178,15 @@ def main(game_id):
     team_a, team_b = set(skater_df['team'])
 
     assemble_multiplot(icetime=icetime_plot, xg_scatter=xg_scatter_plot, scoreboard=scoreboard_plot,
-                       team_a=team_a, team_b=team_b, date=date)
+                       team_a=team_a, team_b=team_b, date=date, filename=filename)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--game_id',
                         help="Game ID (via NST) to create a game report for.")
+    parser.add_argument('-f', '--filename', default=None,
+                        help='Specify filename for output image. Defaults to team/date format')
     args = parser.parse_args()
 
-    main(args.game_id)
+    main(args.game_id, args.filename)

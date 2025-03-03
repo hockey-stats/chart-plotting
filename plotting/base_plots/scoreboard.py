@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from plotting.base_plots.plot import Plot, get_logo_marker
 from util.helpers import total_toi_as_timestamp
+from util.color_maps import label_colors
 
 
 G_HEIGHT = 0.75
@@ -97,7 +99,8 @@ class ScoreBoardPlot(Plot):
                        weight=fontweight,
                        ha='center',
                        va='center',
-                       bbox=bboxes["g"])
+                       bbox=bboxes["g"],
+                       path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
         # "xGoals" text box
         self.axis.text(0.5, XG_HEIGHT, "xGoals",
@@ -105,7 +108,8 @@ class ScoreBoardPlot(Plot):
                        weight=fontweight,
                        ha='center',
                        va='center',
-                       bbox=bboxes["xg"])
+                       bbox=bboxes["xg"],
+                       path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
         total_x_pos = state_map['total']['x_pos']
         for team, x_pos in zip([self.team_a, self.team_b], [total_x_pos, 1 - total_x_pos]):
@@ -114,14 +118,16 @@ class ScoreBoardPlot(Plot):
                            weight=fontweight,
                            ha='center',
                            va='center',
-                           bbox=bboxes["g"])
+                           bbox=bboxes["g"],
+                           path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
             self.axis.text(x_pos, XG_HEIGHT, round(team_data[team]['all']['xgoals'], 1),
                            size=fontsize,
                            weight=fontweight,
                            ha='center',
                            va='center',
-                           bbox=bboxes["xg"])
+                           bbox=bboxes["xg"],
+                           path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
 
     def organize_team_data(self):
@@ -158,7 +164,7 @@ class ScoreBoardPlot(Plot):
             default_x_pos = state_settings['x_pos']
 
             fontsize = 20
-            fontweight = "roman"
+            fontweight = 700
 
             # One x_pos for team a and team b
             for team, x_pos in zip([self.team_a, self.team_b], [default_x_pos, 1 - default_x_pos]):
@@ -169,7 +175,8 @@ class ScoreBoardPlot(Plot):
                                weight=fontweight,
                                bbox=bboxes["state"],
                                ha='center',
-                               va='center')
+                               va='center',
+                               path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
                 # Goal value
                 self.axis.text(x_pos, G_HEIGHT, team_data[team][state]['goals'],
@@ -177,7 +184,8 @@ class ScoreBoardPlot(Plot):
                                weight=fontweight,
                                bbox=bboxes["g"],
                                ha='center',
-                               va='center')
+                               va='center',
+                               path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
                 # xGoal value
                 self.axis.text(x_pos, XG_HEIGHT, round(team_data[team][state]['xgoals'], 1),
@@ -185,7 +193,8 @@ class ScoreBoardPlot(Plot):
                                weight=fontweight,
                                bbox=bboxes["xg"],
                                ha='center',
-                               va='center')
+                               va='center',
+                               path_effects=[PathEffects.withStroke(linewidth=3, foreground='w')])
 
 
     def draw_team_logos(self):
@@ -213,27 +222,32 @@ class ScoreBoardPlot(Plot):
         team_a, team_b = set(g['team'])
         team_a_pp_toi = g[(g['team'] == team_a) & (g['state'] == 'pp')]['icetime'].sum()
         team_b_pp_toi = g[(g['team'] == team_b) & (g['state'] == 'pp')]['icetime'].sum()
-        es_toi = 60 - float(team_a_pp_toi) - float(team_b_pp_toi)
+        #es_toi = 60 - float(team_a_pp_toi) - float(team_b_pp_toi)
 
         # Start the value/label lists as only containing ES info, and only add the PP toi
         # for either team if that toi is > 0
-        values = [es_toi]
-        labels = [f"Even Strength ({total_toi_as_timestamp(es_toi)})"]
+        values = []
+        labels = []
 
         # Check that the toi > 0 before adding to the pie chart
         for team, toi_value in zip([team_a, team_b], [team_a_pp_toi, team_b_pp_toi]):
             if toi_value == 0:
                 continue
             values.append(toi_value)
-            label = f"{team} PP ({total_toi_as_timestamp(toi_value)})"
+            label = f"{team} PP\n{total_toi_as_timestamp(toi_value)}"
             labels.append(label)
 
         # Text settings for pie chart labels
         textprops = {
-            'fontsize': 13,
+            'fontsize': 15,
             'weight': 'heavy',
+            'path_effects': [PathEffects.withStroke(linewidth=2, foreground='w')]
         }
 
         # Add the chart as an inset axis.
         inset_ax = inset_axes(self.axis, width="60%", height="50%", loc="lower center")
-        inset_ax.pie(values, labels=labels, radius=1, textprops=textprops)
+        inset_ax.pie(values, labels=labels, radius=1, textprops=textprops,
+                     colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
+                     labeldistance=0.3,
+                     wedgeprops={"alpha": 0.5})
+

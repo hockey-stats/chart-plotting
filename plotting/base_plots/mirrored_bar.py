@@ -4,7 +4,6 @@ for showing icetime of players from two teams in a game report chart.
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from plotting.base_plots.plot import Plot
 from util.color_maps import label_colors
@@ -94,11 +93,13 @@ class MirroredBarPlot(Plot):
 
         # Mapping of state labels from data to labels for legend
         label_map = {
-            'ev': 'Even Strength',
+            #'ev': 'Even Strength',
             'pp': 'Power Play',
             'pk': 'Penalty Kill'
         }
 
+        bar_pp, bar_pk = (None, None)
+        zorder = 0
         for index, column in enumerate(self.x_col):
             # self.x_col[0] will correspond to the EV TOI, which we start drawing at the y-axis
             if index == 0:
@@ -106,13 +107,13 @@ class MirroredBarPlot(Plot):
                 left_b = 0
                 self.axis.barh(y_range, self.df_b[column],
                                color=label_colors[self.b_label]['bg'],
-                               label=label_map[column],
-                               zorder=1,
+                               #label='Even Strength',
+                               zorder=zorder,
                                alpha=0.5)
                 ax2.barh(y_range, self.df_a[column],
                          color=label_colors[self.a_label]['bg'],
-                         label=label_map[column],
-                         zorder=1,
+                         #label='Even Strength',
+                         zorder=zorder,
                          alpha=0.5)
 
             # self.x_col[1:2] will correspond to pp and pk time, which we start drawing from
@@ -121,29 +122,52 @@ class MirroredBarPlot(Plot):
                 prev_column = self.x_col[index - 1]
                 left_b += self.df_b[prev_column]
                 left_a += self.df_a[prev_column]
-                self.axis.barh(y_range, self.df_b[column], left=left_b,
-                               color=color_map[column],
-                               label=label_map[column],
-                               zorder=1,
-                               alpha=0.5)
+
+                # Have to assign specific portions for pp/pk bars to specific variables for
+                # creating the legend with just these two elements.
+                if index == 1:
+                    bar_pp = self.axis.barh(y_range, self.df_b[column], left=left_b,
+                                            color=color_map[column],
+                                            label=label_map[column],
+                                            zorder=zorder,
+                                            alpha=0.5)
+                else:
+                    bar_pk = self.axis.barh(y_range, self.df_b[column], left=left_b,
+                                            color=color_map[column],
+                                            label=label_map[column],
+                                            alpha=0.5)
+
                 ax2.barh(y_range, self.df_a[column], left=left_a,
                          color=color_map[column],
                          label=label_map[column],
-                         zorder=1,
+                         zorder=zorder,
                          alpha=0.5)
 
-        self.add_scoring_summary()
+        self.add_scoring_summary(ax2)
 
-        self.axis.legend(loc='lower right')
-        ax2.legend(loc='lower left')
+        # Add a vertical line separating the two teams
+        plt.axvline(x=0, color='black')
+
+        # Add further dashed vertical lines indicating every 5-min increment of icetime
+        for x in xticks:
+            if x == 0:
+                continue
+            plt.axvline(x=x, color='grey', linestyle='--', alpha=0.2)
+
+        # Legend will only show the colors for PP/PK, hopefully Even-Strength is intuitive enough
+        self.axis.legend(handles=[bar_pp, bar_pk],
+                         labels=['Power Play', 'Penalty Kill'],
+                         loc='lower right')
 
         self.save_plot()
 
 
-    def add_scoring_summary(self):
+    def add_scoring_summary(self, ax2):
         """
         Method that will draw indicators for players who have scored any goals or assists,
         by drawing a small symbol on their icetime bar for each goal/assist.
+
+        :param Axis ax2: The secondary axis which the elements for the second team should be drawn.
         """
 
         # Define bbox styles for goal and assist indicators
@@ -159,35 +183,54 @@ class MirroredBarPlot(Plot):
         }
 
         # Global font settings
-        fontsize = 11
+        fontsize = 9
         fontweight = 1000
         fontcolor = "mintcream"
 
-        zorder = 0
+        zorder = 10
 
-        vertical_offset = 0.15
+        vertical_offset = 0.13
         horizontal_offset_increment = 1.7
-        horizontal_offset_start = 0.7
-        for df in [self.df_b, self.df_a]:
+        horizontal_offset_start = 1
+        for i, df in enumerate([self.df_b, self.df_a]):
             for index, (_, row) in enumerate(df.iterrows()):
                 horizontal_offset = horizontal_offset_start
                 for _ in range(0, row['g']):
-                    self.axis.text(horizontal_offset, index - vertical_offset,
-                                   "G",
-                                   size=fontsize,
-                                   weight=fontweight,
-                                   color=fontcolor,
-                                   zorder=zorder,
-                                   bbox=g_bbox)
+                    if i == 0:
+                        self.axis.text(horizontal_offset, index - vertical_offset,
+                                    "G",
+                                    size=fontsize,
+                                    weight=fontweight,
+                                    color=fontcolor,
+                                    zorder=zorder,
+                                    bbox=g_bbox)
+                    else:
+                        ax2.text(horizontal_offset, index - vertical_offset,
+                                    "G",
+                                    size=fontsize,
+                                    weight=fontweight,
+                                    color=fontcolor,
+                                    zorder=zorder,
+                                    bbox=g_bbox)
+
                     horizontal_offset += horizontal_offset_increment
                 for _ in range(0, row['a1'] + row['a2']):
-                    self.axis.text(horizontal_offset, index - vertical_offset,
-                                   "A",
-                                   size=fontsize,
-                                   weight=fontweight,
-                                   color=fontcolor,
-                                   zorder=zorder,
-                                   bbox=a_bbox)
+                    if i == 0:
+                        self.axis.text(horizontal_offset, index - vertical_offset,
+                                    "A",
+                                    size=fontsize,
+                                    weight=fontweight,
+                                    color=fontcolor,
+                                    zorder=zorder,
+                                    bbox=a_bbox)
+                    else:
+                        ax2.text(horizontal_offset, index - vertical_offset,
+                                    "A",
+                                    size=fontsize,
+                                    weight=fontweight,
+                                    color=fontcolor,
+                                    zorder=zorder,
+                                    bbox=a_bbox)
                     horizontal_offset += horizontal_offset_increment
             # When switching to team b, mirror the values for horizontal incrementation
             horizontal_offset_start = -1.4
