@@ -77,7 +77,7 @@ class RatioScatterPlot(Plot):
 
         if self.break_even_line:
             # Plot the line to display break-even
-            self.axis.axline((2, 2), slope=1, color='r')
+            self.axis.axline((2, 2), slope=1, color='r', alpha=0.5)
 
         if self.plot_league_average and self.x_col == 'xGFph':
             start = 0.1
@@ -226,7 +226,7 @@ class RatioScatterPlot(Plot):
         If a list of just two strings was provided, then add them in alternating +/- modes in the
         style of the default OFFENSE/DEFENSE quadrant labels.
         """
-        ofs = 0.08  # Offset value for labels (distance between label and axis)
+        ofs = 0.1  # Offset value for labels (distance between label and axis)
         if self.quadrant_labels == 'default' or np.array(self.quadrant_labels).shape == (2,):
             label_a = 'OFFENSE' if self.quadrant_labels == 'default' else self.quadrant_labels[0]
             label_b = 'DEFENSE' if self.quadrant_labels == 'default' else self.quadrant_labels[1]
@@ -238,7 +238,7 @@ class RatioScatterPlot(Plot):
                 label_a += ' ' * (len(label_b) - len(label_a))
 
             # Define colors for 'good' and 'bad'
-            good = 'green'
+            good = 'royalblue'
             bad = 'red'
 
             # Combinations to zip and iterator over
