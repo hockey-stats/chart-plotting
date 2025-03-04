@@ -113,7 +113,6 @@ class ScoreBoardPlot(Plot):
                              "boxstyle": "round",
                              "facecolor": g_color
                            },
-                           backgroundcolor=g_color,
                            path_effects=PATH_EFFECT)
 
             self.axis.text(x_pos, XG_HEIGHT, round(team_data[team]['all']['xgoals'], 1),
@@ -125,7 +124,6 @@ class ScoreBoardPlot(Plot):
                              "boxstyle": "round",
                              "facecolor": xg_color
                            },
-                           backgroundcolor=xg_color,
                            path_effects=PATH_EFFECT)
 
 
