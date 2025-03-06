@@ -87,6 +87,7 @@ def make_icetime_plot(skater_df):
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
                                    title='Icetime and Scoring Breakdown by Team',
+                                   x_label="Icetime in Minutes",
                                    filename='',
                                    data_disclaimer=None)
 

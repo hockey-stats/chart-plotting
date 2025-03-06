@@ -59,7 +59,6 @@ class MirroredBarPlot(Plot):
             self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
             self.df_b = self.df_b.sort_values(by=[self.sort_value], ascending=True)
 
-
         # Add column for display names
         self.df_a['display_name'] = handle_player_full_names(self.df_a)
         self.df_b['display_name'] = handle_player_full_names(self.df_b)
@@ -158,6 +157,10 @@ class MirroredBarPlot(Plot):
         self.axis.legend(handles=[bar_pp, bar_pk],
                          labels=['Power Play', 'Penalty Kill'],
                          loc='lower right')
+
+        # Add label for x-axis
+        if self.x_label:
+            self.axis.set_xlabel(self.x_label)
 
         self.save_plot()
 
