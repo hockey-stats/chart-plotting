@@ -57,13 +57,14 @@ def ratio_to_color(ratio):
     Given a float value in [0, 1], returns the RGB code for a color between red and blue based
     on that ratio, where values closer to 0 give a color closer to red, closer to 1 give a 
     color closer to blue (specifically cornflower blue), and values closer to 0.5 will give
-    a color closer to beige (specifically antique white). 
+    a color closer to white. 
 
     Simply creates two linear mappings between 0 and 0.5 and 0.5 and 1, and returns a multiple
     of the RGB code based on that linear mapping
 
     This is meant to be used to color objects based on ratios to indicate "good/bad" based on 
     the color.
+
     :param float ratio: A value between 0 and 1, inclusive
     :return list(int) result: A 3-tuple representing the RGB value of the resulting color
     """
@@ -74,7 +75,7 @@ def ratio_to_color(ratio):
 
     # The RGB values for colors representing 0, 0.5, and 1
     bad = (1.0, 0.0, 0.0)  # red
-    mid = (0.9803921568627451, 0.9215686274509803, 0.8431372549019608)  # antiquewhite
+    mid = (1.0, 1.0, 1.0)  # white
     good = (0.39215686274509803, 0.5843137254901961, 0.9294117647058824)  # cornflowerblue
 
     if ratio < 0.5:

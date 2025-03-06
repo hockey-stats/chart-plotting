@@ -13,7 +13,7 @@ XG_HEIGHT = 0.63
 STATE_LABEL_HEIGHT = 0.53
 
 TOTAL_X_POS = 0.34
-ES_X_POS = 0.23
+ES_X_POS = 0.24
 PP_X_POS = 0.16
 SH_X_POS = 0.09
 
@@ -210,13 +210,13 @@ class ScoreBoardPlot(Plot):
         """
         Get and draw team logos
         """
-        zoom = 3
-        alpha = 0.8
+        zoom = 5
+        alpha = 0.3
         logo_a = AnnotationBbox(get_logo_marker((self.team_a), alpha=alpha, zoom=zoom),
-                                xy=(0.2, 0.9), frameon=False)
+                                xy=(0.25, 0.9), frameon=False)
 
         logo_b = AnnotationBbox(get_logo_marker((self.team_b), alpha=alpha, zoom=zoom),
-                                xy=(0.8, 0.9), frameon=False)
+                                xy=(0.75, 0.9), frameon=False)
 
         self.axis.add_artist(logo_a)
         self.axis.add_artist(logo_b)
@@ -258,6 +258,8 @@ class ScoreBoardPlot(Plot):
                      colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
                      labeldistance=0.3,
                      wedgeprops={"alpha": 0.5})
+
+        self.axis.text(0.5, 0.03, "Power Play Time Distribution", ha='center')
 
 
     def get_colors_for_teams(self, team_data, state, value):
