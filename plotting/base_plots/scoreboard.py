@@ -3,14 +3,14 @@ import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from plotting.base_plots.plot import Plot, get_logo_marker
+from plotting.base_plots.plot import Plot
 from util.helpers import total_toi_as_timestamp, ratio_to_color
 from util.color_maps import label_colors
 
 
-G_HEIGHT = 0.75
-XG_HEIGHT = 0.63
-STATE_LABEL_HEIGHT = 0.53
+G_HEIGHT = 0.73
+XG_HEIGHT = 0.61
+STATE_LABEL_HEIGHT = 0.51
 
 TOTAL_X_POS = 0.34
 ES_X_POS = 0.24
@@ -64,11 +64,11 @@ class ScoreBoardPlot(Plot):
 
         self.draw_goals_by_state(state_map, team_data)
 
-        self.draw_team_logos()
-
         self.draw_icetime_distribution()
 
         self.axis.set_axis_off()
+
+        self.draw_team_logos()
 
         self.save_plot()
 
@@ -100,7 +100,7 @@ class ScoreBoardPlot(Plot):
         gcolor_a, gcolor_b = self.get_colors_for_teams(team_data, 'all', 'goals')
         xgcolor_a, xgcolor_b = self.get_colors_for_teams(team_data, 'all', 'xgoals')
 
-        for team, x_pos, g_color, xg_color in zip([self.team_a, self.team_b], 
+        for team, x_pos, g_color, xg_color in zip([self.team_a, self.team_b],
                                                   [total_x_pos, 1 - total_x_pos],
                                                   [gcolor_a, gcolor_b],
                                                   [xgcolor_a, xgcolor_b]):
@@ -210,12 +210,11 @@ class ScoreBoardPlot(Plot):
         """
         Get and draw team logos
         """
-        zoom = 5
-        alpha = 0.3
-        logo_a = AnnotationBbox(get_logo_marker((self.team_a), alpha=alpha, zoom=zoom),
+        alpha = 1
+        logo_a = AnnotationBbox(self.get_logo_marker((self.team_a), alpha=alpha, big=True),
                                 xy=(0.25, 0.9), frameon=False)
 
-        logo_b = AnnotationBbox(get_logo_marker((self.team_b), alpha=alpha, zoom=zoom),
+        logo_b = AnnotationBbox(self.get_logo_marker((self.team_b), alpha=alpha, big=True),
                                 xy=(0.75, 0.9), frameon=False)
 
         self.axis.add_artist(logo_a)

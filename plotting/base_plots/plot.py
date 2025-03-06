@@ -1,12 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-
-
-def get_logo_marker(team_name, alpha=1, zoom=1):
-    """
-    Quick function to return the team logo as a matplotlib marker object.
-    """
-    return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=alpha, zoom=zoom)
+from PIL import Image
 
 
 class Plot:
@@ -56,7 +50,7 @@ class Plot:
             plt.savefig(self.filename, dpi=100)
 
 
-    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None, zoom=1):
+    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -64,18 +58,18 @@ class Plot:
         :param str y: Row entry to be used for y-coordinate
         :param matplotlib.pyplot.Axis: Axis object the icon is being added to
         :param str label: Row entry to be used as a label. If not supplied, don't label
-        :param str opacity_scal: Row entry used to scale opacity, if desired
+        :param str opacity_scale: Row entry used to scale opacity, if desired
         :param int opacity_max: Max value to compare against for opacity scale
         :param int zoom: Zoom level on image. Defaults to 1.
         """
-        opacity = 0.6  # Default opacity if scaling isn't used
+        opacity = 1  # Default opacity if scaling isn't used
         if opacity_scale:
             # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
             # the value on this scale (e.g., icetime)
             opacity = row[opacity_scale] / opacity_max
 
         # Assumes the team value is under row['team']
-        artist_box = AnnotationBbox(get_logo_marker(row['team'], alpha=opacity, zoom=zoom),
+        artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, big=False),
                                     xy=(row[x], row[y]), frameon=False)
         self.axis.add_artist(artist_box)
 
@@ -101,3 +95,15 @@ class Plot:
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10)
+
+    def get_logo_marker(self, team_name, alpha=1, big=False):
+        """
+        Quick function to return the team logo as a matplotlib marker object.
+        """
+        if big:
+            img = Image.open(f'team_logos/big/{team_name}.png')
+        else:
+            img = Image.open(f'team_logos/small/{team_name}.png')
+
+        #return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=1, zoom=72./self.fig.dpi)
+        return OffsetImage(img, alpha=alpha, zoom=72./self.fig.dpi)
