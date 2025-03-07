@@ -55,9 +55,9 @@ def handle_player_full_names(df):
 def ratio_to_color(ratio):
     """
     Given a float value in [0, 1], returns the RGB code for a color between red and blue based
-    on that ratio, where values closer to 0 give a color closer to red, closer to 1 give a 
-    color closer to blue (specifically cornflower blue), and values closer to 0.5 will give
-    a color closer to white. 
+    on that ratio, where values closer to 0 give a color closer to red(specifically salmon), 
+    closer to 1 give a color closer to blue (specifically cornflower blue), and values closer 
+    to 0.5 will give a color closer to white. 
 
     Simply creates two linear mappings between 0 and 0.5 and 0.5 and 1, and returns a multiple
     of the RGB code based on that linear mapping
@@ -74,7 +74,7 @@ def ratio_to_color(ratio):
                          "only meant to be used for values within [0, 1].")
 
     # The RGB values for colors representing 0, 0.5, and 1
-    bad = (1.0, 0.0, 0.0)  # red
+    bad = (0.9803921568627451, 0.5019607843137255, 0.4470588235294118) # salmon
     mid = (1.0, 1.0, 1.0)  # white
     good = (0.39215686274509803, 0.5843137254901961, 0.9294117647058824)  # cornflowerblue
 

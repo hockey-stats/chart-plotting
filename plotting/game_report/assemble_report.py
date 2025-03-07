@@ -112,8 +112,8 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
         "plots": [
             {
                 "plot": scoreboard,
-                "position": (0, 1),
-                "colspan": 4,
+                "position": (0, 0),
+                "colspan": 6,
                 "rowspan": 6
             },
             {
