@@ -4,7 +4,7 @@ from matplotlib.ticker import StrMethodFormatter
 from matplotlib.offsetbox import AnnotationBbox
 from scipy.interpolate import make_interp_spline
 
-from plotting.base_plots.plot import Plot, get_logo_marker
+from plotting.base_plots.plot import Plot
 from util.color_maps import label_colors
 
 class RollingAveragePlot(Plot):
@@ -72,7 +72,7 @@ class RollingAveragePlot(Plot):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(get_logo_marker(team), xy=(x_last, y_last),
+            artist_box = AnnotationBbox(self.get_logo_marker(team), xy=(x_last, y_last),
                                         frameon=False, alpha=0.5)
             self.axis.add_artist(artist_box)
 
