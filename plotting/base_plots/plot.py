@@ -50,7 +50,7 @@ class Plot:
             plt.savefig(self.filename, dpi=100)
 
 
-    def add_team_logo(self, row, x, y, label=None, opacity_scale=None, opacity_max=None):
+    def add_team_logo(self, row, x, y, label=None, opacity=1, opacity_scale=None, opacity_max=None):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -58,11 +58,11 @@ class Plot:
         :param str y: Row entry to be used for y-coordinate
         :param matplotlib.pyplot.Axis: Axis object the icon is being added to
         :param str label: Row entry to be used as a label. If not supplied, don't label
+        :param int opacity: Default opacity if scaling isn't used, default value is 1.
         :param str opacity_scale: Row entry used to scale opacity, if desired
         :param int opacity_max: Max value to compare against for opacity scale
         :param int zoom: Zoom level on image. Defaults to 1.
         """
-        opacity = 1  # Default opacity if scaling isn't used
         if opacity_scale:
             # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
             # the value on this scale (e.g., icetime)

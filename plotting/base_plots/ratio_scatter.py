@@ -122,7 +122,7 @@ class RatioScatterPlot(Plot):
                          axis=1)
 
         elif self.scale =='team':
-            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col), axis=1)
+            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()
