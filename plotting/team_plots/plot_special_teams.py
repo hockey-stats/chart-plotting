@@ -62,7 +62,7 @@ def main(situation):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--situation', default='5on4',
-                        help='Given game state for which to process table.')
+                        help='Given game state for which to process table, e.g. 5on4 or 4on5')
     args = parser.parse_args()
 
     main(situation=args.situation)

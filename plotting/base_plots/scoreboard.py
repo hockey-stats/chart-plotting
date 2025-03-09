@@ -215,10 +215,10 @@ class ScoreBoardPlot(Plot):
         Get and draw team logos
         """
         alpha = 1
-        logo_a = AnnotationBbox(self.get_logo_marker((self.team_a), alpha=alpha, big=True),
+        logo_a = AnnotationBbox(self.get_logo_marker((self.team_a), alpha=alpha, size='big'),
                                 xy=(LOGO_XPOS, 0.9), frameon=False)
 
-        logo_b = AnnotationBbox(self.get_logo_marker((self.team_b), alpha=alpha, big=True),
+        logo_b = AnnotationBbox(self.get_logo_marker((self.team_b), alpha=alpha, size='big'),
                                 xy=(1-LOGO_XPOS, 0.9), frameon=False)
 
         self.axis.add_artist(logo_a)

@@ -52,9 +52,9 @@ class LayeredLollipopPlot(Plot):
 
         # Add one more column that represents a value slightly higher than max(value_a, value_b)
         # to provide a point for plotting team logos just above the head of the lollipop
-        self.df['plot_point'] = [x + 0.5 for x in
+        self.df['plot_point'] = [x + 0.6 for x in
                                  list(self.df[[self.value_a, self.value_b]].max(axis=1))]
 
-        self.df.apply(lambda row: self.add_team_logo(row, 'rank', 'plot_point', zoom=0.4), axis=1)
+        self.df.apply(lambda row: self.add_team_logo(row, 'rank', 'plot_point', opacity=0.7, size='tiny'), axis=1)
 
         self.save_plot()

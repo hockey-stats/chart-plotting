@@ -50,7 +50,8 @@ class Plot:
             plt.savefig(self.filename, dpi=100)
 
 
-    def add_team_logo(self, row, x, y, label=None, opacity=1, opacity_scale=None, opacity_max=None):
+    def add_team_logo(self, row, x, y, label=None, opacity=1, opacity_scale=None, opacity_max=None,
+                      size='small'):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -62,6 +63,7 @@ class Plot:
         :param str opacity_scale: Row entry used to scale opacity, if desired
         :param int opacity_max: Max value to compare against for opacity scale
         :param int zoom: Zoom level on image. Defaults to 1.
+        :param str size: Either 'tiny', 'small', or 'big'.
         """
         if opacity_scale:
             # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
@@ -69,7 +71,7 @@ class Plot:
             opacity = row[opacity_scale] / opacity_max
 
         # Assumes the team value is under row['team']
-        artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, big=False),
+        artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, size=size),
                                     xy=(row[x], row[y]), frameon=False)
         self.axis.add_artist(artist_box)
 
@@ -96,14 +98,13 @@ class Plot:
                            verticalalignment=verticalalignment,
                            fontsize=10)
 
-    def get_logo_marker(self, team_name, alpha=1, big=False):
+    def get_logo_marker(self, team_name, alpha=1, size='small'):
         """
         Quick function to return the team logo as a matplotlib marker object.
+
+        Size can be one of 'tiny', 'big', or 'small'.
         """
-        if big:
-            img = Image.open(f'team_logos/big/{team_name}.png')
-        else:
-            img = Image.open(f'team_logos/small/{team_name}.png')
+        img = Image.open(f'team_logos/{size}/{team_name}.png')
 
         #return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=1, zoom=72./self.fig.dpi)
         return OffsetImage(img, alpha=alpha, zoom=72./self.fig.dpi)
