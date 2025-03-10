@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
+
 
 class MultiPlot(Plot):
     """
@@ -23,28 +24,32 @@ class MultiPlot(Plot):
         ]
     }
     """
-    def __init__(self, arrangement, filename, title='', figsize=(14, 14), data_disclaimer='moneypuck'):
+    def __init__(self, arrangement, filename, title='', figsize=(14, 14),
+                 data_disclaimer='moneypuck'):
         self.arrangement = arrangement
         self.filename = filename
         self.title = title
         self.figsize = figsize
+        self.fig = plt.figure(layout='constrained', figsize=self.figsize)
         super().__init__(title=self.title,
                          filename=self.filename,
-                         data_disclaimer=data_disclaimer)
+                         data_disclaimer=data_disclaimer,
+                         figure=self.fig)
 
     def make_multiplot(self):
         """
         Generate the actual multiplot.
         """
-        fig = plt.figure(layout='constrained', figsize=self.figsize)
         dimensions = self.arrangement['dimensions']
         for plot in self.arrangement['plots']:
             ax = plt.subplot2grid(dimensions,
                                   plot["position"],
+                                  axes_class=FancyAxes,
                                   colspan=plot.get("colspan", 1),
                                   rowspan=plot.get("rowspan", 1))
+            ax.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
             plot["plot"].axis = ax
             plot["plot"].make_plot()
 
-        fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
+        self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         self.save_plot()

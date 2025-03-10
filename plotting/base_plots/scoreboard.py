@@ -47,7 +47,6 @@ class ScoreBoardPlot(Plot):
         self.fig = plt.figure(figsize=self.size)
         self.axis = self.fig.add_subplot(111)
 
-
     def make_plot(self):
         """
         Assembles the Plot object.

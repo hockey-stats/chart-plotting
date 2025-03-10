@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
+
 
 class RatioScatterPlot(Plot):
     """
@@ -52,7 +53,8 @@ class RatioScatterPlot(Plot):
         self.for_game_report = for_game_report
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111)
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, facecolor='pink', edgecolor='green', ar=2.0)
+        self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
 
     def make_plot(self):
@@ -98,14 +100,17 @@ class RatioScatterPlot(Plot):
                 # p1 and p2 are the endpoints of the diagonal
                 p1 = (2, 2 * ((1 - x) / x))
                 p2 = (2.5, 2.5 * ((1 - x) / x))
-                color = '0.95'
+                color = '0.88'
                 if round(x * 100, 0) % 5 == 0:  # Emphasize lines at 40, 45, 55, 60, etc.
-                    color = '0.8'
+                    color = '0.6'
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
                     self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
-                self.axis.axline(p1, p2, color=color)
+                
+                # If this is for the game report, we only want the big lines at 40, 45 etc.
+                if not self.for_game_report or  round(x* 100, 0) % 5 == 0:
+                    self.axis.axline(p1, p2, color=color)
 
         # Calculate and plot the average for each value
         if self.plot_x_mean:
@@ -122,7 +127,8 @@ class RatioScatterPlot(Plot):
                          axis=1)
 
         elif self.scale =='team':
-            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
+            self.df.apply(lambda row:
+                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()

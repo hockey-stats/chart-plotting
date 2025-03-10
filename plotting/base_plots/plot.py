@@ -3,6 +3,42 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from PIL import Image
 
 
+from matplotlib import axes
+from matplotlib import patches
+
+class StaticColorAxisBbox(patches.FancyBboxPatch):
+    def set_edgecolor(self, color):
+        if hasattr(self, "_original_edgecolor"):
+            return
+        self._original_edgecolor = color
+        self._set_edgecolor(color)
+
+    def set_linewidth(self, w=1.5):
+        super().set_linewidth(w)
+
+
+class FancyAxes(axes.Axes):
+    name = 'fancy_box_axes'
+    _edgecolor: str
+
+    def __init__(self, *args, **kwargs):
+        print('hello fancy')
+        self._edgecolor = kwargs.pop("edgecolor", None)
+        self.aspect_ratio = kwargs.pop("ar", 1.0)
+        super().__init__(*args, **kwargs)
+
+    def _gen_axes_patch(self):
+        return StaticColorAxisBbox(
+            (0, 0),
+            1.0,
+            1.0,
+            boxstyle='round, rounding_size=0.06, pad=0',
+            mutation_aspect=self.aspect_ratio,
+            edgecolor=self._edgecolor,
+            linewidth=5
+        )
+    
+
 class Plot:
     """
     Base class to be used for all plots. Will only ever be called via super() for a base class
@@ -23,12 +59,24 @@ class Plot:
         self.data_disclaimer = data_disclaimer
 
 
+    def set_styling(self):
+        """
+        Sets some styling options around colors, borders, etc..
+        """
+        #self.fig.patch.set_edgecolor('cornflowerblue')
+        #self.fig.patch.set_linewidth(100)
+        self.fig.set_facecolor('steelblue')
+
+
     def save_plot(self):
         """
         Adds the plot title, the data disclaimer, and saves the plot to a PNG file.
         """
-        # Add title
-        #plt.title(self.title)
+
+        self.set_styling()
+
+        if self.axis:
+            self.axis.set_facecolor('antiquewhite')
 
         # Add data disclaimer
         if self.data_disclaimer is not None:
@@ -43,8 +91,6 @@ class Plot:
             plt.figtext(0.5, 0.01, text, ha="center", color=textcolor,
                         bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
 
-        #if self.fig:
-            #self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
             plt.savefig(self.filename, dpi=100)
@@ -106,5 +152,6 @@ class Plot:
         """
         img = Image.open(f'team_logos/{size}/{team_name}.png')
 
-        #return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=1, zoom=72./self.fig.dpi)
+        # The zoom value here is how we get the native resolution of the image
+        # relative to the DPI of the figure
         return OffsetImage(img, alpha=alpha, zoom=72./self.fig.dpi)

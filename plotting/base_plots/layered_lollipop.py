@@ -55,6 +55,8 @@ class LayeredLollipopPlot(Plot):
         self.df['plot_point'] = [x + 0.6 for x in
                                  list(self.df[[self.value_a, self.value_b]].max(axis=1))]
 
-        self.df.apply(lambda row: self.add_team_logo(row, 'rank', 'plot_point', opacity=0.7, size='tiny'), axis=1)
+        self.df.apply(lambda row:
+                      self.add_team_logo(row, 'rank', 'plot_point', opacity=0.7, size='tiny'),
+                      axis=1)
 
         self.save_plot()

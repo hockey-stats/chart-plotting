@@ -5,7 +5,7 @@ for showing icetime of players from two teams in a game report chart.
 
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
 from util.color_maps import label_colors
 from util.helpers import handle_player_full_names
 
@@ -34,7 +34,8 @@ class MirroredBarPlot(Plot):
         super().__init__(title=title, filename=filename, size=size, data_disclaimer=data_disclaimer)
 
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
-        self.axis = self.fig.add_subplot(111) if axis is None else axis
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis
+        self.axis.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
         self.df_a = dataframe_a
         self.df_b = dataframe_b
         self.x_col = [x_column] if not isinstance(x_column, list) else x_column
@@ -45,6 +46,7 @@ class MirroredBarPlot(Plot):
         self.b_label = b_label
         self.x_label = x_label
         self.y_label = y_label
+
 
     def make_plot(self):
         """
@@ -78,6 +80,7 @@ class MirroredBarPlot(Plot):
         ax2 = self.axis.twinx()
         self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']))
         ax2.set_yticks(y_range, labels=list(self.df_b['display_name']))
+        ax2.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
 
         xticks = list(range(0, 27, 5)) + [x * -1 for x in range(0, 27, 5) if x != 0]
         xticks.sort()
