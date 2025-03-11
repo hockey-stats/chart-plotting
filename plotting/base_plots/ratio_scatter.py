@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
+from util.font_dicts import game_report_label_text_params as label_params
 
 
 class RatioScatterPlot(Plot):
@@ -64,9 +65,20 @@ class RatioScatterPlot(Plot):
         # First plot the actual values
         self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
-        plt.title(self.title)
-        self.axis.set_xlabel(self.x_label)
-        self.axis.set_ylabel(self.y_label)
+        plt.title(self.title, fontdict=label_params)
+        self.axis.set_xlabel(self.x_label, fontdict=label_params)
+
+        # Have the y-axis labels on the right in the game report
+        if self.for_game_report:
+            self.axis.yaxis.set_label_position("right")
+            self.axis.yaxis.tick_right()
+
+        self.axis.set_ylabel(self.y_label, fontdict=label_params)
+        if self.for_game_report:
+            self.axis.set_xticks([])
+            self.axis.set_yticks([])
+
+        self.axis.tick_params(colors='antiquewhite', which='both')
 
         # Set the scaling of the plot
         x_min, x_max, _, y_max = self.set_scaling()

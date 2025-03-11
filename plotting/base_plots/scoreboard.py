@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, FancyBboxPatch
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from plotting.base_plots.plot import Plot
 from util.helpers import total_toi_as_timestamp, ratio_to_color
 from util.color_maps import label_colors
+from util.font_dicts import game_report_label_text_params as label_params
 
 
 G_HEIGHT = 0.73
@@ -251,7 +252,8 @@ class ScoreBoardPlot(Plot):
         textprops = {
             'fontsize': 15,
             'weight': 'heavy',
-            'path_effects': [PathEffects.withStroke(linewidth=2, foreground='w')]
+            'color': 'white',
+            'path_effects': [PathEffects.withStroke(linewidth=2, foreground='black')]
         }
 
         # Add the chart as an inset axis.
@@ -259,9 +261,12 @@ class ScoreBoardPlot(Plot):
         inset_ax.pie(values, labels=labels, radius=1, textprops=textprops,
                      colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
                      labeldistance=0.3,
-                     wedgeprops={"alpha": 0.5})
+                     wedgeprops={"alpha": 0.5},
+                     explode=(0.05, 0.05),
+                     shadow=False)
 
-        self.axis.text(0.5, 0.03, "Power Play Time Distribution", ha='center')
+        self.axis.text(0.5, 0.015, "Power Play Time Distribution", ha='center', 
+                       fontdict=label_params)
 
     def draw_goalie_summary(self):
         """
@@ -291,8 +296,7 @@ class ScoreBoardPlot(Plot):
         # Draw a little box for this section
         self.axis.add_patch(
             Rectangle(xy=(0.001, 0.52), width=0.2, height=height,
-                      facecolor='gainsboro',
-                      alpha=0.8
+                      facecolor='antiquewhite',
             )
         )
 

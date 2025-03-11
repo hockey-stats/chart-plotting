@@ -108,25 +108,25 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
     into a single multiplot.
     """
     arrangement = {
-        "dimensions": (13, 6),
+        "dimensions": (31, 19),
         "plots": [
             {
                 "plot": scoreboard,
                 "position": (0, 0),
-                "colspan": 6,
-                "rowspan": 6
+                "colspan": 18,
+                "rowspan": 15
             },
             {
                 "plot": icetime,
-                "position": (6, 0),
-                "colspan": 3,
-                "rowspan": 6
+                "position": (16, 0),
+                "colspan": 8,
+                "rowspan": 15
             },
             {
                 "plot": xg_scatter,
-                "position": (6, 3),
-                "colspan": 3,
-                "rowspan": 6
+                "position": (16, 10),
+                "colspan": 8,
+                "rowspan": 15
             }
         ]
     }
@@ -139,10 +139,12 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
         filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png'
 
     game_report = MultiPlot(arrangement=arrangement,
-                            figsize=(20, 14),
+                            figsize=(25, 16),
                             filename=filename,
                             title=game_report_title,
                             data_disclaimer='nst')
+
+    #game_report.fig.tight_layout()
 
     game_report.make_multiplot()
 

@@ -1,12 +1,15 @@
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib import axes
+from matplotlib import patches
 from PIL import Image
 
 
-from matplotlib import axes
-from matplotlib import patches
-
 class StaticColorAxisBbox(patches.FancyBboxPatch):
+    """
+    Class extension of FancyBboxPatch that allows us to create axes' with
+    rounded corners (i.e. FancyAxes)
+    """
     def set_edgecolor(self, color):
         if hasattr(self, "_original_edgecolor"):
             return
@@ -18,11 +21,13 @@ class StaticColorAxisBbox(patches.FancyBboxPatch):
 
 
 class FancyAxes(axes.Axes):
+    """
+    Class extension of axes.Axes that, when used, draws axes' with rounded corners.
+    """
     name = 'fancy_box_axes'
     _edgecolor: str
 
     def __init__(self, *args, **kwargs):
-        print('hello fancy')
         self._edgecolor = kwargs.pop("edgecolor", None)
         self.aspect_ratio = kwargs.pop("ar", 1.0)
         super().__init__(*args, **kwargs)
