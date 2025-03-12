@@ -54,8 +54,7 @@ class MirroredBarPlot(Plot):
         Generate the actual plot object.
         """
 
-        # Set title
-        plt.title(self.title, fontdict=text_params)
+        self.set_title()
 
         # df_a and df_b correspond to the two sides of the mirrored bar plot.
         if self.sort_value:

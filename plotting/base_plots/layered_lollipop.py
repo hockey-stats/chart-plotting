@@ -36,7 +36,6 @@ class LayeredLollipopPlot(Plot):
         self.axis.plot(self.df['rank'], self.df[self.value_b], linestyle='',
                        marker='o', color='C1')
 
-        plt.title(self.title)
         self.axis.set_xlabel(self.x_label)
         self.axis.set_ylabel(self.y_label)
         self.axis.legend()

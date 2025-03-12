@@ -1,24 +1,34 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
-from matplotlib.patches import Rectangle, FancyBboxPatch
+from matplotlib.patches import Rectangle
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from plotting.base_plots.plot import Plot
 from util.helpers import total_toi_as_timestamp, ratio_to_color
 from util.color_maps import label_colors
-from util.font_dicts import game_report_label_text_params as label_params
 
 
-G_HEIGHT = 0.73
-XG_HEIGHT = 0.61
-STATE_LABEL_HEIGHT = 0.51
+# Dimensions for the boxes holding the goal/xgoal values
+BOX_WIDTH = 0.08
+BOX_HEIGHT = 0.15
+# Non-total boxes will be slightly smaller, define mult here
+SMALL_BOX_MULT = 0.8
+BOX_EDGE_COLOR = 'navy'
 
-TOTAL_X_POS = 0.40
-ES_X_POS = 0.33
-PP_X_POS = 0.28
-SH_X_POS = 0.19
+# Positional constants
+LOGO_HEIGHT = 0.86
+G_HEIGHT = 0.63
+XG_HEIGHT = 0.45
+STATE_LABEL_HEIGHT = 0.32
+
 LOGO_XPOS = 0.35
+TOTAL_X_POS = 0.39
+ES_X_POS = TOTAL_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
+PP_X_POS = ES_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
+SH_X_POS = PP_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
+
+
 
 # Path effect gives a white outline to text, used many times
 PATH_EFFECT = [PathEffects.withStroke(linewidth=2.2, foreground='w')]
@@ -68,7 +78,9 @@ class ScoreBoardPlot(Plot):
 
         self.draw_icetime_distribution()
 
-        self.axis.set_axis_off()
+        #self.axis.set_axis_off()
+        self.axis.set_yticks([])
+        self.axis.set_xticks([])
 
         self.draw_team_logos()
 
@@ -81,55 +93,79 @@ class ScoreBoardPlot(Plot):
         """
         Organizer method to draw values corresponding to total goals and xgoals.
         """
-        fontsize = 25
-        fontweight = 700
+
+        fontdict = {
+            "size": 45,
+            "weight": 700,
+            "path_effects": PATH_EFFECT
+        }
+
+        label_fontdict = {
+            "size": 45,
+            "weight": 700,
+            "color": "steelblue"
+        }
+
+        # Draw bounding box for all the goal/xgoal values in the scoreboard
+        boundingbox_x = 0.868 * PP_X_POS
+        boundingbox_y = 0.80 * XG_HEIGHT
+        self.axis.add_patch(
+            Rectangle(xy=(boundingbox_x, boundingbox_y),
+                      width=0.545,
+                      height=0.357,
+                      facecolor='antiquewhite',
+                      edgecolor='steelblue',
+                      linewidth=4)
+        )
+
         # "Goals" text box
         self.axis.text(0.5, G_HEIGHT, "Goals",
-                       size=fontsize,
-                       weight=fontweight,
                        ha='center',
                        va='center',
-                       path_effects=PATH_EFFECT)
+                       **label_fontdict)
+
 
         # "xGoals" text box
         self.axis.text(0.5, XG_HEIGHT, "xGoals",
-                       size=fontsize,
-                       weight=fontweight,
                        ha='center',
                        va='center',
-                       path_effects=PATH_EFFECT)
+                       **label_fontdict)
 
         total_x_pos = state_map['total']['x_pos']
 
         gcolor_a, gcolor_b = self.get_ratio_colors_for_teams(team_data, 'all', 'goals')
         xgcolor_a, xgcolor_b = self.get_ratio_colors_for_teams(team_data, 'all', 'xgoals')
 
+
         for team, x_pos, g_color, xg_color in zip([self.team_a, self.team_b],
                                                   [total_x_pos, 1 - total_x_pos],
                                                   [gcolor_a, gcolor_b],
                                                   [xgcolor_a, xgcolor_b]):
-            self.axis.text(x_pos, G_HEIGHT, team_data[team]['all']['goals'],
-                           size=fontsize,
-                           weight=fontweight,
+            self.axis.text(x_pos, G_HEIGHT, f"  {team_data[team]['all']['goals']}  ",
                            ha='center',
                            va='center',
-                           bbox={
-                             "boxstyle": "round",
-                             "facecolor": g_color
-                           },
-                           path_effects=PATH_EFFECT)
+                           **fontdict)
+
+            self.axis.add_patch(
+                Rectangle(xy=(x_pos - 0.5*BOX_WIDTH, G_HEIGHT - 0.5*BOX_HEIGHT),
+                          width=BOX_WIDTH,
+                          height=BOX_HEIGHT,
+                          #edgecolor=BOX_EDGE_COLOR,
+                          facecolor=g_color)
+            )
 
             self.axis.text(x_pos, XG_HEIGHT, round(team_data[team]['all']['xgoals'], 1),
-                           size=fontsize,
-                           weight=fontweight,
                            ha='center',
                            va='center',
-                           bbox={
-                             "boxstyle": "round",
-                             "facecolor": xg_color
-                           },
-                           path_effects=PATH_EFFECT)
+                           **fontdict)
 
+            self.axis.add_patch(
+                Rectangle(xy=(x_pos - 0.5*BOX_WIDTH, XG_HEIGHT - 0.5*BOX_HEIGHT),
+                          width=BOX_WIDTH,
+                          height=BOX_HEIGHT,
+                          #edgecolor=BOX_EDGE_COLOR,
+                          facecolor=xg_color, )
+            )
 
     def organize_team_data(self):
         """
@@ -159,14 +195,27 @@ class ScoreBoardPlot(Plot):
         """
         Organizing method to draw the goal/xgoal total for each state, for each team.
         """
+
+        fontdict = {
+            "size": 30,
+            "weight": 700,
+            "path_effects": PATH_EFFECT
+        }
+
+        label_fontdict = {
+            "size": 30,
+            "weight": 700,
+            "color": "steelblue"
+        }
+
+        # Use a slightly smaller box width for the non-total values
+        box_width = SMALL_BOX_MULT * BOX_WIDTH
+
         for state, state_settings in state_map.items():
             # Gonna skip PK for now, seems low-value as the values are always very low
             if state == 'total' or state == 'pk':
                 continue
             default_x_pos = state_settings['x_pos']
-
-            fontsize = 20
-            fontweight = 700
 
             gcolor_a, gcolor_b = self.get_ratio_colors_for_teams(team_data, state, 'goals')
             xgcolor_a, xgcolor_b = self.get_ratio_colors_for_teams(team_data, state, 'xgoals')
@@ -179,35 +228,37 @@ class ScoreBoardPlot(Plot):
                 # State label
                 text = f"{state.upper()}"
                 self.axis.text(x_pos, STATE_LABEL_HEIGHT, text,
-                               size=fontsize,
-                               weight=fontweight,
                                ha='center',
                                va='center',
-                               path_effects=PATH_EFFECT)
+                               **label_fontdict)
 
                 # Goal value
                 self.axis.text(x_pos, G_HEIGHT, team_data[team][state]['goals'],
-                               size=fontsize,
-                               weight=fontweight,
-                               bbox={
-                                   "boxstyle": "round",
-                                   "facecolor": g_color
-                               },
                                ha='center',
                                va='center',
-                               path_effects=PATH_EFFECT)
+                               **fontdict)
+
+                self.axis.add_patch(
+                    Rectangle(xy=(x_pos - 0.5*box_width, G_HEIGHT - 0.5*BOX_HEIGHT),
+                              width=box_width,
+                              height=BOX_HEIGHT,
+                              #edgecolor=BOX_EDGE_COLOR,
+                              facecolor=g_color, )
+                )
 
                 # xGoal value
                 self.axis.text(x_pos, XG_HEIGHT, round(team_data[team][state]['xgoals'], 1),
-                               size=fontsize,
-                               weight=fontweight,
-                               bbox={
-                                   "boxstyle": "round",
-                                   "facecolor": xg_color
-                               },
                                ha='center',
                                va='center',
-                               path_effects=PATH_EFFECT)
+                               **fontdict)
+
+                self.axis.add_patch(
+                    Rectangle(xy=(x_pos - 0.5*box_width, XG_HEIGHT - 0.5*BOX_HEIGHT),
+                              width=box_width,
+                              height=BOX_HEIGHT,
+                              #edgecolor=BOX_EDGE_COLOR,
+                              facecolor=xg_color, )
+                )
 
 
     def draw_team_logos(self):
@@ -216,10 +267,10 @@ class ScoreBoardPlot(Plot):
         """
         alpha = 1
         logo_a = AnnotationBbox(self.get_logo_marker((self.team_a), alpha=alpha, size='big'),
-                                xy=(LOGO_XPOS, 0.9), frameon=False)
+                                xy=(LOGO_XPOS, LOGO_HEIGHT), frameon=False)
 
         logo_b = AnnotationBbox(self.get_logo_marker((self.team_b), alpha=alpha, size='big'),
-                                xy=(1-LOGO_XPOS, 0.9), frameon=False)
+                                xy=(1-LOGO_XPOS, LOGO_HEIGHT), frameon=False)
 
         self.axis.add_artist(logo_a)
         self.axis.add_artist(logo_b)
@@ -257,7 +308,7 @@ class ScoreBoardPlot(Plot):
         }
 
         # Add the chart as an inset axis.
-        inset_ax = inset_axes(self.axis, width="60%", height="50%", loc="lower center")
+        inset_ax = inset_axes(self.axis, width="20%", height="45%", loc='lower right')
         inset_ax.pie(values, labels=labels, radius=1, textprops=textprops,
                      colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
                      labeldistance=0.3,
@@ -265,8 +316,13 @@ class ScoreBoardPlot(Plot):
                      explode=(0.05, 0.05),
                      shadow=False)
 
-        self.axis.text(0.5, 0.015, "Power Play Time Distribution", ha='center', 
-                       fontdict=label_params)
+        self.axis.text(0.99, 0.455, "Power Play Time\nDistribution", ha='right',
+                       fontdict={
+                           "color": "steelblue",
+                           "fontsize": 20,
+                           "family": "sans-serif",
+                           "fontweight": 700,
+                       })
 
     def draw_goalie_summary(self):
         """
@@ -279,7 +335,7 @@ class ScoreBoardPlot(Plot):
         goalies = list(g['name'])
 
         # Initial y-position for goalie text boxes
-        y_pos = 0.59
+        y_pos = 0.12
 
         # x-pos for name and GSAX text boxes
         name_x_pos = 0.015
@@ -295,14 +351,16 @@ class ScoreBoardPlot(Plot):
 
         # Draw a little box for this section
         self.axis.add_patch(
-            Rectangle(xy=(0.001, 0.52), width=0.2, height=height,
+            Rectangle(xy=(0.001, y_pos-0.07), width=0.2, height=height,
                       facecolor='antiquewhite',
+                      edgecolor='steelblue',
             )
         )
 
         # Give our little box a title
-        self.axis.text(x=0.005, y=0.55 + height,
+        self.axis.text(x=0.005, y=(y_pos + height) * 0.9,
                        s="Goals Saved Above\nExpected",
+                       color='steelblue',
                        size=fontsize,
                        weight=fontweight)
 

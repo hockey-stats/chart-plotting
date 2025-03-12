@@ -4,6 +4,11 @@ from matplotlib import axes
 from matplotlib import patches
 from PIL import Image
 
+from util.font_dicts import title_params
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 class StaticColorAxisBbox(patches.FancyBboxPatch):
     """
@@ -64,25 +69,30 @@ class Plot:
         self.data_disclaimer = data_disclaimer
 
 
+    def set_title(self):
+        plt.title(self.title, fontdict=title_params)
+
+
     def set_styling(self):
         """
         Sets some styling options around colors, borders, etc..
         """
         #self.fig.patch.set_edgecolor('cornflowerblue')
         #self.fig.patch.set_linewidth(100)
-        self.fig.set_facecolor('steelblue')
+        if self.axis:
+            self.axis.set_facecolor('antiquewhite')
 
 
     def save_plot(self):
         """
-        Adds the plot title, the data disclaimer, and saves the plot to a PNG file.
+        Performs the following before saving the plot as a PNG file:
+           i. add styling (colors, frames, etc.)
+          ii. adds the data disclaimer
         """
 
         self.set_styling()
 
-        if self.axis:
-            self.axis.set_facecolor('antiquewhite')
-
+        self.fig.set_facecolor('steelblue')
         # Add data disclaimer
         if self.data_disclaimer is not None:
             if self.data_disclaimer == 'nst':

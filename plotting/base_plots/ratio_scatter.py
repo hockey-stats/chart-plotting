@@ -54,18 +54,20 @@ class RatioScatterPlot(Plot):
         self.for_game_report = for_game_report
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, facecolor='pink', edgecolor='green', ar=2.0)
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
+        
 
 
     def make_plot(self):
         """
         Method to assemble the plot object.
         """
+        
+        self.set_title()
         # First plot the actual values
         self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
-        plt.title(self.title, fontdict=label_params)
         self.axis.set_xlabel(self.x_label, fontdict=label_params)
 
         # Have the y-axis labels on the right in the game report

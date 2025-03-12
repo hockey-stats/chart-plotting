@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
+from util.font_dicts import multiplot_title_params
 
 
 class MultiPlot(Plot):
@@ -51,5 +52,6 @@ class MultiPlot(Plot):
             plot["plot"].axis = ax
             plot["plot"].make_plot()
 
-        self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
+        #self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
+        self.fig.suptitle(self.title, **multiplot_title_params)
         self.save_plot()
