@@ -20,7 +20,7 @@ BOX_EDGE_COLOR = 'navy'
 LOGO_HEIGHT = 0.86
 G_HEIGHT = 0.63
 XG_HEIGHT = 0.45
-STATE_LABEL_HEIGHT = 0.32
+STATE_LABEL_HEIGHT = 0.30
 
 LOGO_XPOS = 0.35
 TOTAL_X_POS = 0.39
@@ -308,7 +308,7 @@ class ScoreBoardPlot(Plot):
         }
 
         # Add the chart as an inset axis.
-        inset_ax = inset_axes(self.axis, width="20%", height="45%", loc='lower right')
+        inset_ax = inset_axes(self.axis, width="15%", height="45%", loc='lower right')
         inset_ax.pie(values, labels=labels, radius=1, textprops=textprops,
                      colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
                      labeldistance=0.3,

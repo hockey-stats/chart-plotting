@@ -35,7 +35,7 @@ def make_xg_ratio_plot(skater_df):
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
                                x_column='xGF', y_column='xGA',
-                               title='Even-Strength On-Ice xGoals', scale='player',
+                               title='Even-Strength xGoal Share', scale='player',
                                x_label='Expected Goals For',
                                y_label='Expected Goals Against (inverted)',
                                ratio_lines=True, invert_y=True,
@@ -87,7 +87,7 @@ def make_icetime_plot(skater_df):
                                    x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
-                                   title='Icetime and Scoring Breakdown by Team',
+                                   title='Icetime and Scoring Breakdown',
                                    x_label="Icetime in Minutes",
                                    filename='',
                                    data_disclaimer=None)
@@ -108,26 +108,49 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
     """
+   # arrangement = {
+   #     "dimensions": (32, 19),
+   #     "plots": [
+   #         {
+   #             "plot": scoreboard,
+   #             "position": (0, 0),
+   #             "colspan": 18,
+   #             "rowspan": 15
+   #         },
+   #         {
+   #             "plot": icetime,
+   #             "position": (17, 0),
+   #             "colspan": 8,
+   #             "rowspan": 15
+   #         },
+   #         {
+   #             "plot": xg_scatter,
+   #             "position": (17, 10),
+   #             "colspan": 8,
+   #             "rowspan": 15
+   #         }
+   #     ]
+   # }
     arrangement = {
-        "dimensions": (32, 19),
+        "dimensions": (14, 14),
         "plots": [
             {
                 "plot": scoreboard,
                 "position": (0, 0),
-                "colspan": 18,
-                "rowspan": 15
+                "colspan": 12,
+                "rowspan": 6
             },
             {
                 "plot": icetime,
-                "position": (17, 0),
-                "colspan": 8,
-                "rowspan": 15
+                "position": (7, 0),
+                "colspan": 6,
+                "rowspan": 6
             },
             {
                 "plot": xg_scatter,
-                "position": (17, 10),
-                "colspan": 8,
-                "rowspan": 15
+                "position": (7, 6),
+                "colspan": 6,
+                "rowspan": 6
             }
         ]
     }

@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
+from util.font_dicts import game_report_label_text_params
 
 
 class LayeredLollipopPlot(Plot):
@@ -10,8 +11,12 @@ class LayeredLollipopPlot(Plot):
     """
     def __init__(self, dataframe, filename, value_a, value_b, title='', x_label='',
                  y_label='', size=(10, 8), figure=None, axis=None,
-                 value_a_label='', value_b_label=''):
-        super().__init__(filename, title, size, figure, axis)
+                 value_a_label='', value_b_label='', legend_loc='upper right'):
+        super().__init__(filename=filename,
+                         title=title,
+                         size=size,
+                         figure=figure,
+                         axis=axis)
 
         self.df = dataframe
         self.x_label = x_label
@@ -21,24 +26,38 @@ class LayeredLollipopPlot(Plot):
         self.value_a_label = value_a_label
         self.value_b_label = value_b_label
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
-        self.axis = self.fig.add_subplot(111) if axis is None else axis
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis
+        self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
+        self.legend_loc = legend_loc
 
 
     def make_plot(self):
+        """
+        Creates the plot object.
+        """
+
+        self.set_title()
         # First add column denoting the rank of each team in the given dataframe
         self.df['rank'] = np.arange(len(self.df.index))
 
         # Then create the plot for value b, and then the plot of value a on top of it.
-        # Then re-plot the final markers of value b sp that they don't have lines going 
+        # Then re-plot the final markers of value b so that they don't have lines going
         # through them.
         self.axis.stem(self.df[self.value_b], linefmt='C1-', label=self.value_b_label)
         self.axis.stem(self.df[self.value_a], linefmt='C0-', label=self.value_a_label)
         self.axis.plot(self.df['rank'], self.df[self.value_b], linestyle='',
                        marker='o', color='C1')
 
-        self.axis.set_xlabel(self.x_label)
-        self.axis.set_ylabel(self.y_label)
-        self.axis.legend()
+        max_y_value = max(self.df[self.value_a].max(), self.df[self.value_b].max())
+
+        y_range = list(range(0, int(max_y_value + 2), 2))
+        self.axis.set_yticks(y_range,
+                             labels=y_range,
+                             fontdict=game_report_label_text_params)
+        self.axis.set_xlabel(self.x_label, fontdict=game_report_label_text_params)
+        self.axis.set_ylabel(self.y_label, fontdict=game_report_label_text_params)
+        self.axis.set_ybound(0, max_y_value + 2)
+        self.axis.legend(loc=self.legend_loc)
 
         # Remove x-labels and ticks
         plt.tick_params(

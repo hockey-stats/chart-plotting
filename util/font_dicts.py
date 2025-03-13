@@ -21,6 +21,14 @@ title_params = {
     "path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='black')]
 }
 
+subtitle_params = {
+    "color": "antiquewhite",
+    "size": 14,
+    "family": "sans-serif",
+    "fontweight": 700,
+    #"path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='black')]
+}
+
 multiplot_title_params = {
     "color": "antiquewhite",
     "size": 35.0,

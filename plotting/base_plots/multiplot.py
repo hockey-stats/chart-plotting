@@ -25,14 +25,21 @@ class MultiPlot(Plot):
         ]
     }
     """
-    def __init__(self, arrangement, filename, title='', figsize=(14, 14),
+    def __init__(self,
+                 arrangement,
+                 filename,
+                 title='',
+                 subtitle='',
+                 figsize=(16, 14),
                  data_disclaimer='moneypuck'):
         self.arrangement = arrangement
         self.filename = filename
         self.title = title
+        self.subtitle = subtitle
         self.figsize = figsize
         self.fig = plt.figure(layout='constrained', figsize=self.figsize)
         super().__init__(title=self.title,
+                         subtitle=self.subtitle,
                          filename=self.filename,
                          data_disclaimer=data_disclaimer,
                          figure=self.fig)

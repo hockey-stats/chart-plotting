@@ -7,6 +7,7 @@ import argparse
 import pandas as pd
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
+from util.team_maps import team_full_names
 
 def main(team, min_icetime):
     """
@@ -25,10 +26,20 @@ def main(team, min_icetime):
     if team != "ALL":
         base_df = base_df[base_df['team'] == team]
 
+    # Format the 'team' string to be used in the title of the plot
+    if team == 'ALL':
+        display_team = 'All'
+    else:
+        display_team = team_full_names[team]
+
+    print(team)
+
     xg_plot = RatioScatterPlot(dataframe=base_df,
                                filename=f'{team}_skater_xg_ratios.png',
                                x_column='xGFph', y_column='xGAph',
-                               title=f'{team} Player xG Rates (5v5, flurry-, score- and venue-adjusted, minimum {min_icetime} minutes)',
+                               title=f'{display_team} Expected Goal Rates',
+                               subtitle=f'5v5, flurry-,score- and venue-adjusted\n'\
+                                        f'min. {min_icetime} minutes',
                                scale='player', x_label='Expected Goals For per hour',
                                y_label='Expected Goals Against per hour (inverted)',
                                ratio_lines=True,
@@ -43,7 +54,7 @@ def main(team, min_icetime):
                               filename=f'{team}_skater_g_ratios.png',
                               x_column='GFph',
                               y_column='GAph',
-                              title=f'{team} Player G Rates (5v5, minimum {min_icetime} minutes)',
+                              title=f'{team} Player G Rates(5v5)\nmin. {min_icetime} minutes',
                               scale='player',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)',

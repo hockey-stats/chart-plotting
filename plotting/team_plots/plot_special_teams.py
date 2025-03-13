@@ -38,7 +38,8 @@ def make_4on5_plot(base_df):
                                   x_label='Teams, by Actual 4-on-5 Goals Against per hour',
                                   size=(14, 6),
                                   value_a_label='Actual Goals',
-                                  value_b_label='Expected Goals')
+                                  value_b_label='Expected Goals',
+                                  legend_loc='upper left')
     pk_plot.make_plot()
 
 

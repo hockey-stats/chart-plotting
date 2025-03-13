@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params as label_params
+from util.helpers import ratio_to_color
 
 
 class RatioScatterPlot(Plot):
@@ -15,6 +16,7 @@ class RatioScatterPlot(Plot):
                  x_column,
                  y_column,
                  title='',
+                 subtitle='',
                  x_label='',
                  y_label='',
                  ratio_lines=False,
@@ -32,7 +34,7 @@ class RatioScatterPlot(Plot):
                  for_game_report=False,
                  data_disclaimer='moneypuck'):
 
-        super().__init__(filename, title, size, data_disclaimer=data_disclaimer)
+        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer)
 
         self.df = dataframe
         self.x_col = x_column
@@ -56,14 +58,13 @@ class RatioScatterPlot(Plot):
         self.fig = plt.figure(figsize=self.size)
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
-        
 
 
     def make_plot(self):
         """
         Method to assemble the plot object.
         """
-        
+
         self.set_title()
         # First plot the actual values
         self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
@@ -93,7 +94,10 @@ class RatioScatterPlot(Plot):
 
         if self.break_even_line:
             # Plot the line to display break-even
-            self.axis.axline((2, 2), slope=1, color='r', alpha=0.5)
+            self.axis.axline((2, 2),
+                             slope=1,
+                             color='black' if self.for_game_report else 'red',
+                             alpha=0.5)
 
         if self.plot_league_average and self.x_col == 'xGFph':
             start = 0.1
@@ -116,7 +120,8 @@ class RatioScatterPlot(Plot):
                 p2 = (2.5, 2.5 * ((1 - x) / x))
                 color = '0.88'
                 if round(x * 100, 0) % 5 == 0:  # Emphasize lines at 40, 45, 55, 60, etc.
-                    color = '0.6'
+                    #color = '0.6'
+                    color = ratio_to_color(x) if self.for_game_report else '0.6'
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
