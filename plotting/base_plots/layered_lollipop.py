@@ -50,10 +50,11 @@ class LayeredLollipopPlot(Plot):
 
         max_y_value = max(self.df[self.value_a].max(), self.df[self.value_b].max())
 
-        y_range = list(range(0, int(max_y_value + 2), 2))
+        y_range = list(range(2, int(max_y_value + 2), 2))
         self.axis.set_yticks(y_range,
                              labels=y_range,
                              fontdict=game_report_label_text_params)
+        self.axis.tick_params(color='antiquewhite')
         self.axis.set_xlabel(self.x_label, fontdict=game_report_label_text_params)
         self.axis.set_ylabel(self.y_label, fontdict=game_report_label_text_params)
         self.axis.set_ybound(0, max_y_value + 2)
