@@ -18,6 +18,7 @@ from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from plotting.base_plots.mirrored_bar import MirroredBarPlot
 from plotting.base_plots.scoreboard import ScoreBoardPlot
 from plotting.base_plots.multiplot import MultiPlot
+from util.team_maps import team_full_names
 
 # Disable an annoying warning
 pd.options.mode.chained_assignment = None
@@ -34,7 +35,7 @@ def make_xg_ratio_plot(skater_df):
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
                                x_column='xGF', y_column='xGA',
-                               title='Even-Strength On-Ice xGoals', scale='player',
+                               title='Even-Strength xGoal Share', scale='player',
                                x_label='Expected Goals For',
                                y_label='Expected Goals Against (inverted)',
                                ratio_lines=True, invert_y=True,
@@ -86,7 +87,7 @@ def make_icetime_plot(skater_df):
                                    x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
-                                   title='Icetime and Scoring Breakdown by Team',
+                                   title='Icetime and Scoring Breakdown',
                                    x_label="Icetime in Minutes",
                                    filename='',
                                    data_disclaimer=None)
@@ -107,44 +108,87 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
     """
+   # arrangement = {
+   #     "dimensions": (32, 19),
+   #     "plots": [
+   #         {
+   #             "plot": scoreboard,
+   #             "position": (0, 0),
+   #             "colspan": 18,
+   #             "rowspan": 15
+   #         },
+   #         {
+   #             "plot": icetime,
+   #             "position": (17, 0),
+   #             "colspan": 8,
+   #             "rowspan": 15
+   #         },
+   #         {
+   #             "plot": xg_scatter,
+   #             "position": (17, 10),
+   #             "colspan": 8,
+   #             "rowspan": 15
+   #         }
+   #     ]
+   # }
     arrangement = {
-        "dimensions": (13, 6),
+        "dimensions": (14, 14),
         "plots": [
             {
                 "plot": scoreboard,
                 "position": (0, 0),
-                "colspan": 6,
+                "colspan": 12,
                 "rowspan": 6
             },
             {
                 "plot": icetime,
-                "position": (6, 0),
-                "colspan": 3,
+                "position": (7, 0),
+                "colspan": 6,
                 "rowspan": 6
             },
             {
                 "plot": xg_scatter,
-                "position": (6, 3),
-                "colspan": 3,
+                "position": (7, 6),
+                "colspan": 6,
                 "rowspan": 6
             }
         ]
     }
 
-    # Date will be given in YYYY-MM-DD format, parse it out here for the plot title
-    year, month, day = date.split('-')
-    game_report_title = f"Game Report - {team_a} vs {team_b}\n{year}-{month}-{day}"
+    game_report_title, default_filename = construct_title(team_a, team_b, date)
 
     if filename is None:
-        filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png'
+        filename = default_filename
 
     game_report = MultiPlot(arrangement=arrangement,
-                            figsize=(20, 14),
+                            figsize=(25, 16),
                             filename=filename,
                             title=game_report_title,
                             data_disclaimer='nst')
 
+    #game_report.fig.tight_layout()
+
     game_report.make_multiplot()
+
+
+def construct_title(team_a, team_b, date):
+    """
+    Construct the string which will be used for the game report title, as well as a 
+    default filename for the output if a specific filename was not given.
+    :param str team_a: Acronym of team A 
+    :param str team_b: Acronym of team B
+    :param str date: Date of the game given in YYYY-MM-DD format
+    """
+    year, month, day = date.split('-')
+
+    # Get full names for teams
+    a = team_full_names[team_a]
+    b = team_full_names[team_b]
+
+    title = f"Game Report\n{a} vs {b}\n{day}-{month}-{year}"
+    filename=f'{team_a}_{team_b}_{year}-{month}-{day}.png'
+
+    return title, filename
 
 
 def main(game_id, filename):

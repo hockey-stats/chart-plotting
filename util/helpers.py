@@ -52,12 +52,18 @@ def handle_player_full_names(df):
     return final_names
 
 
-def ratio_to_color(ratio):
+def ratio_to_color(ratio,
+                   bad=(0.9803921568627451, 0.5019607843137255, 0.4470588235294118),
+                   mid=(1.0, 1.0, 1.0),
+                   good=(0.39215686274509803, 0.5843137254901961, 0.9294117647058824)):
     """
     Given a float value in [0, 1], returns the RGB code for a color between red and blue based
-    on that ratio, where values closer to 0 give a color closer to red(specifically salmon), 
+    on that ratio, where values closer to 0 give a color closer to red (specifically salmon), 
     closer to 1 give a color closer to blue (specifically cornflower blue), and values closer 
-    to 0.5 will give a color closer to white. 
+    to 0.5 will give a color closer to white.
+
+    The colors above are the default values, though different colors can be passed in as 
+    parameters in RGB, matplotlib-friendly formats.
 
     Simply creates two linear mappings between 0 and 0.5 and 0.5 and 1, and returns a multiple
     of the RGB code based on that linear mapping
@@ -72,11 +78,6 @@ def ratio_to_color(ratio):
     if ratio < 0 or ratio > 1:
         raise ValueError(f"Called ratio_to_color with the input value {ratio}, function is"\
                          "only meant to be used for values within [0, 1].")
-
-    # The RGB values for colors representing 0, 0.5, and 1
-    bad = (0.9803921568627451, 0.5019607843137255, 0.4470588235294118) # salmon
-    mid = (1.0, 1.0, 1.0)  # white
-    good = (0.39215686274509803, 0.5843137254901961, 0.9294117647058824)  # cornflowerblue
 
     if ratio < 0.5:
         mult = ratio / 0.5

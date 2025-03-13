@@ -5,9 +5,10 @@ for showing icetime of players from two teams in a game report chart.
 
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
 from util.color_maps import label_colors
 from util.helpers import handle_player_full_names
+from util.font_dicts import game_report_label_text_params as text_params
 
 class MirroredBarPlot(Plot):
     """
@@ -34,7 +35,8 @@ class MirroredBarPlot(Plot):
         super().__init__(title=title, filename=filename, size=size, data_disclaimer=data_disclaimer)
 
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
-        self.axis = self.fig.add_subplot(111) if axis is None else axis
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis
+        self.axis.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
         self.df_a = dataframe_a
         self.df_b = dataframe_b
         self.x_col = [x_column] if not isinstance(x_column, list) else x_column
@@ -46,13 +48,13 @@ class MirroredBarPlot(Plot):
         self.x_label = x_label
         self.y_label = y_label
 
+
     def make_plot(self):
         """
         Generate the actual plot object.
         """
 
-        # Set title
-        plt.title(self.title)
+        self.set_title()
 
         # df_a and df_b correspond to the two sides of the mirrored bar plot.
         if self.sort_value:
@@ -76,13 +78,16 @@ class MirroredBarPlot(Plot):
         # Create a twin axis to host the second set of data, and add ticks with labels for
         # each player name
         ax2 = self.axis.twinx()
-        self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']))
-        ax2.set_yticks(y_range, labels=list(self.df_b['display_name']))
+        self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']), fontdict=text_params)
+        ax2.set_yticks(y_range, labels=list(self.df_b['display_name']), fontdict=text_params)
+        ax2.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
 
         xticks = list(range(0, 27, 5)) + [x * -1 for x in range(0, 27, 5) if x != 0]
         xticks.sort()
         xtick_labels = [abs(x) for x in xticks]
-        self.axis.set_xticks(xticks, labels=xtick_labels)
+        self.axis.set_xticks(xticks, labels=xtick_labels, fontdict=text_params)
+        self.axis.tick_params(color='white')
+        ax2.tick_params(color='white')
 
         # Mapping of colors to use for PP and PK TOI (Even strength will be team color)
         color_map = {
@@ -156,11 +161,14 @@ class MirroredBarPlot(Plot):
         # Legend will only show the colors for PP/PK, hopefully Even-Strength is intuitive enough
         self.axis.legend(handles=[bar_pp, bar_pk],
                          labels=['Power Play', 'Penalty Kill'],
-                         loc='lower right')
+                         prop={'weight': '550',
+                               'size': 12},
+                         loc=(0.02, 0.02),
+                         shadow=True)
 
         # Add label for x-axis
         if self.x_label:
-            self.axis.set_xlabel(self.x_label)
+            self.axis.set_xlabel(self.x_label, fontdict=text_params)
 
         self.save_plot()
 

@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
+from util.font_dicts import game_report_label_text_params as label_params
+from util.helpers import ratio_to_color
+
 
 class RatioScatterPlot(Plot):
     """
@@ -13,6 +16,7 @@ class RatioScatterPlot(Plot):
                  x_column,
                  y_column,
                  title='',
+                 subtitle='',
                  x_label='',
                  y_label='',
                  ratio_lines=False,
@@ -30,7 +34,7 @@ class RatioScatterPlot(Plot):
                  for_game_report=False,
                  data_disclaimer='moneypuck'):
 
-        super().__init__(filename, title, size, data_disclaimer=data_disclaimer)
+        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer)
 
         self.df = dataframe
         self.x_col = x_column
@@ -52,19 +56,32 @@ class RatioScatterPlot(Plot):
         self.for_game_report = for_game_report
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111)
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
+        self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
 
     def make_plot(self):
         """
         Method to assemble the plot object.
         """
+
+        self.set_title()
         # First plot the actual values
         self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
-        plt.title(self.title)
-        self.axis.set_xlabel(self.x_label)
-        self.axis.set_ylabel(self.y_label)
+        self.axis.set_xlabel(self.x_label, fontdict=label_params)
+
+        # Have the y-axis labels on the right in the game report
+        if self.for_game_report:
+            self.axis.yaxis.set_label_position("right")
+            self.axis.yaxis.tick_right()
+
+        self.axis.set_ylabel(self.y_label, fontdict=label_params)
+        if self.for_game_report:
+            self.axis.set_xticks([])
+            self.axis.set_yticks([])
+
+        self.axis.tick_params(colors='antiquewhite', which='both')
 
         # Set the scaling of the plot
         x_min, x_max, _, y_max = self.set_scaling()
@@ -77,7 +94,10 @@ class RatioScatterPlot(Plot):
 
         if self.break_even_line:
             # Plot the line to display break-even
-            self.axis.axline((2, 2), slope=1, color='r', alpha=0.5)
+            self.axis.axline((2, 2),
+                             slope=1,
+                             color='black' if self.for_game_report else 'red',
+                             alpha=0.5)
 
         if self.plot_league_average and self.x_col == 'xGFph':
             start = 0.1
@@ -98,14 +118,18 @@ class RatioScatterPlot(Plot):
                 # p1 and p2 are the endpoints of the diagonal
                 p1 = (2, 2 * ((1 - x) / x))
                 p2 = (2.5, 2.5 * ((1 - x) / x))
-                color = '0.95'
+                color = '0.88'
                 if round(x * 100, 0) % 5 == 0:  # Emphasize lines at 40, 45, 55, 60, etc.
-                    color = '0.8'
+                    #color = '0.6'
+                    color = ratio_to_color(x) if self.for_game_report else '0.6'
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
                     self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
-                self.axis.axline(p1, p2, color=color)
+                
+                # If this is for the game report, we only want the big lines at 40, 45 etc.
+                if not self.for_game_report or  round(x* 100, 0) % 5 == 0:
+                    self.axis.axline(p1, p2, color=color)
 
         # Calculate and plot the average for each value
         if self.plot_x_mean:
@@ -122,7 +146,8 @@ class RatioScatterPlot(Plot):
                          axis=1)
 
         elif self.scale =='team':
-            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
+            self.df.apply(lambda row:
+                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()

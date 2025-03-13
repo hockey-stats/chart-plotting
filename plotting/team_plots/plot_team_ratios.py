@@ -20,7 +20,8 @@ def make_5on5_plots(base_df):
 
     xg_plot = RatioScatterPlot(dataframe=base_df, filename='xg_ratios.png',
                                x_column='xGFph', y_column='xGAph',
-                               title='Team xG Rates (5v5, flurry-, score-, and venue-adjusted)',
+                               title='Team Expected Goal Rates',
+                               subtitle='    5v5, flurry-, score-, and venue-adjusted',
                                scale='team',
                                x_label='Expected Goals For per hour',
     						   y_label='Expected Goals Against per hour (inverted)',

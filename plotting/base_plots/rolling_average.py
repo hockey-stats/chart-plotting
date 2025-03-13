@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
+import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
+from matplotlib.ticker import StrMethodFormatter
 from scipy.interpolate import make_interp_spline
 
 from plotting.base_plots.plot import Plot
 from util.color_maps import label_colors
+from util.font_dicts import game_report_label_text_params as label_params
 
 class RollingAveragePlot(Plot):
     """
@@ -17,6 +19,7 @@ class RollingAveragePlot(Plot):
                  x_column='',
                  y_column='',
                  title='',
+                 subtitle='',
                  x_label='',
                  y_label='',
                  y_midpoint=50,
@@ -24,7 +27,7 @@ class RollingAveragePlot(Plot):
                  multiline_key=None,
                  add_team_logos=False):
 
-        super().__init__(filename, title, size)
+        super().__init__(filename, title, subtitle, size)
 
         self.df = dataframe
         self.x_col = x_column
@@ -51,16 +54,31 @@ class RollingAveragePlot(Plot):
         if self.add_team_logos:
             self.handle_team_logos()
 
-        self.axis.set_xlabel(self.x_label)
-        self.axis.set_ylabel(self.y_label)
+        self.axis.set_xlabel(self.x_label, fontdict=label_params)
+        #self.axis.set_ylabel(self.y_label, fontdict=label_params)
 
         self.set_scaling()
         self.add_x_axis()
 
-        # Make sure x-tick labels are whole numbers
-        self.axis.xaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+        self.axis.set_xticks([])
+        y_range = list(range(40, 65, 5))
+        self.axis.set_yticks(y_range,
+                             labels=[f"{y}%" for y in y_range],
+                             fontdict=label_params)
 
-        self.axis.set_title(self.title)
+        # Make sure x-tick labels are whole numbers
+        #self.axis.xaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+
+        self.axis.set_title(self.title,
+                            fontdict={
+                                "color": "antiquewhite",
+                                "size": 25.0,
+                                "family": "sans-serif",
+                                "weight": 800,
+                                "path_effects": [PathEffects.withStroke(linewidth=4.5, 
+                                                                        foreground='black')]
+                            }
+        )
         self.save_plot()
 
 
@@ -72,8 +90,9 @@ class RollingAveragePlot(Plot):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team), xy=(x_last, y_last),
-                                        frameon=False, alpha=0.5)
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75),
+                                        xy=(x_last, y_last),
+                                        frameon=False)
             self.axis.add_artist(artist_box)
 
 

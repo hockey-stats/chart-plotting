@@ -1,6 +1,50 @@
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib import axes
+from matplotlib import patches
 from PIL import Image
+
+from util.font_dicts import title_params, subtitle_params
+
+
+
+class StaticColorAxisBbox(patches.FancyBboxPatch):
+    """
+    Class extension of FancyBboxPatch that allows us to create axes' with
+    rounded corners (i.e. FancyAxes)
+    """
+    def set_edgecolor(self, color):
+        if hasattr(self, "_original_edgecolor"):
+            return
+        self._original_edgecolor = color
+        self._set_edgecolor(color)
+
+    def set_linewidth(self, w=1.5):
+        super().set_linewidth(w)
+
+
+class FancyAxes(axes.Axes):
+    """
+    Class extension of axes.Axes that, when used, draws axes' with rounded corners.
+    """
+    name = 'fancy_box_axes'
+    _edgecolor: str
+
+    def __init__(self, *args, **kwargs):
+        self._edgecolor = kwargs.pop("edgecolor", None)
+        self.aspect_ratio = kwargs.pop("ar", 1.0)
+        super().__init__(*args, **kwargs)
+
+    def _gen_axes_patch(self):
+        return StaticColorAxisBbox(
+            (0, 0),
+            1.0,
+            1.0,
+            boxstyle='round, rounding_size=0.06, pad=0',
+            mutation_aspect=self.aspect_ratio,
+            edgecolor=self._edgecolor,
+            linewidth=5
+        )
 
 
 class Plot:
@@ -10,41 +54,75 @@ class Plot:
     def __init__(self,
                  filename='',
                  title='',
+                 subtitle='',
                  size=(10, 8),
                  figure=None,
                  axis=None,
-                 data_disclaimer='moneypuck'):
+                 data_disclaimer='moneypuck',
+                 for_game_report=False):
 
         self.filename = filename
         self.title = title
+        self.subtitle = subtitle
         self.size = size
         self.fig = figure
         self.axis = axis
         self.data_disclaimer = data_disclaimer
+        self.for_game_report = for_game_report
 
+
+    def set_title(self):
+        """
+        Set the title of the plot.
+        """
+        if self.subtitle:
+            self.title += '\n\n'
+            plt.suptitle(self.subtitle, y=0.95, **subtitle_params)
+        plt.title(self.title, fontdict=title_params)
+
+
+    def set_styling(self):
+        """
+        Sets some styling options around colors, borders, etc..
+        """
+        #self.fig.patch.set_edgecolor('cornflowerblue')
+        #self.fig.patch.set_linewidth(100)
+        if self.axis:
+            self.axis.set_facecolor('antiquewhite')
+        self.fig.set_facecolor('steelblue')
+
+    def add_data_disclaimer(self):
+        """
+        Adds a disclaimer indicating the source of the data being used in the plot.
+        """
+        if self.data_disclaimer is None:
+            return
+
+        if self.data_disclaimer == 'nst':
+            text = "All data from NaturalStatTrick.com"
+            textcolor = 'whitesmoke'
+            facecolor = 'maroon'
+        else:  # Default is moneypuck
+            text = "All data from MoneyPuck.com"
+            textcolor = 'black'
+            facecolor = 'cyan'
+        
+        size = 20 if self.for_game_report else 10
+        plt.figtext(0.5, 0.01, text, ha="center", color=textcolor, size=size,
+                    bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
 
     def save_plot(self):
         """
-        Adds the plot title, the data disclaimer, and saves the plot to a PNG file.
+        Performs the following before saving the plot as a PNG file:
+           i. add styling (colors, frames, etc.)
+          ii. adds the data disclaimer
         """
-        # Add title
-        #plt.title(self.title)
+
+        self.set_styling()
 
         # Add data disclaimer
-        if self.data_disclaimer is not None:
-            if self.data_disclaimer == 'nst':
-                text = "All data from NaturalStatTrick.com"
-                textcolor = 'whitesmoke'
-                facecolor = 'maroon'
-            else:  # Default is moneypuck
-                text = "All data from MoneyPuck.com"
-                textcolor = 'black'
-                facecolor = 'cyan'
-            plt.figtext(0.5, 0.01, text, ha="center", color=textcolor,
-                        bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
+        self.add_data_disclaimer()
 
-        #if self.fig:
-            #self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
             plt.savefig(self.filename, dpi=100)
@@ -93,7 +171,19 @@ class Plot:
                 name = row[label].split('\xa0')[-1]
             else:
                 name = row[label].split(' ')[-1]
-            self.axis.text(row[x], row[y] + 0.06, name,
+
+            # Set the offset for the logo label based on the vertical alignment of the chart,
+            # with different values if it's for a game report chart
+            if verticalalignment == 'top':
+                if self.for_game_report:
+                    y_mult = 0.1
+                else:
+                    y_mult = 0.05
+            else:
+                y_mult = -0.2
+
+            self.axis.text(row[x], row[y] + y_mult,
+                           name,
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10)
@@ -106,5 +196,6 @@ class Plot:
         """
         img = Image.open(f'team_logos/{size}/{team_name}.png')
 
-        #return OffsetImage(plt.imread(f'team_logos/{team_name}.png'), alpha=1, zoom=72./self.fig.dpi)
+        # The zoom value here is how we get the native resolution of the image
+        # relative to the DPI of the figure
         return OffsetImage(img, alpha=alpha, zoom=72./self.fig.dpi)

@@ -10,7 +10,7 @@ import pandas as pd
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 
 
-def construct_plot(df, team, output_filename, plot_title):
+def construct_plot(df, team, output_filename, plot_title, subtitle):
     """
     Given the dataframe, create the skater points ratio plot with the given
     output filename.
@@ -31,6 +31,7 @@ def construct_plot(df, team, output_filename, plot_title):
                                 x_column='avgTOI',
                                 y_column='pointsPerHour',
                                 title=plot_title,
+                                subtitle=subtitle,
                                 scale='player',
                                 x_label='Average Time on Ice per Game',
                                 y_label='Points per Hour',
@@ -69,13 +70,13 @@ def main(team, min_icetime_minutes, situation):
 
     construct_plot(df_f, team,
                    output_filename=f'{team}_F_{situation}_scoring_rates.png',
-                   plot_title=f'{team} Forward Scoring Rates ({situation}, '\
-                              f'at least {min_icetime_minutes} minutes)')
+                   plot_title=f'{team} Forward Scoring Rates ({situation.replace("on", "v")})',
+                   subtitle=f'min. {min_icetime_minutes} minutes')
 
     construct_plot(df_d, team,
                    output_filename=f'{team}_D_{situation}_scoring_rates.png',
-                   plot_title=f'{team} Defenseman Scoring Rates ({situation}, '\
-                              f'at least {min_icetime_minutes} minutes)')
+                   plot_title=f'{team} Defenseman Scoring Rates ({situation.replace("on", "v")})',
+                   subtitle=f'min. {min_icetime_minutes} minutes)')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -85,7 +86,7 @@ if __name__ == '__main__':
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
     parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
                         choices=['5on5', '4on5', '5on4', 'other'],
-                        help='Game state to measure points for. Defaults to 5on5.')  #TODO: Add support for 'ALL'
+                        help='Game state to measure points for. Defaults to 5on5.')
     args = parser.parse_args()
 
     main(team=args.team, min_icetime_minutes=args.min_icetime, situation=args.situation)

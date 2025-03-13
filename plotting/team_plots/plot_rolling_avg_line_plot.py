@@ -1,7 +1,6 @@
 import argparse
 import pandas as pd
 
-from numpy import array
 from plotting.base_plots.rolling_average import RollingAveragePlot
 from plotting.base_plots.multiplot import MultiPlot
 
@@ -37,34 +36,39 @@ def xg_by_division_multiplot():
 
 
     arrangement = {
-        "dimensions": (9, 2),
+        "dimensions": (11, 9),
         "plots": [
             {
                 "plot": plots[0],
-                "position": (0, 0),
+                "position": (1, 0),
+                "colspan": 4,
                 "rowspan": 4
             },
             {
                 "plot": plots[1],
-                "position": (0, 1),
+                "position": (1, 5),
+                "colspan": 4,
                 "rowspan": 4
             },
             {
                 "plot": plots[2],
-                "position": (4, 0),
+                "position": (6, 0),
+                "colspan": 4,
                 "rowspan": 4
             },
             {
                 "plot": plots[3],
-                "position": (4, 1),
+                "position": (6, 5),
+                "colspan": 4,
                 "rowspan": 4
             }
         ]
     }
 
     multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
-                          title='5v5 Expected Goal Share 10-Game Rolling Average\n'\
-                                'Over the Last 25 Games')
+                          title='5v5 Expected Goal Share Rolling Average\n'\
+                                '10-game rolling average, over the last 25 games',
+                          )
 
     multiplot.make_multiplot()
 
