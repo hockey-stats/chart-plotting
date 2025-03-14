@@ -313,7 +313,7 @@ class ScoreBoardPlot(Plot):
                      colors=[label_colors[team_a]['bg'], label_colors[team_b]['bg']],
                      labeldistance=0.3,
                      wedgeprops={"alpha": 0.5},
-                     explode=(0.05, 0.05),
+                     explode=(0.05,) * len(values),  # Either (0.05,) or (0.05, 0.05)
                      shadow=False)
 
         self.axis.text(0.99, 0.455, "Power Play Time\nDistribution", ha='right',
