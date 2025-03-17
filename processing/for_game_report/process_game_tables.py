@@ -99,7 +99,11 @@ def process_skater_data(path, game_id):
     df.fillna(0, inplace=True)
 
     # Check for and handle an error with the data source where xG values are all given as 0
-    if df['ixG'].sum() == 0:
+    x = [float(a) for a in df['ixG']]
+    col_sum = 0
+    for a in x:
+        col_sum += a
+    if col_sum == 0:
         raise ValueError("Expected Goal values sum to 0, issue with data source, exiting...")
 
     return df, date
