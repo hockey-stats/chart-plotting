@@ -96,8 +96,11 @@ def process_skater_data(path, game_id):
                   right_on=['name', 'state', 'team', 'position'], how='right')\
             .sort_values(by=['name'], ascending=True)
 
-
     df.fillna(0, inplace=True)
+
+    # Check for and handle an error with the data source where xG values are all given as 0
+    if df['ixG'].sum() == 0:
+        raise ValueError("Expected Goal values sum to 0, issue with data source, exiting...")
 
     return df, date
 
