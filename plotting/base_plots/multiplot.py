@@ -15,14 +15,17 @@ class MultiPlot(Plot):
     {
         "dimensions": (2, 2)  \\The raw dimensions of the multiplot
         "plots": [
-            {
+            {  \\ Positioning details for each plot
                 "plot": <Plot Object>,
-                "position": (0, 0),
-                "colspan": 1,
-                "rowspan": 2
+                "y_pos": 0,
+                "start": 1,
+                "end": 2
             },
             ...
-        ]
+        ],
+        \\ Height and width spacing between the plots
+        "hspace": 0.1,
+        "wspace": 0.1
     }
     """
     def __init__(self,
@@ -48,17 +51,24 @@ class MultiPlot(Plot):
         """
         Generate the actual multiplot.
         """
+
         dimensions = self.arrangement['dimensions']
+        gs = self.fig.add_gridspec(dimensions[0], dimensions[1],
+                                   hspace=self.arrangement.get('hspace', 0),
+                                   wspace=self.arrangement.get('wspace', 0))
+
+
         for plot in self.arrangement['plots']:
-            ax = plt.subplot2grid(dimensions,
-                                  plot["position"],
-                                  axes_class=FancyAxes,
-                                  colspan=plot.get("colspan", 1),
-                                  rowspan=plot.get("rowspan", 1))
+            if 'start' in plot.keys():
+                ax = self.fig.add_subplot(gs[plot['y_pos'], plot['start']:plot['end']],
+                                          axes_class=FancyAxes)
+            else:
+                # If no start is provided, assume the plot spans the whole row.
+                ax = self.fig.add_subplot(gs[plot['y_pos'], :],
+                                          axes_class=FancyAxes)
             ax.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
             plot["plot"].axis = ax
             plot["plot"].make_plot()
 
-        #self.fig.suptitle(self.title, size='xx-large', weight='heavy', stretch='expanded')
         self.fig.suptitle(self.title, **multiplot_title_params)
         self.save_plot()

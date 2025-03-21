@@ -37,7 +37,9 @@ def make_xg_ratio_plot(skater_df):
                                x_column='xGF', y_column='xGA',
                                title='Even-Strength xGoal Share', scale='player',
                                x_label='Expected Goals For',
-                               y_label='Expected Goals Against (inverted)',
+                               # The newlines are a hack-y way to make the spacing align with
+                               # the y-axis labels of the icetime plot i'm sorry
+                               y_label='Expected Goals Against (inverted)\n\n\n\n',
                                ratio_lines=True, invert_y=True,
                                plot_x_mean=False,
                                plot_y_mean=False,
@@ -88,7 +90,9 @@ def make_icetime_plot(skater_df):
                                    a_label=teams[0], b_label=teams[1],
                                    sort_value='total_toi',
                                    title='Icetime and Scoring Breakdown',
-                                   x_label="Icetime in Minutes",
+                                   # Similar hack-y thing with the newline here to give us a bit of
+                                   # padding on the bottom of the report i'm still sorry
+                                   x_label="Icetime in Minutes\n",
                                    filename='',
                                    data_disclaimer=None)
 
@@ -108,51 +112,28 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
     Function which takes the various plots which constitute the game report and assembles them
     into a single multiplot.
     """
-   # arrangement = {
-   #     "dimensions": (32, 19),
-   #     "plots": [
-   #         {
-   #             "plot": scoreboard,
-   #             "position": (0, 0),
-   #             "colspan": 18,
-   #             "rowspan": 15
-   #         },
-   #         {
-   #             "plot": icetime,
-   #             "position": (17, 0),
-   #             "colspan": 8,
-   #             "rowspan": 15
-   #         },
-   #         {
-   #             "plot": xg_scatter,
-   #             "position": (17, 10),
-   #             "colspan": 8,
-   #             "rowspan": 15
-   #         }
-   #     ]
-   # }
     arrangement = {
-        "dimensions": (14, 14),
+        "dimensions": (2, 2),
         "plots": [
             {
                 "plot": scoreboard,
-                "position": (0, 0),
-                "colspan": 12,
-                "rowspan": 6
+                "y_pos": 0,
             },
             {
                 "plot": icetime,
-                "position": (7, 0),
-                "colspan": 6,
-                "rowspan": 6
+                "y_pos": 1,
+                "start": 0,
+                "end": 1,
             },
             {
                 "plot": xg_scatter,
-                "position": (7, 6),
-                "colspan": 6,
-                "rowspan": 6
+                "y_pos": 1,
+                "start": 1,
+                "end": 2,
             }
-        ]
+        ],
+        "hspace": 0.1,
+        "wspace": 0
     }
 
     game_report_title, default_filename = construct_title(team_a, team_b, date)
@@ -165,8 +146,6 @@ def assemble_multiplot(icetime, xg_scatter, scoreboard, team_a, team_b, date, fi
                             filename=filename,
                             title=game_report_title,
                             data_disclaimer='nst')
-
-    #game_report.fig.tight_layout()
 
     game_report.make_multiplot()
 

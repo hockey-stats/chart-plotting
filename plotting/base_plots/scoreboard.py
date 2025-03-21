@@ -351,7 +351,7 @@ class ScoreBoardPlot(Plot):
 
         # Draw a little box for this section
         self.axis.add_patch(
-            Rectangle(xy=(0.001, y_pos-0.07), width=0.2, height=height,
+            Rectangle(xy=(0.003, y_pos-0.07), width=0.2, height=height,
                       facecolor='antiquewhite',
                       edgecolor='steelblue',
             )

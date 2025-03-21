@@ -28,7 +28,7 @@ def xg_by_division_multiplot():
         div_plot = RollingAveragePlot(dataframe=div_df, filename='',
                                       x_column='gameNumber',
                                       y_column='xGoalsPercentageRollingAvg',
-                                      title=div['name'], x_label='Game #',
+                                      title=div['name'], x_label='Game #\n',
                                       y_label='5v5 xG% - 10-Game Rolling Average',
                                       multiline_key='team', add_team_logos=True)
 
@@ -36,38 +36,40 @@ def xg_by_division_multiplot():
 
 
     arrangement = {
-        "dimensions": (11, 9),
+        "dimensions": (2, 2),
         "plots": [
             {
                 "plot": plots[0],
-                "position": (1, 0),
-                "colspan": 4,
-                "rowspan": 4
+                "y_pos": 0,
+                "start": 0,
+                "end": 1
             },
             {
                 "plot": plots[1],
-                "position": (1, 5),
-                "colspan": 4,
-                "rowspan": 4
+                "y_pos": 0,
+                "start": 1,
+                "end": 2
             },
             {
                 "plot": plots[2],
-                "position": (6, 0),
-                "colspan": 4,
-                "rowspan": 4
+                "y_pos": 1,
+                "start": 0,
+                "end": 1
             },
             {
                 "plot": plots[3],
-                "position": (6, 5),
-                "colspan": 4,
-                "rowspan": 4
+                "y_pos": 1,
+                "start": 1,
+                "end": 2
             }
-        ]
+        ],
+        "hspace": 0,
+        "wspace": 0.1
     }
 
     multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
                           title='5v5 Expected Goal Share Rolling Average\n'\
-                                '10-game rolling average, over the last 25 games',
+                                '10-game rolling average, over the last 25 games\n',
                           )
 
     multiplot.make_multiplot()
