@@ -3,6 +3,7 @@ Sub-class of Plot that created a mirrored horizontal bar chart. This was origina
 for showing icetime of players from two teams in a game report chart.
 """
 
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
@@ -56,11 +57,6 @@ class MirroredBarPlot(Plot):
 
         self.set_title()
 
-        # df_a and df_b correspond to the two sides of the mirrored bar plot.
-        if self.sort_value:
-            self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
-            self.df_b = self.df_b.sort_values(by=[self.sort_value], ascending=True)
-
         # Add column for display names
         self.df_a['display_name'] = handle_player_full_names(self.df_a)
         self.df_b['display_name'] = handle_player_full_names(self.df_b)
@@ -78,6 +74,18 @@ class MirroredBarPlot(Plot):
         # Create a twin axis to host the second set of data, and add ticks with labels for
         # each player name
         ax2 = self.axis.twinx()
+        print(len(self.df_a['display_name']))
+        print(len(self.df_b['display_name']))
+
+        if len(self.df_a['display_name']) != len(self.df_b['display_name']):
+            # If one team has less players than the other, call method to adjust
+            self.adjust_for_mismatched_player_counts()
+
+        # df_a and df_b correspond to the two sides of the mirrored bar plot.
+        if self.sort_value:
+            self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
+            self.df_b = self.df_b.sort_values(by=[self.sort_value], ascending=True)
+
         self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']), fontdict=text_params)
         ax2.set_yticks(y_range, labels=list(self.df_b['display_name']), fontdict=text_params)
         ax2.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
@@ -206,7 +214,7 @@ class MirroredBarPlot(Plot):
         for i, df in enumerate([self.df_b, self.df_a]):
             for index, (_, row) in enumerate(df.iterrows()):
                 horizontal_offset = horizontal_offset_start
-                for _ in range(0, row['g']):
+                for _ in range(0, int(row['g'])):
                     if i == 0:
                         self.axis.text(horizontal_offset, index - vertical_offset,
                                     "G",
@@ -225,7 +233,7 @@ class MirroredBarPlot(Plot):
                                     bbox=g_bbox)
 
                     horizontal_offset += horizontal_offset_increment
-                for _ in range(0, row['a1'] + row['a2']):
+                for _ in range(0, int(row['a1']) + int(row['a2'])):
                     if i == 0:
                         self.axis.text(horizontal_offset, index - vertical_offset,
                                     "A",
@@ -246,3 +254,36 @@ class MirroredBarPlot(Plot):
             # When switching to team b, mirror the values for horizontal incrementation
             horizontal_offset_start = -1.4
             horizontal_offset_increment = -1 * horizontal_offset_increment
+
+
+    def adjust_for_mismatched_player_counts(self):
+        """
+        Method that is called when the two teams have different amounts of players.
+
+        Adds empty rows to the team with less so that they are equal.
+        """
+        a_is_more = False
+        b_is_more = False
+        if len(self.df_a['display_name']) < len(self.df_b['display_name']):
+            b_is_more = True
+        else:
+            a_is_more = True
+
+        diff = abs(len(self.df_a['display_name']) - len(self.df_b['display_name']))
+        team = self.a_label if b_is_more else self.b_label
+
+        rows = {
+            'name': [''] * diff,
+            'team': [team] * diff,
+            'position': [''] * diff,
+            'display_name': [''] * diff
+        }
+
+        df = pd.DataFrame(rows)
+
+        if a_is_more:
+            self.df_b = pd.concat([self.df_b, df]).fillna(0)
+            print(self.df_b)
+        else:
+            self.df_a = pd.concat([self.df_a, df]).fillna(0)
+            print(self.df_a)
