@@ -23,8 +23,8 @@ def construct_plot(df, team, output_filename, plot_title, subtitle):
 
     max_pph = max(df['pointsPerHour']) + 0.2
 
-    if team != "ALL":
-        df = df[df['team'] == team]
+    #if team != "ALL":
+    #    df = df[df['team'] == team]
 
     pph_plot = RatioScatterPlot(dataframe=df,
                                 filename=output_filename,
@@ -35,6 +35,8 @@ def construct_plot(df, team, output_filename, plot_title, subtitle):
                                 scale='player',
                                 x_label='Average Time on Ice per Game',
                                 y_label='Points per Hour',
+                                team=team,
+                                show_league_context=True,
                                 percentiles={'horizontal': pph_percentiles},
                                 quadrant_labels=['OPPORTUNITY', 'PRODUCTION'],
                                 plot_x_mean=False,

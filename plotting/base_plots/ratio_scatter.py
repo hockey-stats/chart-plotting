@@ -28,6 +28,8 @@ class RatioScatterPlot(Plot):
                  percentiles=None,
                  break_even_line=True,
                  plot_league_average=0,
+                 show_league_context=False,
+                 team='ALL',
                  scale='team',
                  scale_to_extreme=False,
                  y_min_max=None,
@@ -52,6 +54,8 @@ class RatioScatterPlot(Plot):
         self.plot_x_mean = plot_x_mean
         self.plot_y_mean = plot_y_mean
         self.quadrant_labels = quadrant_labels
+        self.show_league_context = show_league_context
+        self.team = team
         self.scale_to_extreme = scale_to_extreme
         self.for_game_report = for_game_report
         self.y_min_max = y_min_max
@@ -66,8 +70,6 @@ class RatioScatterPlot(Plot):
         """
 
         self.set_title()
-        # First plot the actual values
-        self.axis.scatter(x=self.df[self.x_col], y=self.df[self.y_col], s=0)
 
         self.axis.set_xlabel(self.x_label, fontdict=label_params)
 
@@ -139,11 +141,7 @@ class RatioScatterPlot(Plot):
 
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
-            max_icetime = self.df.icetime.max()
-            self.df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
-                                                         opacity_scale='icetime',
-                                                         opacity_max=max_icetime),
-                         axis=1)
+            self.self_add_player_data()
 
         elif self.scale =='team':
             self.df.apply(lambda row:
@@ -153,6 +151,29 @@ class RatioScatterPlot(Plot):
             self.axis.invert_yaxis()
 
         self.save_plot()
+
+
+    def self_add_player_data(self):
+        """
+        Method to add the logos for each player in the plot. 
+        
+        If `self.team` is not 'ALL' and `self.show_league_context` is True, then show players from
+        all teams with severely reduced opacity and no labels.
+        """
+        if self.team != 'ALL' and self.show_league_context:
+            # DataFrame for every player excluding the target team
+            remaining_df = self.df[self.df['team'] != self.team]
+            remaining_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
+                                                              opacity=0.1),
+                               axis=1)
+
+        max_icetime = self.df.icetime.max()
+        # Now add the desired players for the given team, with scaled opacity and name labels
+        team_df = self.df[self.df['team'] == self.team] if self.team != 'ALL' else self.df
+        team_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
+                                                     opacity_scale='icetime',
+                                                     opacity_max=max_icetime),
+                      axis=1)
 
 
     def set_scaling(self):

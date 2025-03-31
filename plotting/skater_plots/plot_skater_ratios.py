@@ -23,16 +23,11 @@ def main(team, min_icetime):
     league_avg_xg = base_df['xGFph'].mean()
     league_avg_g = base_df['GFph'].mean()
 
-    if team != "ALL":
-        base_df = base_df[base_df['team'] == team]
-
     # Format the 'team' string to be used in the title of the plot
     if team == 'ALL':
         display_team = 'All'
     else:
         display_team = team_full_names[team]
-
-    print(team)
 
     xg_plot = RatioScatterPlot(dataframe=base_df,
                                filename=f'{team}_skater_xg_ratios.png',
@@ -42,6 +37,8 @@ def main(team, min_icetime):
                                         f'min. {min_icetime} minutes',
                                scale='player', x_label='Expected Goals For per hour',
                                y_label='Expected Goals Against per hour (inverted)',
+                               team=team,
+                               show_league_context=True,
                                ratio_lines=True,
                                invert_y=True,
                                plot_x_mean=False,
@@ -58,6 +55,8 @@ def main(team, min_icetime):
                               scale='player',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)',
+                              team=team,
+                              show_league_context=True,
                               ratio_lines=True,
                               invert_y=True,
                               plot_x_mean=False,

@@ -176,9 +176,9 @@ class Plot:
             # with different values if it's for a game report chart
             if verticalalignment == 'top':
                 if self.for_game_report:
-                    y_mult = 0.1
+                    y_mult = 0.08
                 else:
-                    y_mult = 0.05
+                    y_mult = 0.07
             else:
                 y_mult = -0.2
 
