@@ -63,6 +63,9 @@ class RatioScatterPlot(Plot):
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
+        # Filter Dataframe if looking at a specific team
+        self.df = self.df[self.df['team'] == self.team] if not self.show_league_context else self.df
+
 
     def make_plot(self):
         """
@@ -128,7 +131,7 @@ class RatioScatterPlot(Plot):
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
                     self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
-                
+  
                 # If this is for the game report, we only want the big lines at 40, 45 etc.
                 if not self.for_game_report or  round(x* 100, 0) % 5 == 0:
                     self.axis.axline(p1, p2, color=color)
@@ -164,7 +167,7 @@ class RatioScatterPlot(Plot):
             # DataFrame for every player excluding the target team
             remaining_df = self.df[self.df['team'] != self.team]
             remaining_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
-                                                              opacity=0.1),
+                                                              opacity=0.08),
                                axis=1)
 
         max_icetime = self.df.icetime.max()
@@ -190,6 +193,7 @@ class RatioScatterPlot(Plot):
 
         Returns the max/min x-,y-values to be used,
         """
+
         x_min = self.df[self.x_col].min() - 0.1
         x_max = self.df[self.x_col].max() + 0.1
         y_min = self.df[self.y_col].min() - 0.1

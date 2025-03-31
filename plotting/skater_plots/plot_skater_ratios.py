@@ -38,7 +38,6 @@ def main(team, min_icetime):
                                scale='player', x_label='Expected Goals For per hour',
                                y_label='Expected Goals Against per hour (inverted)',
                                team=team,
-                               show_league_context=True,
                                ratio_lines=True,
                                invert_y=True,
                                plot_x_mean=False,
