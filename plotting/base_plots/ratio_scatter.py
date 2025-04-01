@@ -64,7 +64,9 @@ class RatioScatterPlot(Plot):
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
         # Filter Dataframe if looking at a specific team
-        self.df = self.df[self.df['team'] == self.team] if not self.show_league_context else self.df
+        #self.df = self.df[self.df['team'] == self.team] if not self.show_league_context else self.df
+        if not self.show_league_context and self.team != 'ALL':
+            self.df = self.df[self.df['team'] == self.team]
 
 
     def make_plot(self):
