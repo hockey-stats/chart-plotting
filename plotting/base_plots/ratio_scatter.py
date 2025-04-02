@@ -34,9 +34,10 @@ class RatioScatterPlot(Plot):
                  scale_to_extreme=False,
                  y_min_max=None,
                  for_game_report=False,
-                 data_disclaimer='moneypuck'):
+                 data_disclaimer='moneypuck',
+                 sport='hockey'):
 
-        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer)
+        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer, sport=sport)
 
         self.df = dataframe
         self.x_col = x_column
