@@ -56,7 +56,7 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 plotting/team_plots/plot_rolling_avg_line_plot.py
+          python3 plotting/hockey/team_plots/plot_rolling_avg_line_plot.py
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4
