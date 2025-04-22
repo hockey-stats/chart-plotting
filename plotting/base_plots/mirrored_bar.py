@@ -90,7 +90,10 @@ class MirroredBarPlot(Plot):
         ax2.set_yticks(y_range, labels=list(self.df_b['display_name']), fontdict=text_params)
         ax2.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
 
-        xticks = list(range(0, 27, 5)) + [x * -1 for x in range(0, 27, 5) if x != 0]
+        # Create x-ticks in the range of [-n, n] by increments of 5, where n is the largest ToI value
+        # in the dataset plus 1
+        n = int(x_max) + 1
+        xticks = list(range(0, n, 5)) + [x * -1 for x in range(0, n, 5) if x != 0]
         xticks.sort()
         xtick_labels = [abs(x) for x in xticks]
         self.axis.set_xticks(xticks, labels=xtick_labels, fontdict=text_params)
