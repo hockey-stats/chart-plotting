@@ -59,7 +59,8 @@ class Plot:
                  figure=None,
                  axis=None,
                  data_disclaimer='moneypuck',
-                 for_game_report=False):
+                 for_game_report=False,
+                 sport='hockey'):
 
         self.filename = filename
         self.title = title
@@ -69,6 +70,7 @@ class Plot:
         self.axis = axis
         self.data_disclaimer = data_disclaimer
         self.for_game_report = for_game_report
+        self.sport = sport
 
 
     def set_title(self):
@@ -97,11 +99,15 @@ class Plot:
         """
         if self.data_disclaimer is None:
             return
-
+        print(self.data_disclaimer)
         if self.data_disclaimer == 'nst':
             text = "All data from NaturalStatTrick.com"
             textcolor = 'whitesmoke'
             facecolor = 'maroon'
+        elif self.data_disclaimer == 'fangraphs':
+            text = "All data from fangraphs.com"
+            textcolor = 'black'
+            facecolor = 'limegreen'
         else:  # Default is moneypuck
             text = "All data from MoneyPuck.com"
             textcolor = 'black'
@@ -149,8 +155,9 @@ class Plot:
             opacity = row[opacity_scale] / opacity_max
 
         # Assumes the team value is under row['team']
-        artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, size=size),
-                                    xy=(row[x], row[y]), frameon=False)
+        artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, size=size,
+                                                         sport=self.sport),
+                                    xy=(row[x], row[y]), frameon=False) 
         self.axis.add_artist(artist_box)
 
         if label:
@@ -188,13 +195,14 @@ class Plot:
                            verticalalignment=verticalalignment,
                            fontsize=10)
 
-    def get_logo_marker(self, team_name, alpha=1, size='small'):
+    def get_logo_marker(self, team_name, alpha=1, size='small', sport='hockey'):
         """
         Quick function to return the team logo as a matplotlib marker object.
 
         Size can be one of 'tiny', 'big', or 'small'.
+        Sport can be 'hockey' or 'baseball'.
         """
-        img = Image.open(f'team_logos/{size}/{team_name}.png')
+        img = Image.open(f'team_logos/{sport}/{size}/{team_name}.png')
 
         # The zoom value here is how we get the native resolution of the image
         # relative to the DPI of the figure
