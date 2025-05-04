@@ -134,7 +134,7 @@ class SwarmPlot(Plot):
 
             # Draw a line connect logo to the point in the swarmplot
             plt.plot([logo_x_pos, coord[0]], [y_pos, coord[1]], color=line_color,
-                     linewidth=3, zorder=10, alpha=0.2)
+                     linewidth=3, zorder=10, alpha=0.4)
 
             # Pad the metric value if it is only 2-digits
             if 10 < int(metric) < 100:
