@@ -185,3 +185,126 @@ label_colors = {
 		"line": "hotpink",
   },
 }
+
+mlb_label_colors = {
+	"ARI": {
+		"bg": "sienna",
+		"line": "indigo"
+	},
+	"ATH": {
+		"bg": "forestgreen",
+		"line": "yellow"
+	},
+	"ATL": {
+		"bg": "indianred",
+		"line": "navy"
+	},
+	"BAL": {
+		"bg": "orange",
+		"line": "black"
+	},
+	"BOS": {
+		"bg": "red",
+		"line": "red"
+	},
+	"CHC": {
+		"bg": "royalblue",
+		"line": "red"
+	},
+	"CHW": {
+		"bg": "silver",
+		"line": "black"
+	},
+	"CIN": {
+		"bg": "red",
+		"line": "red"
+	},
+	"CLE": {
+		"bg": "marroon",
+		"line": "goldenrod"
+	},
+	"COL": {
+		"bg": "blueviolet",
+		"line": "blueviolet"
+	},
+	"DET": {
+		"bg": "black",
+		"line": "black"
+	},
+	"HOU": {
+		"bg": "navy",
+		"line": "darkorange"
+	},
+	"KCR": {
+		"bg": "cornflowerblue",
+		"line": "gold"
+	},
+	"LAA": {
+		"bg": "crimson",
+		"line": "crimson"
+	},
+	"LAD": {
+		"bg": "dodgerblue",
+		"line": "dodgerblue"
+	},
+	"MIA": {
+		"bg": "cyan",
+		"line": "lightsalmon"
+	},
+	"MIL": {
+		"bg": "navy",
+		"line": "gold"
+	},
+	"MIN": {
+		"bg": "navy",
+		"line": "firebrick"
+	},
+	"NYM": {
+		"bg": "blue",
+		"line": "orange"
+	},
+	"NYY": {
+		"bg": "silver",
+		"line": "black"
+	},
+	"PHI": {
+		"bg": "lightskyblue",
+		"line": "maroon"
+	},
+	"PIT": {
+		"bg": "black",
+		"line": "yello"
+	},
+	"SDP": {
+		"bg": "sienna",
+		"line": "yellow"
+	},
+	"SEA": {
+		"bg": "lightseagreen",
+		"line": "seagreen"
+	},
+	"SFG": {
+		"bg": "darkorange",
+		"line": "darkorange"
+	},
+	"STL": {
+		"bg": "red",
+		"line": "gold"
+	},
+	"TBR": {
+		"bg": "lightsteelblue",
+		"line": "yellow"
+	},
+	"TEX": {
+		"bg": "blue",
+		"line": "red"
+	},
+	"TOR": {
+		"bg": "blue",
+		"line": "crimson"
+	},
+	"WSN": {
+		"bg": "navy",
+		"line": "red"
+	},
+}
