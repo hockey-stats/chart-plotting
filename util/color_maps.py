@@ -111,7 +111,7 @@ label_colors = {
   },
   "STL": {
 		"bg": "mediumblue",
-		"text": "yellow",
+		"text": "gold",
 		"line": "mediumblue",
   },
   "SEA": {
@@ -193,7 +193,7 @@ mlb_label_colors = {
 	},
 	"ATH": {
 		"bg": "forestgreen",
-		"line": "yellow"
+		"line": "gold"
 	},
 	"ATL": {
 		"bg": "indianred",
@@ -273,11 +273,11 @@ mlb_label_colors = {
 	},
 	"PIT": {
 		"bg": "black",
-		"line": "yello"
+		"line": "gold"
 	},
 	"SDP": {
 		"bg": "sienna",
-		"line": "yellow"
+		"line": "gold"
 	},
 	"SEA": {
 		"bg": "lightseagreen",
@@ -293,7 +293,7 @@ mlb_label_colors = {
 	},
 	"TBR": {
 		"bg": "lightsteelblue",
-		"line": "yellow"
+		"line": "gold"
 	},
 	"TEX": {
 		"bg": "blue",
