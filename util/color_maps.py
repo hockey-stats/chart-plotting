@@ -220,7 +220,7 @@ mlb_label_colors = {
 		"line": "red"
 	},
 	"CLE": {
-		"bg": "marroon",
+		"bg": "maroon",
 		"line": "goldenrod"
 	},
 	"COL": {
