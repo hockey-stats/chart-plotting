@@ -51,8 +51,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year for which to get data, defaults to current year')
-    parser.add_argument('-q', '--qual', default=20, type=int,
-                        help='Minimum plate appearances to qualify in query, defaults to 20')
+    parser.add_argument('-q', '--qual', default=50, type=int,
+                        help='Minimum plate appearances to qualify in query, defaults to 50')
     parser.add_argument('-t', '--team', required=True, type=str,
                         help='Team for which players should be highlighted.')
     args = parser.parse_args()

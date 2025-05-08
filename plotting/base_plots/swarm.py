@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
+import matplotlib.transforms as transforms
 from matplotlib.offsetbox import AnnotationBbox
 import seaborn as sns
 import pandas as pd
-import pybaseball
 
 from plotting.base_plots.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params as label_params
@@ -102,39 +102,57 @@ class SwarmPlot(Plot):
                                                  player's point in the plot.
         """
         # Define starting x- and y-pos.
-        y_pos = 225
-        logo_x_pos = 0.50
-        wrc_x_pos = 0.62
-        name_x_pos = 0.82
+        y_pos = 0.73
+        logo_x_pos = 0.35
 
         # Get logo marker for team in question
         team_logo = self.get_logo_marker(self.team, sport='baseball', size='tiny')
 
-        # Define style dicts for the label Bbox
-        base_dict = {
+        # Define style dicts for the label and metric Bbox
+        metric_dict = {
             'size': 15,
             'weight': 600,
-            'color': 'white',
-            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='black')],
+            'color': 'black',
+            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
             'bbox': {
-                'alpha': 0.6,
+                'alpha': 0.8,
+                'boxstyle': 'round'
+            }
+        }
+        label_dict = {
+            'size': 15,
+            'weight': 600,
+            'color': 'black',
+            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
+            'bbox': {
+                'alpha': 0.3,
+                'color': mlb_label_colors[self.team]['bg'],
                 'boxstyle': 'round'
             }
         }
 
         for name, qual, metric, coord in zip(team_df['Name'], team_df[self.qualifier],
                                              team_df[self.column], team_coords):
-            # Draw the logos
-            self.axis.add_artist(AnnotationBbox(team_logo, xy=(logo_x_pos, y_pos), frameon=False,
-                                                zorder=11))
-
             # Get the appropriate colors for the team
             line_color = mlb_label_colors[self.team]["line"]
-            box_color = mlb_label_colors[self.team]["bg"]
 
+            # Our logo x-/y-pos are in Axes coordinates, we want them in data coordinates
+            # to be able to draw the line connecting them to the points in the swarm plot
+            axis_to_data = self.axis.transAxes + self.axis.transData.inverted()
+            x, y = axis_to_data.transform((logo_x_pos, y_pos))
+
+            # Not exactly sure why the x-coordinate gets inverted in the transformation process,
+            # but it does
+            x = -1 * x
+
+            # Draw the logos
+            self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, y),
+                                                frameon=False,
+                                                xycoords='data', zorder=11))
             # Draw a line connect logo to the point in the swarmplot
-            plt.plot([logo_x_pos, coord[0]], [y_pos, coord[1]], color=line_color,
+            plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
                      linewidth=3, zorder=10, alpha=0.4)
+
 
             # Pad the metric value if it is only 2-digits
             if 10 < int(metric) < 100:
@@ -143,29 +161,26 @@ class SwarmPlot(Plot):
             # Determine the color of the metric text box based on the value
             ratio = float(metric) / 200.0 if float(metric) > 0.0 else 0.0
             metric_color = ratio_to_color(min(ratio, 1.0))
-            metric_dict = base_dict
             metric_dict['bbox']['facecolor'] = metric_color
 
             # Draw the metric text box
-            self.axis.text(x=wrc_x_pos, y=y_pos-4, s=metric,
+            self.axis.text(x=x*1.2, y=y, s=metric,
+                           transform=self.axis.transData,
                            **metric_dict)
 
             # Format name as {FirstInitial}. {LastName}, e.g. Bo Bichette -> B. Bichette
             name = f"{name.split(' ')[0][0]}. {' '.join(name.split(' ')[1:])}"
 
-            label_dict = base_dict
-            base_dict['bbox']['facecolor'] = box_color
-
             # Draw the text box with player info
-            self.axis.text(x=name_x_pos, y=y_pos-4,
-                           s=f'{name} ({qual} PAs)',
+            self.axis.text(x=x*1.6, y=y, s=f'{name} ({qual} PAs)',
+                           transform=self.axis.transData,
                            **label_dict)
 
             # Increment the y_pos
-            y_pos -= 25
+            y_pos -= 0.06
 
         if self.team_rank is not None:
-            self.add_team_rank(base_dict)
+            self.add_team_rank(label_dict, metric_dict)
 
 
     def make_dummy_categorical_data(self):
@@ -200,22 +215,30 @@ class SwarmPlot(Plot):
         :param int avg_value: The average value of the metric, defaults to 100.
         :param str league_name: Name of the league, for label.
         """
-        self.axis.axhline(y=avg_value, xmin=0.06, xmax=0.28, color='black', alpha=0.3, zorder=8)
-        self.axis.text(x=0.04, y=0.45, s=f"{league_name}\nAverage", size=9, color='black',
-                       transform=self.axis.transAxes, ha='center', va='center')
+
+        self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='black', alpha=0.3, zorder=8)
+
+        # Create custom transform to have x-coordinates correspond to the Axes and y-coordinates
+        # correspond to the data
+        trans = transforms.blended_transform_factory(self.axis.transAxes, self.axis.transData)
+        self.axis.text(x=0.04, y=99, s=f"{league_name}\nAverage", size=9, color='black',
+                       transform=trans, ha='center', va='top')
 
 
-    def add_team_rank(self, base_dict):
+    def add_team_rank(self, label_dict, metric_dict):
         """
-        Add text box for the entire team's metric value as well as their leaguewide rank.
+        Adds text boxes displaying the entire team's rank in the metric.
+
+        :param dict label_dict: Config info for the labels text box.
+        :param dictg metric_dict: Config info for the metrics text box.
         """
+
         metric_ratio = min(1.0, float(self.team_level_metric) / 200.0)
         metric_color = ratio_to_color(metric_ratio)
 
-        base_dict['size'] = 20
-
-        metric_dict = base_dict
-        label_dict = base_dict
+        # Increase text size
+        label_dict['size'] = 20
+        metric_dict['size'] = 20
 
         x = 0.4
         y = 0.9
@@ -245,3 +268,4 @@ class SwarmPlot(Plot):
 
         self.axis.text(x + 0.28, y - 0.05, s=f"({rank_text})", color='black', size=10,
                        transform=self.axis.transAxes)
+

@@ -23,7 +23,7 @@ on:
       minimum_abs:
         description: Minimum at-bat cutoff to use on included batters
         type: number
-        default: 20
+        default: 50
     
 env: 
   PLOTS_ARTIFACT_NAME: 'batter-wrc-plot'
