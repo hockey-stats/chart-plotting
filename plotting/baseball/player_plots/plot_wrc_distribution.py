@@ -13,7 +13,7 @@ def main(year, qual, team):
 
     team_full_name = mlb_team_full_names[team]
 
-    plot_title = f"wRC+ for {team_full_name} Hitters"
+    plot_title = f"{team_full_name} Hitters by wRC+"
 
     team_rank, team_wrc = get_teamwide_wrc(year, team)
 
