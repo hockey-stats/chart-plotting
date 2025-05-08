@@ -155,7 +155,7 @@ class SwarmPlot(Plot):
 
 
             # Pad the metric value if it is only 2-digits
-            if 10 < int(metric) < 100:
+            if 9 < int(metric) < 100:
                 metric = f" {metric} "
 
             # Determine the color of the metric text box based on the value
