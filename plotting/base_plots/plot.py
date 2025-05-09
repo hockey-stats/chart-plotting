@@ -135,7 +135,7 @@ class Plot:
 
 
     def add_team_logo(self, row, x, y, label=None, opacity=1, opacity_scale=None, opacity_max=None,
-                      size='small'):
+                      teams_to_fade=None, size='small'):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -147,12 +147,17 @@ class Plot:
         :param str opacity_scale: Row entry used to scale opacity, if desired
         :param int opacity_max: Max value to compare against for opacity scale
         :param int zoom: Zoom level on image. Defaults to 1.
+        :param set(str) teams_to_fade: For playoffs, set of eliminated teams to fade their logos
         :param str size: Either 'tiny', 'small', or 'big'.
         """
         if opacity_scale:
             # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
             # the value on this scale (e.g., icetime)
             opacity = row[opacity_scale] / opacity_max
+
+        if teams_to_fade:
+            if row['team'] in teams_to_fade:
+                opacity = 0.2
 
         # Assumes the team value is under row['team']
         artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, size=size,

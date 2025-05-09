@@ -25,7 +25,7 @@ def make_5on5_plots(base_df):
                                scale='team',
                                x_label='Expected Goals For per hour',
     						   y_label='Expected Goals Against per hour (inverted)',
-                               ratio_lines=True, invert_y=True, plot_x_mean=True, plot_y_mean=True,
+                               ratio_lines=True, invert_y=True, plot_x_mean=False, plot_y_mean=False,
                                scale_to_extreme=True, plot_league_average=league_avg_xg)
     xg_plot.make_plot()
 
@@ -35,7 +35,7 @@ def make_5on5_plots(base_df):
                               title='Team Goal Rates (5v5)', scale='team',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)',
-                              ratio_lines=True, invert_y=True, plot_x_mean=True, plot_y_mean=True,
+                              ratio_lines=True, invert_y=True, plot_x_mean=False, plot_y_mean=False,
                               scale_to_extreme=True, plot_league_average=league_avg_g)
     g_plot.make_plot()
 

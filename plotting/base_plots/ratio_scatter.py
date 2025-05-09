@@ -35,9 +35,11 @@ class RatioScatterPlot(Plot):
                  y_min_max=None,
                  for_game_report=False,
                  data_disclaimer='moneypuck',
+                 fade_non_playoffs=False,
                  sport='hockey'):
 
-        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer, sport=sport)
+        super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer,
+                         sport=sport)
 
         self.df = dataframe
         self.x_col = x_column
@@ -65,9 +67,11 @@ class RatioScatterPlot(Plot):
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
         # Filter Dataframe if looking at a specific team
-        #self.df = self.df[self.df['team'] == self.team] if not self.show_league_context else self.df
         if not self.show_league_context and self.team != 'ALL':
             self.df = self.df[self.df['team'] == self.team]
+
+        # Setting specific to playoffs, fades the logos of non-playoff teams
+        self.fade_non_playoffs = fade_non_playoffs
 
 
     def make_plot(self):
@@ -107,7 +111,7 @@ class RatioScatterPlot(Plot):
                              color='black' if self.for_game_report else 'red',
                              alpha=0.5)
 
-        if self.plot_league_average and self.x_col == 'xGFph':
+        if self.plot_league_average:
             start = 0.1
             end = 0.9
             self.axis.axvline(self.plot_league_average, color='k', label='NHL Average',
@@ -134,24 +138,31 @@ class RatioScatterPlot(Plot):
                     if text_xy[0] > x_max or text_xy[0] < x_min:
                         text_xy = (x_max - 0.1, x_max * ((1 - x) / x))
                     self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
-  
+
                 # If this is for the game report, we only want the big lines at 40, 45 etc.
                 if not self.for_game_report or  round(x* 100, 0) % 5 == 0:
                     self.axis.axline(p1, p2, color=color)
 
         # Calculate and plot the average for each value
         if self.plot_x_mean:
-            self.axis.axvline(self.plot_league_average, color='k', label='NHL Average')
+            x_mean = self.df[self.x_col].mean()
+            self.axis.axvline(x_mean, color='k', label='NHL Average')
         if self.plot_y_mean:
-            self.axis.axhline(self.plot_league_average, color='k', label='NHL Average')
+            y_mean = self.df[self.y_col].mean()
+            self.axis.axhline(y_mean, color='k', label='NHL Average')
 
         # Add team logos, slightly different based on team- or player-scale
         if self.scale == 'player':
             self.self_add_player_data()
 
         elif self.scale =='team':
+            bad_teams = set()
+            if self.fade_non_playoffs:
+                bad_teams = {'OTT', 'STL', 'TB', 'TBL', 'MTL', 'NJD', 'NJ', 'LAK', 'LA',
+                             'MIN', 'COL'}
             self.df.apply(lambda row:
-                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7), axis=1)
+                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7, 
+                                             teams_to_fade=bad_teams), axis=1)
 
         if self.invert_y:
             self.axis.invert_yaxis()
@@ -197,13 +208,18 @@ class RatioScatterPlot(Plot):
         Returns the max/min x-,y-values to be used,
         """
 
-        x_min = self.df[self.x_col].min() - 0.1
-        x_max = self.df[self.x_col].max() + 0.1
-        y_min = self.df[self.y_col].min() - 0.1
-        y_max = self.df[self.y_col].max() + 0.1
+        x_min = self.df[self.x_col].min() / 1.04
+        x_max = self.df[self.x_col].max() * 1.04
+        y_min = self.df[self.y_col].min() / 1.04
+        y_max = self.df[self.y_col].max() * 1.04
+       # x_min = self.df[self.x_col].min() - 0.1
+       # x_max = self.df[self.x_col].max() + 0.1
+       # y_min = self.df[self.y_col].min() - 0.1
+       # y_max = self.df[self.y_col].max() + 0.1
 
         if self.scale_to_extreme:
             if not self.plot_league_average:
+                # Need the average value for one of the axes to use as the midpoint
                 raise AttributeError("self.scale_to_extreme set to True but "\
                                      "self.plot_league_average not provided.")
             max_diff = 0
