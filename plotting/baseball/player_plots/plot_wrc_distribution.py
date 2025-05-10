@@ -27,8 +27,8 @@ def main(year, qual, team):
                       y_label='wRC+',
                       title=plot_title,
                       data_disclaimer='fangraphs',
-                      subtitle=f"Plotted against league distribution, min. {qual} PAs\n"\
-                                "Shows the team's top 12 hitters by total PAs")
+                      subtitle=f"Plotted against league distribution, min. {qual} ABs\n"\
+                                "Shows the team's top 12 hitters by total ABs")
 
     plot.make_plot()
 

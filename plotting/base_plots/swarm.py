@@ -172,7 +172,7 @@ class SwarmPlot(Plot):
             name = f"{name.split(' ')[0][0]}. {' '.join(name.split(' ')[1:])}"
 
             # Draw the text box with player info
-            self.axis.text(x=x*1.6, y=y, s=f'{name} ({qual} PAs)',
+            self.axis.text(x=x*1.6, y=y, s=f'{name} ({qual} ABs)',
                            transform=self.axis.transData,
                            **label_dict)
 
