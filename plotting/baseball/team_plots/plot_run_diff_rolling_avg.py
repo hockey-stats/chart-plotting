@@ -24,12 +24,12 @@ def proccess_data(division: int, year: int) -> pd.DataFrame:
     :return pd.DataFrame: DataFrame fit for rolling average plot.
     """
     divisions = {
-        1: ['TOR', 'BOS', 'NYY', 'TBR', 'BAL'],
-        2: ['SEA', 'HOU', 'LAA', 'TEX', 'ATH'],
-        3: ['CLE', 'DET', 'KCR', 'MIN', 'CHW'],
-        4: ['MIA', 'WSN', 'ATL', 'NYM', 'PHI'],
-        5: ['SDP', 'COL', 'SFG', 'LAD', 'ARI'],
-        6: ['STL', 'MIL', 'CHC', 'CIN', 'PIT']
+        "American League East": ['TOR', 'BOS', 'NYY', 'TBR', 'BAL'],
+        "American League West": ['SEA', 'HOU', 'LAA', 'TEX', 'ATH'],
+        "American League Central": ['CLE', 'DET', 'KCR', 'MIN', 'CHW'],
+        "National League East": ['MIA', 'WSN', 'ATL', 'NYM', 'PHI'],
+        "National League West": ['SDP', 'COL', 'SFG', 'LAD', 'ARI'],
+        "National League Central": ['STL', 'MIL', 'CHC', 'CIN', 'PIT']
     }
 
     output_dfs = []
@@ -54,34 +54,22 @@ def proccess_data(division: int, year: int) -> pd.DataFrame:
     return final_output
 
 
-def main(division: int, year: int) -> None:
+def main(division: str, year: int) -> None:
     """
     Main function that pulls the necessary data and calls the RollingAverage
     plotting method. The plot will display a run differential rolling average for all
     teams in a single division.
 
-    :param int division: Integer which corresponds to the different MLB divisions.
-                          0 - AL East
-                          1 - AL West
-                          2 - AL Central
-                          3 - NL East
-                          4 - NL West
-                          5 - NL Central
+    :param str division: Name of division for which to generate plot.
     :param int year: Year for which to gather data.
     """
     df = proccess_data(division, year)
     #df = pd.read_csv('test_ra.csv')
 
-    division_map = {
-        0: "AL East",
-        1: "AL West",
-        2: "AL Central",
-        3: "NL East",
-        4: "NL West",
-        5: "NL Central",
-    }
+    # American League East -> AL East
+    division_name_shorthand = f"{division[0]}L {division.split(' ')[-1]}"
 
-    plot_title = f"{division_map[division]} - Run Differential "\
+    plot_title = f"{division_name_shorthand} - Run Differential "\
                  f"{WINDOW}-Game Rolling Average"
     subtitle = f"Over the last {NUM_GAMES} games"
 
@@ -104,9 +92,8 @@ def main(division: int, year: int) -> None:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--division', type=int, required=True,
-                        help="Integer corresponding to the different MLB divisions to create the " \
-                             "rolling average plot.")
+    parser.add_argument('-d', '--division', type=str, required=True,
+                        help="Name of division for which to generate plot.")
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year for which to gather data, defaults to current year.')
     args = parser.parse_args()
