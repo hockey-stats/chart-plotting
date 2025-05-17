@@ -201,7 +201,7 @@ mlb_label_colors = {
 	},
 	"BAL": {
 		"bg": "orange",
-		"line": "black"
+		"line": "orange"
 	},
 	"BOS": {
 		"bg": "red",
@@ -209,7 +209,7 @@ mlb_label_colors = {
 	},
 	"CHC": {
 		"bg": "royalblue",
-		"line": "red"
+		"line": "cornflowerblue"
 	},
 	"CHW": {
 		"bg": "silver",
@@ -229,7 +229,7 @@ mlb_label_colors = {
 	},
 	"DET": {
 		"bg": "black",
-		"line": "black"
+		"line": "orange"
 	},
 	"HOU": {
 		"bg": "navy",
@@ -253,7 +253,7 @@ mlb_label_colors = {
 	},
 	"MIL": {
 		"bg": "navy",
-		"line": "gold"
+		"line": "navy"
 	},
 	"MIN": {
 		"bg": "navy",
@@ -272,7 +272,7 @@ mlb_label_colors = {
 		"line": "maroon"
 	},
 	"PIT": {
-		"bg": "black",
+		"bg": "gold",
 		"line": "gold"
 	},
 	"SDP": {
@@ -289,7 +289,7 @@ mlb_label_colors = {
 	},
 	"STL": {
 		"bg": "red",
-		"line": "gold"
+		"line": "pink"
 	},
 	"TBR": {
 		"bg": "lightsteelblue",
@@ -297,11 +297,11 @@ mlb_label_colors = {
 	},
 	"TEX": {
 		"bg": "blue",
-		"line": "red"
+		"line": "navy"
 	},
 	"TOR": {
 		"bg": "blue",
-		"line": "crimson"
+		"line": "royalblue"
 	},
 	"WSN": {
 		"bg": "navy",
