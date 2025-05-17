@@ -99,7 +99,6 @@ class Plot:
         """
         if self.data_disclaimer is None:
             return
-        print(self.data_disclaimer)
         if self.data_disclaimer == 'nst':
             text = "All data from NaturalStatTrick.com"
             textcolor = 'whitesmoke'

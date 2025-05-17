@@ -131,7 +131,6 @@ class RollingAveragePlot(Plot):
 
             color = 'black'
             if self.add_team_logos:  # If we're adding team logos, color the lines by team color
-                print(self.sport)
                 if self.sport == 'hockey':
                     color = label_colors[key]['line']
                 elif self.sport == 'baseball':
@@ -156,15 +155,10 @@ class RollingAveragePlot(Plot):
         """
         y_min = self.df[self.y_col].min()
         y_max = self.df[self.y_col].max()
-        print(y_min)
-        print(y_max)
-        print(self.y_midpoint)
 
         y_scale = max(abs(self.y_midpoint - y_max), abs(self.y_midpoint - y_min)) * 1.1
-        print(y_scale)
 
         y_ticks = list(range(math.floor(y_scale * -1), math.ceil(y_scale + 1)))
-        print(y_ticks)
 
         self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
         return y_ticks
