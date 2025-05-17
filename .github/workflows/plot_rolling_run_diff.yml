@@ -1,0 +1,60 @@
+name: Scrape and Plot Skater Points
+on:
+  workflow_call:
+    inputs:
+      division:
+        description: Integer corresponding to division for which to generate plot
+        type: number
+        default: 0
+    outputs:
+      plot_artifact_name: 
+        value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+        description: Name of plot artifact
+
+  workflow_dispatch:
+    inputs:
+      division:
+        description: Integer corresponding to division for which to generate plot
+        type: number
+        default: 0
+    
+env: 
+  PLOTS_ARTIFACT_NAME: 'run_diff_rolling_avg_plot'
+
+jobs:
+  plot-graphs:
+    runs-on: ubuntu-latest
+    outputs:
+      plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
+    ###
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
+      #
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      # 
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+      #
+      - name: Generate Charts
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python3 plotting/baseball/team_plots/plot_run_diff_rolling_avg.py --division ${{ inputs.division }} 
+      #
+      - name: Save Charts as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+      #
+      - name: Set Output for Artifact Name 
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+    ###

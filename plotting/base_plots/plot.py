@@ -108,6 +108,10 @@ class Plot:
             text = "All data from fangraphs.com"
             textcolor = 'black'
             facecolor = 'limegreen'
+        elif self.data_disclaimer == 'baseballreference':
+            text = "All data from baseballreference.com"
+            textcolor = 'whitesmoke'
+            facecolor = 'maroon'
         else:  # Default is moneypuck
             text = "All data from MoneyPuck.com"
             textcolor = 'black'
