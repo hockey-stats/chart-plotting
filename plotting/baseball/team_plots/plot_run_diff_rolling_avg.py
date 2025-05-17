@@ -35,7 +35,7 @@ def proccess_data(division: int, year: int) -> pd.DataFrame:
     output_dfs = []
     print(divisions[division])
     for team in divisions[division]:
-        print(team)
+        print("querying!!!!:", year, team)
         # Pull the schedule record data for each individual team, to process and save in a list
         df = schedule_and_record(year, team).fillna(0)
         # Filter out games that haven't been played yet
