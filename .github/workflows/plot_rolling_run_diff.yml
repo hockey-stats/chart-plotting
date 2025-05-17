@@ -4,8 +4,8 @@ on:
     inputs:
       division:
         description: Integer corresponding to division for which to generate plot
-        type: number
-        default: 0
+        type: string
+        default: "American League East"
     outputs:
       plot_artifact_name: 
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
     inputs:
       division:
-        description: Integer corresponding to division for which to generate plot
-        type: number
-        default: 0
+        description: Name of division for which to generate plot
+        type: string
+        default: "American League East"
     
 env: 
   PLOTS_ARTIFACT_NAME: 'run_diff_rolling_avg_plot'
