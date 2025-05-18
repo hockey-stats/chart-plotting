@@ -109,7 +109,7 @@ class RatioScatterPlot(Plot):
             self.axis.axline((2, 2),
                              slope=1,
                              color='black' if self.for_game_report else 'red',
-                             alpha=0.5)
+                             alph0.5)
 
         if self.plot_league_average:
             start = 0.1
@@ -159,7 +159,7 @@ class RatioScatterPlot(Plot):
             bad_teams = set()
             if self.fade_non_playoffs:
                 bad_teams = {'OTT', 'STL', 'TB', 'TBL', 'MTL', 'NJD', 'NJ', 'LAK', 'LA',
-                             'MIN', 'COL'}
+                             'MIN', 'COL', 'WPG', 'VGK', 'WSH'}
             self.df.apply(lambda row:
                           self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7, 
                                              teams_to_fade=bad_teams), axis=1)
