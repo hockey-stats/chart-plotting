@@ -109,7 +109,7 @@ class RatioScatterPlot(Plot):
             self.axis.axline((2, 2),
                              slope=1,
                              color='black' if self.for_game_report else 'red',
-                             alph0.5)
+                             alpha=0.5)
 
         if self.plot_league_average:
             start = 0.1
