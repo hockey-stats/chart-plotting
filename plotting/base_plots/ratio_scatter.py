@@ -159,7 +159,7 @@ class RatioScatterPlot(Plot):
             bad_teams = set()
             if self.fade_non_playoffs:
                 bad_teams = {'OTT', 'STL', 'TB', 'TBL', 'MTL', 'NJD', 'NJ', 'LAK', 'LA',
-                             'MIN', 'COL', 'WPG', 'VGK', 'WSH'}
+                             'MIN', 'COL', 'WPG', 'VGK', 'WSH', 'TOR'}
             self.df.apply(lambda row:
                           self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7, 
                                              teams_to_fade=bad_teams), axis=1)
