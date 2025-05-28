@@ -144,13 +144,15 @@ class SwarmPlot(Plot):
             # Not exactly sure why the x-coordinate gets inverted in the transformation process,
             # but it does
             x = -1 * x
+            # Set the logo to be slightly higher so that is aligns better with the label
+            logo_y = y + 4
 
             # Draw the logos
-            self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, y),
+            self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, logo_y),
                                                 frameon=False,
                                                 xycoords='data', zorder=11))
             # Draw a line connect logo to the point in the swarmplot
-            plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
+            plt.plot([x, coord[0]], [logo_y, coord[1]], color=line_color,
                      linewidth=3, zorder=10, alpha=0.4)
 
 
