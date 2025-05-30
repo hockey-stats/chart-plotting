@@ -17,7 +17,7 @@ jobs:
         env:
           SECRET_PASSPHRASE: ${{ secrets.YAHOO_OAUTH_DECRPYT_KEY }}
         run: |
-          gpg --quiet --batch --yes --decrypt --pasphrase="$SECRET_PASSPHRASE" \
+          gpg --quiet --batch --yes --decrypt --passphrase="$SECRET_PASSPHRASE" \
           --output ./oauth.json oauth.json.gpg
       #
       - name: Login to Docker Hub
