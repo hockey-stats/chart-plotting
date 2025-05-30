@@ -8,7 +8,7 @@ echo Creating free agency plot for "${positions[$current_pos]}"
 
 python3 processing/for_fantasy_baseball/get_free_agent_summary.py -p "${positions[$current_pos]}";
 python3 plotting/fantasy/mlb_free_agents.py -p "${positions[$current_pos]}";
-python3 tweet-posting/skeet_picture.py -i fantasy_plot.png -t 'this is a test'
+python3 tweet-posting/skeet_picture.py -i fantasy_plot.png -t 'this is a test' -a '10,15'
 
 echo Scripts completed
 
