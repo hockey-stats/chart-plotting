@@ -10,5 +10,3 @@ RUN git clone https://github.com/hockey-stats/tweet-posting.git
 ENV PYTHONPATH='/home'
 RUN pip3 install -r requirements.txt --break-system-packages
 RUN pip3 install -r tweet-posting/requirements.txt --break-system-packages
-
-ENTRYPOINT ["python3"]
