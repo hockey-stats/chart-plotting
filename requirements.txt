@@ -2,5 +2,9 @@ pandas==2.1.2
 numpy==1.26.0
 matplotlib==3.8.0
 scipy==1.13.1
-git+https://github.com/sohraub/pybaseball
+pybaseball
 seaborn==0.13.2
+yahoo_fantasy_api
+yahoo_oauth
+polars==1.29.0
+unidecode

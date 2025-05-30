@@ -28,10 +28,9 @@ ES_X_POS = TOTAL_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
 PP_X_POS = ES_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
 SH_X_POS = PP_X_POS - (BOX_WIDTH * SMALL_BOX_MULT)
 
-
-
 # Path effect gives a white outline to text, used many times
 PATH_EFFECT = [PathEffects.withStroke(linewidth=2.2, foreground='w')]
+
 
 class ScoreBoardPlot(Plot):
     """

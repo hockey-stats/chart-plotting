@@ -60,6 +60,7 @@ class Plot:
                  axis=None,
                  data_disclaimer='moneypuck',
                  for_game_report=False,
+                 fantasy_mode=False,
                  sport='hockey'):
 
         self.filename = filename
@@ -70,6 +71,7 @@ class Plot:
         self.axis = axis
         self.data_disclaimer = data_disclaimer
         self.for_game_report = for_game_report
+        self.fantasy_mode = fantasy_mode
         self.sport = sport
 
 
@@ -134,6 +136,7 @@ class Plot:
 
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
+            print(self.filename)
             plt.savefig(self.filename, dpi=100)
 
 
@@ -165,7 +168,7 @@ class Plot:
         # Assumes the team value is under row['team']
         artist_box = AnnotationBbox(self.get_logo_marker(row['team'], alpha=opacity, size=size,
                                                          sport=self.sport),
-                                    xy=(row[x], row[y]), frameon=False) 
+                                    xy=(row[x], row[y]), frameon=False)
         self.axis.add_artist(artist_box)
 
         if label:
@@ -186,22 +189,35 @@ class Plot:
                 name = row[label].split('\xa0')[-1]
             else:
                 name = row[label].split(' ')[-1]
+                # If the last word is Jr., add the 2nd-last word as well
+                if name == 'Jr.':
+                    name = f"{row[label].split(' ')[-2]} {name}"
 
             # Set the offset for the logo label based on the vertical alignment of the chart,
             # with different values if it's for a game report chart
             if verticalalignment == 'top':
                 if self.for_game_report:
-                    y_mult = 0.08
+                    y_coord = row[y] + 0.08
                 else:
-                    y_mult = 0.07
+                    y_coord = row[y] + 0.07
             else:
-                y_mult = -0.2
+                y_coord = row[y] - 0.2
 
-            self.axis.text(row[x], row[y] + y_mult,
+            if self.fantasy_mode:
+                y_coord = row[y] - 2
+                bbox = {
+                    'facecolor': 'white',
+                    'alpha': 0.2
+                }
+            else:
+                bbox = {}
+
+            self.axis.text(row[x], y_coord,
                            name,
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
-                           fontsize=10)
+                           fontsize=10,
+                           bbox=bbox)
 
     def get_logo_marker(self, team_name, alpha=1, size='small', sport='hockey'):
         """

@@ -21,6 +21,7 @@ class RatioScatterPlot(Plot):
                  y_label='',
                  ratio_lines=False,
                  invert_y=False,
+                 invert_x=False,
                  plot_x_mean=False,
                  plot_y_mean=False,
                  quadrant_labels='default',
@@ -36,10 +37,11 @@ class RatioScatterPlot(Plot):
                  for_game_report=False,
                  data_disclaimer='moneypuck',
                  fade_non_playoffs=False,
+                 fantasy_mode=False,
                  sport='hockey'):
 
         super().__init__(filename, title, subtitle, size, data_disclaimer=data_disclaimer,
-                         sport=sport)
+                         fantasy_mode=fantasy_mode, sport=sport)
 
         self.df = dataframe
         self.x_col = x_column
@@ -54,6 +56,7 @@ class RatioScatterPlot(Plot):
         self.scale = scale
         self.ratio_lines = ratio_lines
         self.invert_y = invert_y
+        self.invert_x = invert_x
         self.plot_x_mean = plot_x_mean
         self.plot_y_mean = plot_y_mean
         self.quadrant_labels = quadrant_labels
@@ -63,7 +66,12 @@ class RatioScatterPlot(Plot):
         self.for_game_report = for_game_report
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
+        if fantasy_mode:
+            self.axis = self.fig.add_subplot(4, 1, (1, 2), axes_class=FancyAxes, ar=2.0)
+            plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.95, wspace=0, hspace=0)
+
+        else:
+            self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
         # Filter Dataframe if looking at a specific team
@@ -72,6 +80,9 @@ class RatioScatterPlot(Plot):
 
         # Setting specific to playoffs, fades the logos of non-playoff teams
         self.fade_non_playoffs = fade_non_playoffs
+
+        # Setting for fantasy charts, fades free agent logos
+        self.fantasy_mode = fantasy_mode
 
 
     def make_plot(self):
@@ -167,6 +178,12 @@ class RatioScatterPlot(Plot):
         if self.invert_y:
             self.axis.invert_yaxis()
 
+        if self.invert_x:
+            self.axis.invert_xaxis()
+
+        if self.fantasy_mode:
+            self.add_table()
+
         self.save_plot()
 
 
@@ -176,7 +193,23 @@ class RatioScatterPlot(Plot):
         
         If `self.team` is not 'ALL' and `self.show_league_context` is True, then show players from
         all teams with severely reduced opacity and no labels.
+
+        If `self.fantasy_mode` is True, fades the logos of free agent players.
         """
+        if self.fantasy_mode:
+            team_df = self.df[self.df['on_team']]
+            team_df['team'] = team_df['Team']
+            team_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
+                                                         label='Name', opacity=1),
+                          axis=1)
+            fa_df = self.df[self.df['on_team'] == False]
+            fa_df['team'] = fa_df['Team']
+            fa_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
+                                                       label='Name', opacity=0.2),
+                          axis=1)
+
+            return
+
         if self.team != 'ALL' and self.show_league_context:
             # DataFrame for every player excluding the target team
             remaining_df = self.df[self.df['team'] != self.team]
@@ -338,3 +371,60 @@ class RatioScatterPlot(Plot):
             self.axis.annotate(self.quadrant_labels[0][1],  # Top-right
                             xy=(1 - ofs, 1 - ofs), xycoords='axes fraction',
                             color='black', fontweight='bold', va='center', ha='center')
+
+
+    def add_table(self):
+        """
+        Adds a table to the top of the scatter plot, used primarily for showing detailed 
+        free-agent information for fantasy charts.
+        """
+        df = self.df.copy()
+        df['Name'] = df.apply(lambda row: f"*{row['Name']}" if row['on_team'] is True else row["Name"], axis=1)
+        #names = [ f"*{name}"list(df['Name'])]
+        names = list(df['Name'])
+
+        del df['on_team']
+        del df['Name']
+
+
+        for stat in ['AVG', 'xwOBA']:
+            if stat in list(df.columns):
+                df[stat] = df.apply(lambda row: "%.3f" % row[stat], axis=1)
+
+        # Each column has a width of 0.07 by default
+        col_widths = [0.08] * len(df.columns)
+        # Make the column for position a bit bigger
+        col_widths[1] = 0.16
+
+        table = plt.table(cellText=df.values,
+                          colWidths=col_widths,
+                          colLabels=df.columns,
+                          cellLoc='center',
+                          colLoc='center',
+                          colColours=['antiquewhite'] * len(df.columns),
+                          rowLabels=names,
+                          rowLoc='left',
+                          bbox=(.24, -1.1, .7, .9),
+                          #loc='top',
+                          edges='BRLT'
+                          )
+
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.auto_set_column_width(col=list(range(len(df.columns))))
+
+        # Set properties for each cell
+        cells = table.properties()["celld"]
+        for x in range(-1, len(df.columns)):
+            for y in range(0, len(df) + 1):
+                if y == 0 and x == -1:
+                    continue
+                cells[y, x].set_edgecolor('gray')
+                cells[y, x].set_linewidth(0)
+                if y % 2 == 0:
+                    cells[y, x].set_facecolor("antiquewhite")
+                else:
+                    cells[y, x].set_facecolor("powderblue")
+
+                if y == 0 or x == -1:
+                    cells[y, x].set_text_props(weight=600)
