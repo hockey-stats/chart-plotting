@@ -14,8 +14,10 @@ jobs:
         uses: actions/checkout@v4
       #
       - name: Decrypt oauth key
+        env:
+          SECRET_PASSPHRASE: ${{ secrets.YAHOO_OAUTH_DECRPYT_KEY }}
         run: |
-          gpg --quiet --batch --yes --decrypt --pasphrase="${{ secrets.YAHOO_OAUTH_DECRYPT_KEY }}"\
+          gpg --quiet --batch --yes --decrypt --pasphrase="$LARGE_SECRET_PASSPHRASE"\
           --output ./oauth.json oauth.json.gpg
       #
       - name: Login to Docker Hub
