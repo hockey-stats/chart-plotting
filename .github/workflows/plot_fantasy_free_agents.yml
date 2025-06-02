@@ -47,6 +47,7 @@ jobs:
         env:
           SECRET_PASSPHRASE: ${{ secrets.YAHOO_OAUTH_DECRYPT_KEY }}
         run: |
+          echo ${{ secrets.YAHOO_OAUTH_DECRYPT_KEY }};
           gpg --quiet --batch --yes --decrypt --passphrase="$SECRET_PASSPHRASE" \
           --output ./oauth.json oauth.json.gpg;
           ls
