@@ -197,7 +197,8 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
             continue
         p_dict['name'].append(unidecode(details['name']['full']))
         p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
-        p_dict['positions'].append(','.join([pos['position'] for pos in details['eligible_positions'] \
+        p_dict['positions'].append(','.join([pos['position'] \
+                                             for pos in details['eligible_positions'] \
                                              if pos['position'] != 'Util']))
         p_dict['ab'].append(int(stats['H/AB'].split('/')[-1]))
 
@@ -343,10 +344,11 @@ def main(position: str) -> None:
 
 
 if __name__ == '__main__':
+    positions = ['1B', '2B', '3B', 'C', 'OF', 'P', 'SP', 'RP']
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--position', type=str, required=True,
-                        choices=['1B', '2B', '3B', 'C', 'OF', 'P', 'SP', 'RP'],
+    parser.add_argument('-p', '--position', type=str, default="",
+                        choices=positions,
                         help='Position for which to display free agents.')
     args = parser.parse_args()
 
-    main(args.position.upper())
+    main(position=args.position)
