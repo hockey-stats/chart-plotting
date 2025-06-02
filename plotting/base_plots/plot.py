@@ -207,7 +207,7 @@ class Plot:
                 y_coord = row[y] - 2
                 bbox = {
                     'facecolor': 'white',
-                    'alpha': 0.2
+                    'alpha': 0.4
                 }
             else:
                 bbox = {}

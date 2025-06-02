@@ -172,7 +172,7 @@ class RatioScatterPlot(Plot):
                 bad_teams = {'OTT', 'STL', 'TB', 'TBL', 'MTL', 'NJD', 'NJ', 'LAK', 'LA',
                              'MIN', 'COL', 'WPG', 'VGK', 'WSH', 'TOR'}
             self.df.apply(lambda row:
-                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7, 
+                          self.add_team_logo(row, self.x_col, self.y_col, opacity=0.7,
                                              teams_to_fade=bad_teams), axis=1)
 
         if self.invert_y:
@@ -205,7 +205,7 @@ class RatioScatterPlot(Plot):
             fa_df = self.df[self.df['on_team'] == False]
             fa_df['team'] = fa_df['Team']
             fa_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
-                                                       label='Name', opacity=0.2),
+                                                       label='Name', opacity=0.4),
                           axis=1)
 
             return
@@ -379,13 +379,15 @@ class RatioScatterPlot(Plot):
         free-agent information for fantasy charts.
         """
         df = self.df.copy()
-        df['Name'] = df.apply(lambda row: f"*{row['Name']}" if row['on_team'] is True else row["Name"], axis=1)
-        #names = [ f"*{name}"list(df['Name'])]
+
+        df = df.sort_values(by='on_team', ascending=False)
+        num_on_team = len(df[df['on_team'] == True])
+        print(num_on_team)
+
         names = list(df['Name'])
 
         del df['on_team']
         del df['Name']
-
 
         for stat in ['AVG', 'xwOBA']:
             if stat in list(df.columns):
@@ -421,10 +423,19 @@ class RatioScatterPlot(Plot):
                     continue
                 cells[y, x].set_edgecolor('gray')
                 cells[y, x].set_linewidth(0)
-                if y % 2 == 0:
-                    cells[y, x].set_facecolor("antiquewhite")
+                if 0 < y <= num_on_team:
+                    # Styling rules for players already on our team
+                    # Currently, sets the name cell to be green
+                    if y % 2 == 0:
+                        cells[y, x].set_facecolor("#CCFFCC")
+                    else:
+                        cells[y, x].set_facecolor("#7FBC7F")
+
                 else:
-                    cells[y, x].set_facecolor("powderblue")
+                    if y % 2 == 0:
+                        cells[y, x].set_facecolor("antiquewhite")
+                    else:
+                        cells[y, x].set_facecolor("powderblue")
 
                 if y == 0 or x == -1:
                     cells[y, x].set_text_props(weight=600)
