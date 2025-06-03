@@ -38,7 +38,7 @@ jobs:
         run: |
           import os
           from datetime import datetime
-          today = int(datetime.now().weekday())
+          today = int(datetime.now().day)
           position = ['1B', '2B', '3B', 'C', 'OF', 'P', 'SP', 'RP'][today % 8]
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               print(f"position={position}", file=fh)
