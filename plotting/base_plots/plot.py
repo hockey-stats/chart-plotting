@@ -136,12 +136,11 @@ class Plot:
 
         # If self.filename is empty, then this is for a multiplot so don't save as a file
         if self.filename:
-            print(self.filename)
             plt.savefig(self.filename, dpi=100)
 
 
     def add_team_logo(self, row, x, y, label=None, opacity=1, opacity_scale=None, opacity_max=None,
-                      teams_to_fade=None, size='small'):
+                      teams_to_fade=None, size='small', label_bbox=None):
         """
         Function used with DataFrame.map() that adds a team logo to an axis object.
         :param pandas.Series row: Row of the dataframe being applied on
@@ -155,6 +154,7 @@ class Plot:
         :param int zoom: Zoom level on image. Defaults to 1.
         :param set(str) teams_to_fade: For playoffs, set of eliminated teams to fade their logos
         :param str size: Either 'tiny', 'small', or 'big'.
+        :param dict label_bbox: If given, styling options for label bbox.
         """
         if opacity_scale:
             # Gives a value between 0 and 1, so that the opacity of the icon demonstrates
@@ -217,7 +217,7 @@ class Plot:
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10,
-                           bbox=bbox)
+                           bbox=label_bbox)
 
     def get_logo_marker(self, team_name, alpha=1, size='small', sport='hockey'):
         """

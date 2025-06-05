@@ -1,4 +1,5 @@
 import argparse
+import logging
 from itertools import combinations
 
 import polars as pl
@@ -6,6 +7,9 @@ import pybaseball as pb
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 from unidecode import unidecode
+
+oauth_logger = logging.getLogger('yahoo_oauth')
+oauth_logger.disabled = True
 
 
 # All the abbreviations that differ between the two data sources
@@ -19,6 +23,9 @@ TEAM_MAPPING = {
     'WSH': 'WSN',
 }
 
+# All the positions that we will be collecting data for
+POSITIONS = ['1B', '2B', '3B', 'C', 'OF', 'SP', 'RP']
+
 
 def create_session() -> OAuth2:
     """
@@ -27,8 +34,6 @@ def create_session() -> OAuth2:
     :return OAuth2: Active OAuth2 session
     """
     sc = OAuth2(None, None, from_file='oauth.json')
-    if not sc.token_is_valid():
-        sc.refresh_access_token()
     return sc
 
 
@@ -61,7 +66,7 @@ def get_free_agents(position: str, league: yfa.League) -> pl.DataFrame:
     if position in {'1B', '2B', '3B', 'C', 'OF'}:
         df = collect_batter_stats(player_ids, league)
     else:
-        df = collect_pitcher_stats(player_ids, league)
+        df = collect_pitcher_stats(player_ids, league, position)
 
     return df
 
@@ -97,23 +102,27 @@ def get_players_from_own_team(position: str, league: yfa.League, session: OAuth2
     if position in {'1B', '2B', '3B', 'C', 'OF'}:
         df = collect_batter_stats(players, league)
     else:
-        df = collect_pitcher_stats(players, league)
+        df = collect_pitcher_stats(players, league, position)
 
     return df
 
 
-def collect_pitcher_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
+def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -> pl.DataFrame:
     """
     Given a list of player IDs for pitchers, pull the given stats and organize into a DF.
 
     :param list(str) player_ids: List of player IDs given as strings.
     :param yfa.League league: The League object to query against.
+    :param str position: SP or RP, since we filter the results slightly differently for starters
     :return pl.DataFrame: Details and stats for each player.
     """
 
     player_details = league.player_details(player_ids)
-    # For fantasy stats, only use data from the last month
-    player_stats = league.player_stats(player_ids, 'lastmonth')
+
+    # Collect stats across the past week, month, and season
+    player_stats_week = league.player_stats(player_ids, 'lastweek')
+    player_stats_month = league.player_stats(player_ids, 'lastmonth')
+    player_stats_season = league.player_stats(player_ids, 'season')
 
     p_dict = {
         "name": [],
@@ -124,30 +133,44 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
         "whip": [],
         "k": [],
         "w": [],
-        "sv": []
+        "sv": [],
+        "term": []
     }
 
-    for details, stats in zip(player_details, player_stats):
-        if stats['IP'] == 0.0 or stats['IP'] == '-':
-            # Skip players without any innings pitched
-            continue
-        p_dict['name'].append(unidecode(details['name']['full']))
-        p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
-        p_dict['positions'].append(','.join([pos['position'] for pos in details['eligible_positions'] \
-                                             if pos['position'] != 'P']))
-        p_dict['ip'].append(stats['IP'])
-        p_dict['era'].append(stats['ERA'])
-        p_dict['whip'].append(stats['WHIP'])
-        p_dict['k'].append(int(stats['K']))
-        p_dict['w'].append(int(stats['W']))
-        p_dict['sv'].append(int(stats['SV']))
+    for player_stats, term in zip([player_stats_week, player_stats_month, player_stats_season],
+                                  ['week', 'month', 'season']):
+        for details, stats in zip(player_details, player_stats):
+            if stats['IP'] == 0.0 or stats['IP'] == '-':
+                # Skip players without any innings pitched
+                continue
+            p_dict['name'].append(unidecode(details['name']['full']))
+            p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
+            p_dict['positions'].append(','.join([pos['position'] for pos in details['eligible_positions'] \
+                                                if pos['position'] != 'P']))
+            p_dict['ip'].append(stats['IP'])
+            p_dict['era'].append(stats['ERA'])
+            p_dict['whip'].append(stats['WHIP'])
+            p_dict['k'].append(int(stats['K']))
+            p_dict['w'].append(int(stats['W']))
+            p_dict['sv'].append(int(stats['SV']))
+            p_dict['term'].append(term)
 
     # Collect yahoo stats into DF
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'xERA', 'Stuff+']])
+    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'xERA', 'Stuff+', 'G', 'GS']])
     p_df = p_df.rename({"Name": "name", "Team": "team"})
+
+    if position == 'SP':
+        # If looking for starters, remove every pitcher with 0 starts
+        p_df = p_df.remove(pl.col("GS") == 0)
+    else:
+        # If looking for relievers, remove every pitcher with as many starts as appearances
+        p_df = p_df.remove(pl.col("GS") == pl.col("G"))
+
+    # Remove the games/starts column
+    p_df = p_df.drop("G", "GS")
 
     # Add a last_name column to both dataframes for the join (different sources might have
     # different first names)
@@ -160,9 +183,7 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
 
     # Join the two DFs and return
     df = y_df.join(p_df, how='inner', on=['last_name', 'team'])
-    df = df.drop("last_name")
-    df = df.drop("name_right")
-    # Join the two DFs and return
+    df = df.drop("last_name", "name_right")
 
     return df
 
@@ -177,8 +198,11 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
     """
 
     player_details = league.player_details(player_ids)
-    # For fantasy stats, only use data from the last month
-    player_stats = league.player_stats(player_ids, 'lastmonth')
+
+    # Collect stats across the past week, month, and season
+    player_stats_week = league.player_stats(player_ids, 'lastweek')
+    player_stats_month = league.player_stats(player_ids, 'lastmonth')
+    player_stats_season = league.player_stats(player_ids, 'season')
 
     p_dict = {
         "name": [],
@@ -189,35 +213,39 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
         "hr": [],
         "rbi": [],
         "sb": [],
+        "term": []
     }
 
-    for details, stats in zip(player_details, player_stats):
-        if stats['AVG'] == '-':
-            # Skip players without any at-bats.
-            continue
-        p_dict['name'].append(unidecode(details['name']['full']))
-        p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
-        p_dict['positions'].append(','.join([pos['position'] \
-                                             for pos in details['eligible_positions'] \
-                                             if pos['position'] != 'Util']))
-        p_dict['ab'].append(int(stats['H/AB'].split('/')[-1]))
+    for player_stats, term in zip([player_stats_week, player_stats_month, player_stats_season],
+                                  ['week', 'month', 'season']):
+        for details, stats in zip(player_details, player_stats):
+            if stats['AVG'] == '-':
+                # Skip players without any at-bats.
+                continue
+            p_dict['name'].append(unidecode(details['name']['full']))
+            p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
+            p_dict['positions'].append(','.join([pos['position'] \
+                                                for pos in details['eligible_positions'] \
+                                                if pos['position'] != 'Util']))
+            p_dict['ab'].append(int(stats['H/AB'].split('/')[-1]))
 
-        p_dict['avg'].append(stats['AVG'])
-        p_dict['hr'].append(int(stats['HR']))
-        p_dict['rbi'].append(int(stats['RBI']))
-        p_dict['sb'].append(int(stats['SB']))
+            p_dict['avg'].append(stats['AVG'])
+            p_dict['hr'].append(int(stats['HR']))
+            p_dict['rbi'].append(int(stats['RBI']))
+            p_dict['sb'].append(int(stats['SB']))
+            p_dict['term'].append(term)
 
     # Collect yahoo stats into DF
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.batting_stats(2025, qual=20)[['Name', 'Team', 'wRC+', 'xwOBA']])
+    p_df = pl.from_pandas(pb.batting_stats(2025, qual=70)[['Name', 'Team', 'wRC+', 'xwOBA']])
     p_df = p_df.rename({"Name": "name", "Team": "team"})
 
     p_df = p_df.with_columns(pl.col('xwOBA').cast(pl.Decimal(10, 3)))
 
     # Add a last_name column to both dataframes for the join (different sources might have
-    # different first names)
+    # different versions of first names)
     p_df = p_df.with_columns(
         (pl.col("name").str.split(" ").list.slice(1, None).list.join(" ")).alias("last_name")
     )
@@ -241,6 +269,8 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
 
     Hitters need to be above average in 2 of the given stats to appear, whereas pitchers need
     3.
+    
+    These comparisons are done only for stats across the last month.
 
     :param pl.DataFrame fa_df: DF containing free agent data
     :param pl.DataFrame t_df: DF containing data from players on our team
@@ -257,6 +287,12 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
         combo_num = 3
         if position == 'SP':
             stats.append('w')
+
+    base_fa_df = fa_df.clone()
+
+    # Filter both dataframes to only contain stats from this past month
+    t_df = t_df.filter(pl.col('term') == 'month')
+    fa_df = fa_df.filter(pl.col('term') == 'month')
 
     # Get the averages among players on our team
     avg = {}
@@ -282,12 +318,15 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
         filtered_df = filtered_df.filter(pl.col('sv') > 2)
         final_df = pl.concat([final_df, filtered_df])
 
-    final_df = final_df.unique(subset=['name', 'team'], maintain_order=True)
+    names_to_include = list(set(final_df['name']))
+
+    final_df = base_fa_df.filter(pl.col('name').is_in(names_to_include))
+    final_df = final_df.unique(subset=['name', 'team', 'term'], maintain_order=True)
 
     return final_df
 
 
-def main(position: str) -> None:
+def main(position: str, output_filename: str = 'fantasy_data.csv') -> None:
     """
     Script used to generate a DataFrame that will be used plot reports comparing Free Agents
     in a Yahoo Fantasy Baseball league to the players on my team.
@@ -297,6 +336,7 @@ def main(position: str) -> None:
     outperforms those on my team, some from the fantasy API and some from pybaseball.
 
     :param str position: Player position for which to compare.
+    :param str output_filename: Name of the output CSV.
     """
 
     session = create_session()
@@ -337,18 +377,34 @@ def main(position: str) -> None:
             "whip": "WHIP",
         })
 
-    with pl.Config(tbl_cols=12):
-        print(final_df)
+    final_df.write_csv(output_filename)
 
-    final_df.write_csv('fantasy_data.csv')
+
+def dashboard_main():
+    """
+    Alternative main function to be called when the script is invoked with the `--for_dashboard`
+    flag.
+
+    Prepares data to be used for the corresponding dashboard, so gather data for all positions and
+    store separately for use.
+    """
+    for pos in POSITIONS:
+        print(f"Gathering data for {pos}...")
+        main(position=pos, output_filename=f'fantasy_data_{pos}.csv')
 
 
 if __name__ == '__main__':
-    positions = ['1B', '2B', '3B', 'C', 'OF', 'P', 'SP', 'RP']
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--position', type=str, default="",
-                        choices=positions,
+                        choices=POSITIONS,
                         help='Position for which to display free agents.')
+    parser.add_argument('-f', '--output_filename', default='fantasy_data.csv')
+    parser.add_argument('--for_dashboard', action='store_true', default=False,
+                        help="Option for when collecting data for the dashboard. If enabled, \"" \
+                             "gathers data for all positions and multiple terms.")
     args = parser.parse_args()
 
-    main(position=args.position)
+    if args.for_dashboard:
+        dashboard_main()
+    else:
+        main(position=args.position, output_filename=args.output_filename)

@@ -1,10 +1,13 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params as label_params
 from util.helpers import ratio_to_color
 
+# Disable annoying warning
+pd.options.mode.chained_assignment = None
 
 class RatioScatterPlot(Plot):
     """
@@ -67,8 +70,9 @@ class RatioScatterPlot(Plot):
         self.y_min_max = y_min_max
         self.fig = plt.figure(figsize=self.size)
         if fantasy_mode:
-            self.axis = self.fig.add_subplot(4, 1, (1, 2), axes_class=FancyAxes, ar=2.0)
-            plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.95, wspace=0, hspace=0)
+            #self.axis = self.fig.add_subplot(4, 1, (1, 2), axes_class=FancyAxes, ar=2.0)
+            #plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.95, wspace=0, hspace=0)
+            self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
 
         else:
             self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
@@ -85,7 +89,7 @@ class RatioScatterPlot(Plot):
         self.fantasy_mode = fantasy_mode
 
 
-    def make_plot(self):
+    def make_plot(self, dashboard=False):
         """
         Method to assemble the plot object.
         """
@@ -182,9 +186,13 @@ class RatioScatterPlot(Plot):
             self.axis.invert_xaxis()
 
         if self.fantasy_mode:
-            self.add_table()
+            self.axis.grid()
+            #self.add_table()
 
         self.save_plot()
+
+        if dashboard:
+            return self.fig
 
 
     def self_add_player_data(self):
@@ -200,12 +208,20 @@ class RatioScatterPlot(Plot):
             team_df = self.df[self.df['on_team']]
             team_df['team'] = team_df['Team']
             team_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
-                                                         label='Name', opacity=1),
+                                                         label='Name', opacity=1,
+                                                         label_bbox={
+                                                             'facecolor': "#7FBC7F",
+                                                             'alpha': 0.6
+                                                         }),
                           axis=1)
             fa_df = self.df[self.df['on_team'] == False]
             fa_df['team'] = fa_df['Team']
             fa_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
-                                                       label='Name', opacity=0.4),
+                                                       label='Name', opacity=1,
+                                                       label_bbox={
+                                                           'facecolor': 'white',
+                                                           'alpha': 0.6
+                                                       }),
                           axis=1)
 
             return
@@ -382,7 +398,6 @@ class RatioScatterPlot(Plot):
 
         df = df.sort_values(by='on_team', ascending=False)
         num_on_team = len(df[df['on_team'] == True])
-        print(num_on_team)
 
         names = list(df['Name'])
 
