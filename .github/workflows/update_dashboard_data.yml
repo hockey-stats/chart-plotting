@@ -13,27 +13,27 @@ env:
 jobs:
   get-data:
     runs-on: ubuntu-latest
-  ###
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    #
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-    #
-    - name: Install Requirements
-      run: pip install -r requirements.txt
-    #
-    - name: Gather Data
-      run: python3 processing/for_fantasy_baseball/get_free_agent_summary.py --for_dashboard
-    #
-    - name: Save Output as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.DATA_ARTIFACT_NAME }}
-        path: ./*csv
-        retention-days: 2
-  ###
+    ###
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      #
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      #
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+      #
+      - name: Gather Data
+        run: python3 processing/for_fantasy_baseball/get_free_agent_summary.py --for_dashboard
+      #
+      - name: Save Output as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DATA_ARTIFACT_NAME }}
+          path: ./*csv
+          retention-days: 2
+    ###
