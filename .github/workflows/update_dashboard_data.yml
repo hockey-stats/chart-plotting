@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       #
+      - name: Decrypt oauth key
+        env:
+          SECRET_PASSPHRASE: ${{ secrets.YAHOO_OAUTH_DECRYPT_KEY }}
+        run: |
+          gpg --quiet --batch --yes --decrypt --passphrase="$SECRET_PASSPHRASE" \
+          --output ./oauth.json oauth.json.gpg;
+          ls
+      #
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -25,7 +33,7 @@ jobs:
           cache: 'pip'
       #
       - name: Install Requirements
-        run: pip install -r requirements.txt
+        run: pip install -r requirements_data.txt
       #
       - name: Gather Data
         run: python3 processing/for_fantasy_baseball/get_free_agent_summary.py --for_dashboard
