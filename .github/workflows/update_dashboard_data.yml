@@ -44,4 +44,5 @@ jobs:
           name: ${{ env.DATA_ARTIFACT_NAME }}
           path: ./*csv
           retention-days: 2
+          overwrite: true
     ###
