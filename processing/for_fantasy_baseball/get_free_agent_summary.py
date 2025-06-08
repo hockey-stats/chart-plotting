@@ -24,7 +24,7 @@ TEAM_MAPPING = {
 }
 
 # All the positions that we will be collecting data for
-POSITIONS = ['1B', '2B', '3B', 'C', 'OF', 'SP', 'RP']
+POSITIONS = ['1B', '2B', '3B', 'SS', 'C', 'OF', 'SP', 'RP']
 
 
 def create_session() -> OAuth2:
