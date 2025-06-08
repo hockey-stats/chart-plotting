@@ -14,7 +14,7 @@ def main(position: str, dashboard: bool = False, term=None) -> None:
     """
 
 
-    if position in {'1B', '2B', '3B', 'C', 'OF'}:
+    if position in {'1B', '2B', '3B', 'SS', 'C', 'OF'}:
         x = 'xwOBA'
         y = 'wRC+'
         invert_x = False
@@ -24,7 +24,7 @@ def main(position: str, dashboard: bool = False, term=None) -> None:
         invert_x = True
 
     if dashboard:
-        df = pl.read_csv(f"fantasy_data_{position}.csv").to_pandas()
+        df = pl.read_csv(f"data/fantasy_data_{position}.csv").to_pandas()
         df = df[df['term'] == term]
     else:
         df = pl.read_csv('fantasy_data.csv').to_pandas()
@@ -52,7 +52,7 @@ def main(position: str, dashboard: bool = False, term=None) -> None:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--position', type=str, required=True,
-                        choices=['1B', '2B', '3B', 'C', 'OF', 'P', 'SP', 'RP'],
+                        choices=['1B', '2B', '3B', 'C', 'SS', 'OF', 'P', 'SP', 'RP'],
                         help='Position for which to display free agents.')
     args = parser.parse_args()
 
