@@ -63,7 +63,7 @@ def get_free_agents(position: str, league: yfa.League) -> pl.DataFrame:
     # Get the ID for every returned player, we use these IDs to query more detailed info
     player_ids = [int(player['player_id']) for player in players if player['status'] == '']
 
-    if position in {'1B', '2B', '3B', 'C', 'OF'}:
+    if position in {'1B', '2B', '3B', 'C', 'OF', 'SS'}:
         df = collect_batter_stats(player_ids, league)
     else:
         df = collect_pitcher_stats(player_ids, league, position)
@@ -99,7 +99,7 @@ def get_players_from_own_team(position: str, league: yfa.League, session: OAuth2
         if position in player['eligible_positions']:
             players.append(player['player_id'])
 
-    if position in {'1B', '2B', '3B', 'C', 'OF'}:
+    if position in {'1B', '2B', '3B', 'C', 'OF', 'SS'}:
         df = collect_batter_stats(players, league)
     else:
         df = collect_pitcher_stats(players, league, position)
@@ -279,7 +279,7 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
                           as players on our team.
     """
 
-    if position in {'1B', '2B', '3B', 'C', 'OF'}:
+    if position in {'1B', '2B', '3B', 'C', 'OF', 'SS'}:
         stats = ['avg', 'rbi', 'hr', 'wRC+', 'xwOBA']
         combo_num = 2
     else:
@@ -353,7 +353,7 @@ def main(position: str, output_filename: str = 'fantasy_data.csv') -> None:
     final_df = pl.concat([t_df, filtered_fa_df])
 
     # Rename some columns for presentation purposes
-    if position in {'1B', '2B', '3B', 'C', 'OF'}:
+    if position in {'1B', '2B', '3B', 'C', 'OF', 'SS'}:
         final_df = final_df.rename({
             "name": "Name",
             "team": "Team",
