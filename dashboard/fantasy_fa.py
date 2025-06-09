@@ -115,7 +115,7 @@ def load_data() -> None:
     url = "https://api.github.com/repos/hockey-stats/chart-plotting/actions/artifacts"
     payload = {}
     headers = {
-        'Authorization': f'Bearer {os.env["GITHUB_PAT"]}'
+        'Authorization': f'Bearer {os.environ["GITHUB_PAT"]}'
     }
     output_filename = 'data.zip'
 
