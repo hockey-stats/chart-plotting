@@ -17,11 +17,9 @@ def main(position: str, dashboard: bool = False, term=None) -> None:
     if position in {'1B', '2B', '3B', 'SS', 'C', 'OF'}:
         x = 'xwOBA'
         y = 'wRC+'
-        invert_x = False
     else:
-        x = 'xERA'
+        x = 'K-BB%'
         y = 'Stuff+'
-        invert_x = True
 
     if dashboard:
         df = pl.read_csv(f"data/fantasy_data_{position}.csv").to_pandas()
@@ -34,7 +32,7 @@ def main(position: str, dashboard: bool = False, term=None) -> None:
                             title=f'Interesting Free Agents - {position}',
                             y_label=y, x_label=x,
                             quadrant_labels=None,
-                            invert_x=invert_x,
+                            invert_x=False,
                             #size=(10, 15),
                             break_even_line=False,
                             scale='player',
