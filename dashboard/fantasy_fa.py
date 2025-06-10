@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import panel as pn
 
-from plotting.fantasy.mlb_free_agents import main as fa_plot
+from plotting.base_plots.ratio_scatter import RatioScatterPlot
 
 matplotlib.use("agg")
 
@@ -43,11 +43,36 @@ async def get_plot(pos: str, date_range: str) -> matplotlib.figure:
     Bound function which takes the position and date_range from their respective widgets
     and created a MatplotLib plot that will be displayed in the panel.
 
+    Uses a RatioScatterPlot to create the figure.
+
     :param str pos: The player position for which to make the plot.
     :param str date_range: The date range being used (i.e. week, month, season)
     :return matplotlib.figure: The matplotlib figure which will be displayed.
     """
-    fig = fa_plot(position=pos, dashboard=True, term=date_range.split(' ')[-1].lower())
+    if pos in {'1B', '2B', '3B', 'SS', 'C', 'OF'}:
+        x = 'xwOBA'
+        y = 'wRC+'
+    else:
+        x = 'K-BB%'
+        y = 'Stuff+'
+
+    df = pd.read_csv(f"data/fantasy_data_{pos}.csv")
+    df = df[df['term'] == date_range.split(' ')[-1].lower()]
+
+    plot = RatioScatterPlot(df, filename='',
+                            y_column=y, x_column=x,
+                            title=f'Interesting Free Agents - {pos}',
+                            y_label=y, x_label=x,
+                            quadrant_labels=None,
+                            invert_x=False,
+                            #size=(10, 15),
+                            break_even_line=False,
+                            scale='player',
+                            data_disclaimer='fangraphs',
+                            sport='baseball',
+                            fantasy_mode=True)
+
+    fig = plot.make_plot(dashboard=True)
     plt.close(fig)  # CLOSE THE FIGURE TO AVOID MEMORY LEAKS!
     return fig
 
@@ -192,7 +217,7 @@ table = pn.bind(get_df, pos=position_widget, date_range=date_range_widget)
 # Initialize the table widget which displays our statistics in a table
 table_pane = pn.widgets.Tabulator(
                              table,
-                             layout='fit_columns',
+                             layout='fit_data_table',
                              show_index=False,
                              frozen_rows=rows_to_freeze,
                              theme='simple',
@@ -200,7 +225,7 @@ table_pane = pn.widgets.Tabulator(
                          )
 
 # Initialize the pane displaying our plot
-plot = pn.pane.Matplotlib(
+plot_pane = pn.pane.Matplotlib(
     figure, format="svg", dpi=144, fixed_aspect=True, height=350
 )
 
@@ -209,7 +234,7 @@ pn.template.FastListTemplate(
     title="Fantasy Free Agents of Interest",
     sidebar=[position_widget, date_range_widget],
     sidebar_width=70,
-    main=[pn.Row(table_pane, plot)],
+    main=[pn.Row(table_pane, plot_pane)],
     accent=ACCENT,
     main_layout=None
 ).servable()
