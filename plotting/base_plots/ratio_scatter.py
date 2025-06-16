@@ -146,8 +146,9 @@ class RatioScatterPlot(Plot):
                 p1 = (2, 2 * ((1 - x) / x))
                 p2 = (2.5, 2.5 * ((1 - x) / x))
                 color = '0.88'
-                if round(x * 100, 0) % 5 == 0:  # Emphasize lines at 40, 45, 55, 60, etc.
-                    #color = '0.6'
+                
+                # For hockey ratio plots, emphasize lines at 40, 45, 55, 60, etc.
+                if round(x * 100, 0) % 5 == 0 and self.sport == 'hockey': 
                     color = ratio_to_color(x) if self.for_game_report else '0.6'
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
@@ -155,7 +156,7 @@ class RatioScatterPlot(Plot):
                     self.axis.annotate(f'{str(round(x, 3) * 100)[:2]}%', xy=text_xy, color=color)
 
                 # If this is for the game report, we only want the big lines at 40, 45 etc.
-                if not self.for_game_report or  round(x* 100, 0) % 5 == 0:
+                if not self.for_game_report or round(x* 100, 0) % 5 == 0:
                     self.axis.axline(p1, p2, color=color)
 
         # Calculate and plot the average for each value
@@ -214,7 +215,7 @@ class RatioScatterPlot(Plot):
                                                              'alpha': 0.6
                                                          }),
                           axis=1)
-            fa_df = self.df[self.df['on_team'] == False]
+            fa_df = self.df[~self.df['on_team']]
             fa_df['team'] = fa_df['Team']
             fa_df.apply(lambda row: self.add_team_logo(row, self.x_col, self.y_col,
                                                        label='Name', opacity=1,
@@ -223,7 +224,6 @@ class RatioScatterPlot(Plot):
                                                            'alpha': 0.6
                                                        }),
                           axis=1)
-
             return
 
         if self.team != 'ALL' and self.show_league_context:
