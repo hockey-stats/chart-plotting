@@ -294,6 +294,11 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
     t_df = t_df.filter(pl.col('term') == 'month')
     fa_df = fa_df.filter(pl.col('term') == 'month')
 
+    # For now let's ignore Caglianone when doing the averages, he's bringing them
+    # down but we have faith.
+    # TODO: Resolve this somehow
+    t_df = t_df.filter(pl.col('name') != 'Jac Caglianone')
+
     # Get the averages among players on our team
     avg = {}
     for stat in stats:
