@@ -1,0 +1,50 @@
+name: Plot Team Run Diffrential
+on:
+  workflow_call:
+    outputs:
+      plot_artifact_name: 
+        value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
+        description: Name of plot artifact
+
+  workflow_dispatch:
+    
+env: 
+  PLOTS_ARTIFACT_NAME: 'run_diff_scatter_plot'
+
+jobs:
+  plot-graphs:
+    runs-on: ubuntu-latest
+    outputs:
+      plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
+    ###
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
+      #
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      # 
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+      #
+      - name: Generate Charts
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python3 plotting/baseball/team_plots/plot_run_differential.py
+      #
+      - name: Save Charts as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+      #
+      - name: Set Output for Artifact Name 
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+    ###
