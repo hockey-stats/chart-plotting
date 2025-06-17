@@ -103,14 +103,14 @@ class SwarmPlot(Plot):
         """
         # Define starting x- and y-pos.
         y_pos = 0.73
-        logo_x_pos = 0.35
+        logo_x_pos = 3
 
         # Get logo marker for team in question
         team_logo = self.get_logo_marker(self.team, sport='baseball', size='tiny')
 
         # Define style dicts for the label and metric Bbox
         metric_dict = {
-            'size': 15,
+            'size': 14,
             'weight': 600,
             'color': 'black',
             'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
@@ -120,7 +120,7 @@ class SwarmPlot(Plot):
             }
         }
         label_dict = {
-            'size': 15,
+            'size': 14,
             'weight': 600,
             'color': 'black',
             'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
@@ -131,8 +131,7 @@ class SwarmPlot(Plot):
             }
         }
 
-        for name, qual, metric, coord in zip(team_df['Name'], team_df[self.qualifier],
-                                             team_df[self.column], team_coords):
+        for name, metric, coord in zip(team_df['Name'], team_df[self.column], team_coords):
             # Get the appropriate colors for the team
             line_color = mlb_label_colors[self.team]["line"]
 
@@ -166,15 +165,16 @@ class SwarmPlot(Plot):
             metric_dict['bbox']['facecolor'] = metric_color
 
             # Draw the metric text box
-            self.axis.text(x=x*1.2, y=y, s=metric,
+            self.axis.text(x=x*1.25, y=y, s=metric,
                            transform=self.axis.transData,
                            **metric_dict)
 
             # Format name as {FirstInitial}. {LastName}, e.g. Bo Bichette -> B. Bichette
-            name = f"{name.split(' ')[0][0]}. {' '.join(name.split(' ')[1:])}"
+            #name = f"{name.split(' ')[0][0]}. {' '.join(name.split(' ')[1:])}"
+            name = f"{' '.join(name.split(' ')[1:])}"
 
             # Draw the text box with player info
-            self.axis.text(x=x*1.6, y=y, s=f'{name} ({qual} ABs)',
+            self.axis.text(x=x*1.75, y=y, s=f'{name}',
                            transform=self.axis.transData,
                            **label_dict)
 
@@ -184,15 +184,18 @@ class SwarmPlot(Plot):
         if self.team_rank is not None:
             self.add_team_rank(label_dict, metric_dict)
 
+        self.add_table(team_df)
+
 
     def make_dummy_categorical_data(self):
         """
         To achieve the affect of the swarmplot being on the left-hand side of the axis, create
-        a dummy column called 'day' to hold a catergorical value, where all the values in our
+        a dummy column called 'day' to hold a categorical value, where all the values in our
         sample will belong to one category, and create dummy values for each of the other
         categories. When these categories are passed into the swarmplot function, each category
         will get their own 'column' in the axis, but all columns except for the first will be
-        empty, creating the desired affect of all the relevant values being on the left.
+        empty, creating the desired affect of all the relevant values being on the left, and the
+        plot being empty otherwise.
         """
         self.df['day'] = 0
         dummy_rows = {
@@ -232,7 +235,7 @@ class SwarmPlot(Plot):
         Adds text boxes displaying the entire team's rank in the metric.
 
         :param dict label_dict: Config info for the labels text box.
-        :param dictg metric_dict: Config info for the metrics text box.
+        :param dict metric_dict: Config info for the metrics text box.
         """
 
         metric_ratio = min(1.0, float(self.team_level_metric) / 200.0)
@@ -243,7 +246,7 @@ class SwarmPlot(Plot):
         metric_dict['size'] = 20
 
         x = 0.4
-        y = 0.9
+        y = 0.94
 
         label_dict['bbox']['facecolor'] = mlb_label_colors[self.team]['bg']
         self.axis.text(x, y, s=f'Team {self.column}', **label_dict,
@@ -271,3 +274,51 @@ class SwarmPlot(Plot):
         self.axis.text(x + 0.28, y - 0.05, s=f"({rank_text})", color='black', size=10,
                        transform=self.axis.transAxes)
 
+
+    def add_table(self, team_df: pd.DataFrame) -> None:
+        """
+        Adds a table to the right of the swarm plot showing some basic hitting metrics
+
+        :param pd.DataFrame team_df: DataFrame containing stats for players on the team.
+        """
+        # Work with a copy of the DataFrame to avoid silly issues
+        df = team_df.copy()
+
+        # Format some columns with 0 decimal places, and others with 3.
+        for col in ['AB', 'HR']:
+            df[f'{col}s'] = df.apply(lambda row: "%.0f" % row[col], axis=1)
+
+        for col in ['AVG', 'OPS']:
+            df[col] = df.apply(lambda row: "%.3f" % row[col], axis=1)
+
+        # Isolate only the columns we want, in the order we want
+        df = df[['ABs', 'AVG', 'HRs', 'OPS']]
+
+        table = plt.table(cellText=df.values,
+                          colLabels=df.columns,
+                          cellLoc='center',
+                          colLoc='center',
+                          rowLoc='left',
+                          bbox=(0.68, 0.05, 0.3, 0.785),
+                          edges='B'
+                          )
+
+        table.set_fontsize(12)
+
+        # Apply some specific formatting to the cells
+        cells = table.properties()['celld']
+        for x in range(0, len(df.columns)):
+            for y in range(0, len(df) + 1):
+                # Set the edge color and width between rows
+                cells[y, x].set_edgecolor('steelblue')
+                cells[y, x].set_linewidth(2)
+
+                # Don't draw an edge under the last row
+                if y == len(df):
+                    cells[y, x].set_linewidth(0)
+
+                # Column headers are bolded, other values less so
+                if y == 0:
+                    cells[y, x].set_text_props(weight=600)
+                else:
+                    cells[y, x].set_text_props(weight=300)
