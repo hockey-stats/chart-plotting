@@ -1,6 +1,7 @@
 import argparse
 from datetime import datetime
-import pybaseball
+
+import pybaseball as pyb
 
 from plotting.base_plots.swarm import SwarmPlot
 from util.team_maps import mlb_team_full_names
@@ -8,7 +9,7 @@ from util.team_maps import mlb_team_full_names
 
 
 def main(year, qual, team):
-    data = pybaseball.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+']]
+    data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+', 'AVG', 'HR', 'OPS', 'Barrel%', 'maxEV']]
     data['team'] = data['Team']
 
     team_full_name = mlb_team_full_names[team]
@@ -39,7 +40,7 @@ def get_teamwide_wrc(year, team):
     :param int year: Year of the season in question.
     :param str team: 3-letter acronym of team in question.
     """
-    df = pybaseball.team_batting(year)[['Team', 'wRC+']]
+    df = pyb.team_batting(year)[['Team', 'wRC+']]
     df = df.sort_values(by='wRC+', ascending=False).reset_index()
     rank = int(df[df['Team'] == team].index[0]) + 1
     wrc = int(df[df['Team'] == team]['wRC+'].iloc[0])

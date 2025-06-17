@@ -397,7 +397,7 @@ class RatioScatterPlot(Plot):
         df = self.df.copy()
 
         df = df.sort_values(by='on_team', ascending=False)
-        num_on_team = len(df[df['on_team'] == True])
+        num_on_team = len(df[df['on_team']])
 
         names = list(df['Name'])
 
