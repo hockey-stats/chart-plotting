@@ -38,7 +38,7 @@ def main(year: int):
                             scale_to_extreme=True,
                             ratio_lines=True,
                             plot_league_average=league_avg,
-                            quadrant_labels=['PREVENTION', 'PRODUCTION'],
+                            quadrant_labels=['OFFENSE', 'DEFENSE'],
                             data_disclaimer='fangraphs')
     
     plot.make_plot()
