@@ -145,8 +145,9 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
                 continue
             p_dict['name'].append(unidecode(details['name']['full']))
             p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
-            p_dict['positions'].append(','.join([pos['position'] for pos in details['eligible_positions'] \
-                                                if pos['position'] != 'P']))
+            p_dict['positions'].append(','.join([pos['position'] for pos in \
+                                                 details['eligible_positions'] \
+                                                 if pos['position'] != 'P']))
             p_dict['ip'].append(stats['IP'])
             p_dict['era'].append(stats['ERA'])
             p_dict['whip'].append(stats['WHIP'])
@@ -159,7 +160,8 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%', 'Stuff+', 'G', 'GS']])
+    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%',
+                                                           'Stuff+', 'G', 'GS']])
     p_df = p_df.rename({"Name": "name", "Team": "team"})
 
     if position == 'SP':
@@ -284,9 +286,7 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
         combo_num = 2
     else:
         stats = ['k', 'era', 'K-BB%', 'Stuff+']
-        combo_num = 3
-        if position == 'SP':
-            stats.append('w')
+        combo_num = 4 if position == 'RP' else 3
 
     base_fa_df = fa_df.clone()
 
