@@ -36,7 +36,7 @@ jobs:
         run: pip install -r requirements_data.txt
       #
       - name: Gather Data
-        run: python3 processing/for_fantasy_baseball/get_free_agent_summary.py --for_dashboard
+        run: python3 processing/for_fantasy_baseball/get_free_agent_summary.py
       #
       - name: Save Output as Artifact
         uses: actions/upload-artifact@v4
