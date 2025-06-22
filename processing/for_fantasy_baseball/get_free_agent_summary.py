@@ -1,4 +1,3 @@
-import argparse
 import logging
 from itertools import combinations
 
@@ -304,11 +303,6 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
     t_df = t_df.filter(pl.col('term') == 'month')
     fa_df = fa_df.filter(pl.col('term') == 'month')
 
-    # For now let's ignore Caglianone when doing the averages, he's bringing them
-    # down but we have faith.
-    # TODO: Resolve this somehow
-    t_df = t_df.filter(pl.col('name') != 'Jac Caglianone')
-
     # Get the averages among players on our team
     avg = {}
     for stat in stats:
@@ -341,81 +335,119 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
     return final_df
 
 
-def main(position: str, output_filename: str = 'fantasy_data.csv') -> None:
+
+def filter_taken(df: pl.DataFrame, free_agents: list[str], my_team: list[str]) -> pl.DataFrame:
+    """
+    Removes from a player DF every player that's on a team which is not my team, and then adds 
+    a column for boolean values corresponding to whether or not a player is on my team.
+
+    :param pl.DataFrame df: DataFrame containing stats for all players
+    :param set[str] free_agents: Set of names of players which are free agents
+    :param set[str] my_team: Set of names of players on my team.
+    :return pl.DataFrame: DataFrame with taken players removed and 'on_team' column added.
+    """
+
+    # Filter out players that are already taken
+    df = df.filter(pl.col('name').is_in(free_agents + my_team))
+
+    # Also filter out any injured players
+    df = df.filter(pl.col('positions').str.contains('IL').not_())
+
+    # Set 'on_team' to True if player is on my team, False otherwise
+    df = df.with_columns(
+        pl.when(pl.col('name').str.contains_any(my_team))
+            .then(pl.lit(True))
+            .otherwise(pl.lit(False))
+            .alias('on_team')
+    )
+
+    return df
+
+
+def compute_z_scores(batter_df: pl.DataFrame, player_type: str) -> pl.DataFrame:
+
+    """
+    Computes z-scores for each column in the DataFrame and returns one with an extra column
+    for the average of these z-scores for each term.
+
+    :param pl.DataFrame batter_df: Raw statistics for each player.
+    :param str player_type: Either 'batters' or 'pitchers'
+    :return pl.DataFrame: Provided DataFrame with z-scores added in.
+    """
+    # Dict to store DataFrames for each term
+    dfs = dict()
+
+    if player_type == 'batters':
+        columns = ['avg', 'r', 'hr', 'rbi', 'sb', 'wRC+', 'xwOBA']
+    else:
+        columns = ['era', 'whip', 'k', 'w', 'sv', 'Stuff+', 'K-BB%']
+
+    for term in ['season', 'month', 'week']:
+        # Compute z-scores seperately for each term
+        x = batter_df.filter(pl.col('term') == term)
+
+        for col in columns:
+            mult = -1 if col in {'era', 'whip'} else 1
+            x = x.with_columns(
+                (((pl.col(col) - pl.mean(col)) / pl.std(col)) * mult).alias(f"z_{col}")
+            )
+
+        if player_type == 'batters':
+            x = x.with_columns(
+                ((pl.col('z_avg') +\
+                  pl.col('z_hr') +\
+                  pl.col('z_rbi') +\
+                  pl.col('z_sb') +\
+                  pl.col('z_r') +\
+                  pl.col('z_wRC+') +\
+                  pl.col('z_xwOBA')) / 7).alias('z_total')
+            )
+        else:
+            x = x.with_columns(
+                ((pl.col('z_era') +\
+                  pl.col('z_whip') +\
+                  pl.col('z_k') +\
+                  pl.col('z_w') +\
+                  pl.col('z_sv') +\
+                  pl.col('z_Stuff+') +\
+                  pl.col('z_K-BB%')) / 7).alias('z_total')
+            )
+
+        # Add a column for ranking by z_total
+        x = x.with_columns(pl.struct('z_total').rank('ordinal', descending=True).alias("Rank"))
+
+        # Drop columns we don't want in final output (i.e. the z_ columns)
+        drop_columns = [f'z_{col}' for col in columns] + ['z_total']
+        x = x.drop(drop_columns)
+
+        # Save to dict
+        dfs[term] = x.clone()
+
+    # Return the final output as a concatenation of all the term-specific DFs
+    final = pl.concat(list(dfs.values()))
+
+    return final
+
+
+def main() -> None:
     """
     Script used to generate a DataFrame that will be used plot reports comparing Free Agents
     in a Yahoo Fantasy Baseball league to the players on my team.
 
-    Uses the Yahoo Fantasy API to pull data for all free agents and compare their stats to 
-    players on my team, then creates a DataFrame with statistics for every player who 
-    outperforms those on my team, some from the fantasy API and some from pybaseball.
-
-    :param str position: Player position for which to compare.
-    :param str output_filename: Name of the output CSV.
+    Uses the Yahoo Fantasy API to pull data for all players, compute z-scores to approximate
+    the Yahoo Fantasy rankings (with some other metrics baked in) and outputs a batter and pitcher
+    CSV containing all players on my team as well as every free agent with all of the metrics
+    included.
     """
-
+    # Authenticate the session and get the League object to query against
     session = create_session()
     game = yfa.Game(session, 'mlb')
     league = yfa.League(session, game.league_ids()[1])
 
-    t_df = get_players_from_own_team(position, league, session)
-    fa_df = get_free_agents(position, league)
-    filtered_fa_df = filter_free_agents(fa_df, t_df, position)
-
-    t_df = t_df.with_columns((pl.lit(True)).alias('on_team'))
-    filtered_fa_df = filtered_fa_df.with_columns((pl.lit(False)).alias('on_team'))
-
-    final_df = pl.concat([t_df, filtered_fa_df])
-
-    # Rename some columns for presentation purposes
-    if position in {'1B', '2B', '3B', 'C', 'OF', 'SS'}:
-        final_df = final_df.rename({
-            "name": "Name",
-            "team": "Team",
-            "positions": "Position(s)",
-            "avg": "AVG",
-            "ab": "ABs",
-            "hr": "HRs",
-            "rbi": "RBIs",
-            "sb": "SBs"
-        })
-    else:
-        final_df = final_df.rename({
-            "name": "Name",
-            "team": "Team",
-            "positions": "Position(s)",
-            "ip": "IP",
-            "k": "Ks",
-            "w": "Ws",
-            "sv": "SVs",
-            "era": "ERA",
-            "whip": "WHIP",
-        })
-
-    final_df.write_csv(output_filename)
-
-
-def dashboard_main():
-    """
-    Alternative main function to be called when the script is invoked with the `--for_dashboard`
-    flag.
-
-    Prepares data to be used for the corresponding dashboard, so gather data for all positions and
-    store separately for use.
-    """
-    for pos in POSITIONS:
-        print(f"Gathering data for {pos}...")
-        main(position=pos, output_filename=f'fantasy_data_{pos}.csv')
-
-
-def get_z_scores():
-    session = create_session()
-    game = yfa.Game(session, 'mlb')
-    league = yfa.League(session, game.league_ids()[1])
-
+    # Get every player that's already on a team
     taken = league.taken_players()
 
-    # Batters
+    # Get the free agent batters, combine with taken ones, and compute rank
     batter_ids = [p['player_id'] for p in taken if p['position_type'] == 'B']
 
     batters = league.free_agents('Util')
@@ -423,10 +455,10 @@ def get_z_scores():
 
     b_df = collect_batter_stats(batter_ids, league)
 
+    # Output DataFrame with ranks included
     batter_df = compute_z_scores(b_df, player_type='batters')
 
-
-    # Pitchers
+    # Do the same with pitchers
     pitcher_ids = [p['player_id'] for p in taken if p['position_type'] == 'P']
     pitchers = league.free_agents('P')
     pitcher_ids.extend([p['player_id'] for p in pitchers])
@@ -435,17 +467,17 @@ def get_z_scores():
 
     pitcher_df = compute_z_scores(p_df, player_type='pitchers')
 
-
+    # Compile list of all free agents to be included in final output
     free_agent_batters = list(set([p['name'] for p in batters]))
     free_agent_pitchers = list(set([p['name'] for p in pitchers]))
 
+    # Do the same with players from my team
     my_team = list(get_players_from_own_team(position='Util',
                                              league=league,
                                              session=session)['name']) + \
               list(get_players_from_own_team(position='P',
                                              league=league,
                                              session=session)['name'])
-
     my_team = list(set(my_team))
 
     # Filter players that are on other teams
@@ -481,117 +513,5 @@ def get_z_scores():
     batter_df.write_csv('batter_data.csv')
 
 
-
-def filter_taken(df: pl.DataFrame, free_agents: list[str], my_team: list[str]) -> pl.DataFrame:
-    """
-    Removes from a player DF every player that's on a team which is not my team, and then adds 
-    a column for boolean values corresponding to whether or not a player is on my team.
-
-    :param pl.DataFrame df: DataFrame containing stats for all players
-    :param set[str] free_agents: Set of names of players which are free agents
-    :param set[str] my_team: Set of names of players on my team.
-    :return pl.DataFrame: DataFrame with taken players removed and 'on_team' column added.
-    """
-
-    # Filter out players that are already taken
-    df = df.filter(pl.col('name').is_in(free_agents + my_team))
-
-    # Also filter out any injured players
-    df = df.filter(pl.col('positions').str.contains('IL').not_())
-
-    # Set 'on_team' to True if player is on my team, False otherwise
-    df = df.with_columns(
-        pl.when(pl.col('name').str.contains_any(my_team))
-            .then(pl.lit(True))
-            .otherwise(pl.lit(False))
-            .alias('on_team')
-    )
-
-    return df
-
-
-
-
-
-def compute_z_scores(batter_df: pl.DataFrame, player_type: str) -> pl.DataFrame:
-
-    """
-    Computes z-scores for each column in the DataFrame and returns one with an extra column
-    for the average of these z-scores for each term.
-
-    :param pl.DataFrame batter_df: Raw statistics for each player.
-    :param str player_type: Either 'batters' or 'pitchers'
-    :return pl.DataFrame: Provided DataFrame with z-scores added in.
-    """
-    # Dict to store DataFrames for each term
-    dfs = dict()
-
-    if player_type == 'batters':
-        columns = ['avg', 'r', 'hr', 'rbi', 'sb', 'wRC+', 'xwOBA']
-    else:
-        columns = ['era', 'whip', 'k', 'w', 'sv', 'Stuff+', 'K-BB%']
-
-    min_thresholds = {
-        "batters": {
-            "week": 
-        }
-    }
-
-    for term in ['season', 'month', 'week']:
-        # Compute z-scores seperately for each term
-        x = batter_df.filter(pl.col('term') == term)
-
-        for col in columns:
-            mult = -1 if col in {'era', 'whip'} else 1
-            x = x.with_columns(
-                (((pl.col(col) - pl.mean(col)) / pl.std(col)) * mult).alias(f"z_{col}")
-            )
-
-        if player_type == 'batters':
-            x = x.with_columns(
-                ((pl.col('z_avg') +\
-                  pl.col('z_hr') +\
-                  pl.col('z_rbi') +\
-                  pl.col('z_sb') +\
-                  pl.col('z_r') +\
-                  pl.col('z_wRC+') +\
-                  pl.col('z_xwOBA')) / 7).alias('z_total')
-            )
-        else:
-            x = x.with_columns(
-                ((pl.col('z_era') +\
-                  pl.col('z_whip') +\
-                  pl.col('z_k') +\
-                  pl.col('z_w') +\
-                  pl.col('z_sv') +\
-                  pl.col('z_Stuff+') +\
-                  pl.col('z_K-BB%')) / 7).alias('z_total')
-            )
-
-        drop_columns = [f'z_{col}' for col in columns]
-        x = x.drop(drop_columns)
-        dfs[term] = x.clone()
-
-    final = pl.concat(list(dfs.values()))
-
-    return final
-
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--position', type=str, default="",
-                        choices=POSITIONS,
-                        help='Position for which to display free agents.')
-    parser.add_argument('-f', '--output_filename', default='fantasy_data.csv')
-    parser.add_argument('--for_dashboard', action='store_true', default=False,
-                        help="Option for when collecting data for the dashboard. If enabled, \"" \
-                             "gathers data for all positions and multiple terms.")
-    args = parser.parse_args()
-
-    get_z_scores()
-
-   # if args.for_dashboard:
-   #     dashboard_main()
-   # else:
-   #     main(position=args.position, output_filename=args.output_filename)
+    main()
