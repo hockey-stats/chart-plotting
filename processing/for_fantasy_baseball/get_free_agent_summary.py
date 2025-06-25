@@ -125,6 +125,7 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
 
     p_dict = {
         "name": [],
+        "id": [],
         "team": [],
         "positions": [],
         "ip": [],
@@ -147,6 +148,7 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
                 print(details, stats)
                 raise e
             p_dict['name'].append(unidecode(details['name']['full']))
+            p_dict['id'].append(stats['player_id'])
             p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
             p_dict['positions'].append(','.join([pos['position'] for pos in \
                                                  details['eligible_positions'] \
@@ -211,6 +213,7 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
 
     p_dict = {
         "name": [],
+        "id": [],
         "team": [],
         "positions": [],
         "r": [],
@@ -234,6 +237,7 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
                 raise e
 
             p_dict['name'].append(unidecode(details['name']['full']))
+            p_dict['id'].append(stats['player_id'])
             p_dict['team'].append(standardize_team_names(details['editorial_team_abbr']))
             p_dict['positions'].append(','.join([pos['position'] \
                                                 for pos in details['eligible_positions'] \
@@ -272,6 +276,7 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
     return df
 
 
+# Currently not being used. TODO: Remove?
 def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -> pl.DataFrame:
     """
     Given DFs containing stats for both the free agents and players on our team, convert the
@@ -335,27 +340,28 @@ def filter_free_agents(fa_df: pl.DataFrame, t_df: pl.DataFrame, position: str) -
     return final_df
 
 
-
-def filter_taken(df: pl.DataFrame, free_agents: list[str], my_team: list[str]) -> pl.DataFrame:
+def filter_taken(df: pl.DataFrame, free_agents: list[int], my_team: list[int]) -> pl.DataFrame:
     """
     Removes from a player DF every player that's on a team which is not my team, and then adds 
     a column for boolean values corresponding to whether or not a player is on my team.
 
+    Uses player_ids returned by the Yahoo Fantasy API for filtering.
+
     :param pl.DataFrame df: DataFrame containing stats for all players
-    :param set[str] free_agents: Set of names of players which are free agents
-    :param set[str] my_team: Set of names of players on my team.
+    :param set[int] free_agents: Set of IDs of players which are free agents
+    :param set[int] my_team: Set of IDs of players on my team.
     :return pl.DataFrame: DataFrame with taken players removed and 'on_team' column added.
     """
 
     # Filter out players that are already taken
-    df = df.filter(pl.col('name').is_in(free_agents + my_team))
+    df = df.filter(pl.col('id').is_in(free_agents + my_team))
 
     # Also filter out any injured players
     df = df.filter(pl.col('positions').str.contains('IL').not_())
 
     # Set 'on_team' to True if player is on my team, False otherwise
     df = df.with_columns(
-        pl.when(pl.col('name').str.contains_any(my_team))
+        pl.when(pl.col('id').is_in(my_team))
             .then(pl.lit(True))
             .otherwise(pl.lit(False))
             .alias('on_team')
@@ -468,16 +474,16 @@ def main() -> None:
     pitcher_df = compute_z_scores(p_df, player_type='pitchers')
 
     # Compile list of all free agents to be included in final output
-    free_agent_batters = list(set([p['name'] for p in batters]))
-    free_agent_pitchers = list(set([p['name'] for p in pitchers]))
+    free_agent_batters = list(set([p['player_id'] for p in batters]))
+    free_agent_pitchers = list(set([p['player_id'] for p in pitchers]))
 
     # Do the same with players from my team
     my_team = list(get_players_from_own_team(position='Util',
                                              league=league,
-                                             session=session)['name']) + \
+                                             session=session)['id']) + \
               list(get_players_from_own_team(position='P',
                                              league=league,
-                                             session=session)['name'])
+                                             session=session)['id'])
     my_team = list(set(my_team))
 
     # Filter players that are on other teams
@@ -496,6 +502,8 @@ def main() -> None:
         "r": "Runs",
         "sb": "SBs"
     })
+    batter_df.drop('id')
+
     pitcher_df = pitcher_df.rename({
         "name": "Name",
         "team": "Team",
@@ -507,7 +515,8 @@ def main() -> None:
         "era": "ERA",
         "whip": "WHIP",
     })
-        
+    pitcher_df.drop('id')
+
     # Save output
     pitcher_df.write_csv('pitcher_data.csv')
     batter_df.write_csv('batter_data.csv')
