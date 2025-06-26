@@ -384,9 +384,9 @@ def compute_z_scores(batter_df: pl.DataFrame, player_type: str) -> pl.DataFrame:
     dfs = dict()
 
     if player_type == 'batters':
-        columns = ['avg', 'r', 'hr', 'rbi', 'sb', 'wRC+', 'xwOBA']
+        columns = ['ab', 'avg', 'r', 'hr', 'rbi', 'sb']
     else:
-        columns = ['era', 'whip', 'k', 'w', 'sv', 'Stuff+', 'K-BB%']
+        columns = ['ip', 'era', 'whip', 'k', 'w', 'sv']
 
     for term in ['season', 'month', 'week']:
         # Compute z-scores seperately for each term
@@ -405,8 +405,7 @@ def compute_z_scores(batter_df: pl.DataFrame, player_type: str) -> pl.DataFrame:
                   pl.col('z_rbi') +\
                   pl.col('z_sb') +\
                   pl.col('z_r') +\
-                  pl.col('z_wRC+') +\
-                  pl.col('z_xwOBA')) / 7).alias('z_total')
+                  pl.col('z_ab')) / 6).alias('z_total')
             )
         else:
             x = x.with_columns(
@@ -415,8 +414,7 @@ def compute_z_scores(batter_df: pl.DataFrame, player_type: str) -> pl.DataFrame:
                   pl.col('z_k') +\
                   pl.col('z_w') +\
                   pl.col('z_sv') +\
-                  pl.col('z_Stuff+') +\
-                  pl.col('z_K-BB%')) / 7).alias('z_total')
+                  pl.col('z_ip')) / 6).alias('z_total')
             )
 
         # Add a column for ranking by z_total
