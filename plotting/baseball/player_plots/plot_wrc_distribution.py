@@ -1,16 +1,44 @@
 import argparse
 from datetime import datetime
 
+import pandas as pd
 import pybaseball as pyb
 
 from plotting.base_plots.swarm import SwarmPlot
 from util.team_maps import mlb_team_full_names
 
 
+def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    For players who have played on multiple teams, fangraphs returns their 'Team' value as
+    '- - -'. Replace these values with the actual current team.
+    """
+    traded_players = list(df[df['team'] == '- - -']['Name'])
+    traded_db = {
+        'Rafael Devers': 'SFG',
+        'Kody Clemens': 'MIN',
+        'Matt Thaiss': 'TBR',
+        'Austin Wynns': 'ATH',
+        'Garret Hampson': 'STL',
+        'Jonah Bride': 'MIN',
+        'Leody Taveras': 'SEA',
+        'LaMonte Wade Jr.': 'LAA'
+    }
+    for name in traded_players:
+        if name in traded_db:
+            index = df[df['Name'] == name].index
+            df.loc[index, 'team'] = traded_db[name]
+
+    return df
+
 
 def main(year, qual, team):
-    data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+', 'AVG', 'HR', 'OPS', 'Barrel%', 'maxEV']]
+    data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+', 'AVG',
+                                               'HR', 'OPS', 'Barrel%', 'maxEV']]
     data['team'] = data['Team']
+    del data['Team']
+
+    data = fix_teams_for_traded_players(data)
 
     team_full_name = mlb_team_full_names[team]
 
