@@ -1,5 +1,4 @@
 import argparse
-from datetime import datetime
 
 import pandas as pd
 
@@ -72,15 +71,14 @@ def main(division: int) -> None:
     # American League East -> AL East
     division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
 
-    plot_title = f"{division_name_shorthand} - Run Differential "\
-                 f"{WINDOW}-Game Rolling Average"
+    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages"
     subtitle = f"Over the last {NUM_GAMES} games"
 
     plot = RollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
                               x_column='gameNumber',
                               y_column='RDRollingAvg',
                               title=plot_title, subtitle=subtitle,
-                              y_label='Run Diff. Rolling Avg',
+                              y_label=f'{WINDOW}-Game Rolling Average',
                               x_label='Game #',
                               multiline_key='team',
                               sport='baseball',

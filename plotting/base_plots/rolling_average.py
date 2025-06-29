@@ -5,7 +5,7 @@ import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
 from scipy.interpolate import make_interp_spline
 
-from plotting.base_plots.plot import Plot
+from plotting.base_plots.plot import Plot, FancyAxes
 from util.color_maps import label_colors, mlb_label_colors
 from util.font_dicts import game_report_label_text_params as label_params
 
@@ -37,8 +37,6 @@ class RollingAveragePlot(Plot):
         self.y_col = y_column
         self.x_label = x_label
         self.y_label = y_label
-        self.fig = plt.figure(figsize=self.size)
-        self.axis = self.fig.add_subplot(111)
         self.sport = sport
         self.y_midpoint = y_midpoint
         self.multiline_key = multiline_key
@@ -46,6 +44,9 @@ class RollingAveragePlot(Plot):
         self.for_multiplot = for_multiplot
         self.data_disclaimer = data_disclaimer
 
+        self.fig = plt.figure(figsize=self.size)
+        self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
+        self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
 
     def make_plot(self):
         """
@@ -73,7 +74,7 @@ class RollingAveragePlot(Plot):
         else:
             x_min = self.df['gameNumber'].min()
             x_max = self.df['gameNumber'].max()
-            x_ticks = list(range(x_min, x_max, 2))
+            x_ticks = list(range(x_min, x_max, 5))
             self.axis.set_xticks(x_ticks, labels=x_ticks, fontdict=label_params)
         #y_range = list(range(40, 65, 5))
         self.axis.set_yticks(y_range,
@@ -101,7 +102,7 @@ class RollingAveragePlot(Plot):
 
     def handle_team_logos(self):
         """
-        Add the team logo to the last point of each line.
+        Add the team logo to the first and last point of each line.
         """
         for team in set(self.df['team']):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
@@ -109,6 +110,14 @@ class RollingAveragePlot(Plot):
 
             artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
                                         xy=(x_last, y_last),
+                                        frameon=False)
+            self.axis.add_artist(artist_box)
+
+            x_first = list(self.df[self.df['team'] == team][self.x_col])[0]
+            y_first = list(self.df[self.df['team'] == team][self.y_col])[0]
+
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+                                        xy=(x_first, y_first),
                                         frameon=False)
             self.axis.add_artist(artist_box)
 
