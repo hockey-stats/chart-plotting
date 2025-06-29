@@ -9,49 +9,34 @@ from util.color_maps import mlb_label_colors
 
 
 # Number of games over which to compute the rolling average
-WINDOW = 10
+WINDOW = 15
 # Number of games to include in plot
 NUM_GAMES = 25
 
 
-def proccess_data(division: int, year: int) -> pd.DataFrame:
+def proccess_data(teams: list[str], year: int) -> pd.DataFrame:
     """
     Pulls the requisite data from pybaseball for teams in the given division and processes
     data to be fit for rolling average chart.
 
-    :param int division: Integer corresponding to division.
+    :param list[str] teams: List of teams to process.
     :param int year: Year for which to gather data.
     :return pd.DataFrame: DataFrame fit for rolling average plot.
     """
-    divisions = {
-        "American League East": ['TOR', 'BOS', 'NYY', 'TBR', 'BAL'],
-        "American League West": ['SEA', 'HOU', 'LAA', 'TEX', 'ATH'],
-        "American League Central": ['CLE', 'DET', 'KCR', 'MIN', 'CHW'],
-        "National League East": ['MIA', 'WSN', 'ATL', 'NYM', 'PHI'],
-        "National League West": ['SDP', 'COL', 'SFG', 'LAD', 'ARI'],
-        "National League Central": ['STL', 'MIL', 'CHC', 'CIN', 'PIT']
-    }
-
+    base_df = pd.read_csv('data/team_records.csv')
     output_dfs = []
-    print(divisions[division])
-    for team in divisions[division]:
-        print("querying!!!!:", year, team)
-        # Pull the schedule record data for each individual team, to process and save in a list
-        df = schedule_and_record(year, team).fillna(0)
-        # Filter out games that haven't been played yet
-        df = df[df['Win'] != 0]
+
+    for team in teams:
+        df = base_df[base_df['team'] == team]
         # Add run differential column
-        df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
+        df['RD'] = df.apply(lambda row: row['runs_for'] - row['runs_against'], 1)
         # Add rolling average column
         df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
-        df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
-        df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
+        df = df[['game_number', 'team', 'RDRollingAvg']]
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
     # Rename team column
-    final_output['team'] = final_output['Tm']
-    del final_output['Tm']
     final_output.to_csv('test_ra.csv')
     return final_output
 
@@ -65,11 +50,26 @@ def main(division: str, year: int) -> None:
     :param str division: Name of division for which to generate plot.
     :param int year: Year for which to gather data.
     """
-    df = proccess_data(division, year)
+    divisions = {
+        0: { "name": "American League East",
+             "teams": ['TOR', 'BOS', 'NYY', 'TBR', 'BAL'] },
+        1: { "name": "American League West",
+             "teams": ['SEA', 'HOU', 'LAA', 'TEX', 'ATH'] },
+        2: { "name": "American League Central",
+             "teams": ['CLE', 'DET', 'KCR', 'MIN', 'CHW'] },
+        3: { "name": "National League East", 
+             "teams": ['MIA', 'WSN', 'ATL', 'NYM', 'PHI'] },
+        4: { "name": "National League West",
+             "teams": ['SDP', 'COL', 'SFG', 'LAD', 'ARI'] },
+        5: { "name": "National League Central",
+             "teams": ['STL', 'MIL', 'CHC', 'CIN', 'PIT'] }
+    }
+    df = proccess_data(divisions[division]['teams'], year)
     #df = pd.read_csv('test_ra.csv')
-
+    
+    division_name = divisions[division]['name']
     # American League East -> AL East
-    division_name_shorthand = f"{division[0]}L {division.split(' ')[-1]}"
+    division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
 
     plot_title = f"{division_name_shorthand} - Run Differential "\
                  f"{WINDOW}-Game Rolling Average"
@@ -94,7 +94,7 @@ def main(division: str, year: int) -> None:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--division', type=str, required=True,
+    parser.add_argument('-d', '--division', type=int, required=True,
                         help="Name of division for which to generate plot.")
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year for which to gather data, defaults to current year.')
