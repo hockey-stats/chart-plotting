@@ -2,21 +2,19 @@ import argparse
 from datetime import datetime
 
 import pandas as pd
-from pybaseball import schedule_and_record
 
 from plotting.base_plots.rolling_average import RollingAveragePlot
-from util.color_maps import mlb_label_colors
 
 
 # Number of games over which to compute the rolling average
-WINDOW = 15
+WINDOW = 20
 # Number of games to include in plot
-NUM_GAMES = 25
+NUM_GAMES = 40
 
 
-def proccess_data(teams: list[str], year: int) -> pd.DataFrame:
+def proccess_data(teams: list[str]) -> pd.DataFrame:
     """
-    Pulls the requisite data from pybaseball for teams in the given division and processes
+    Loads scraped data for teams in the given division and processes
     data to be fit for rolling average chart.
 
     :param list[str] teams: List of teams to process.
@@ -36,19 +34,22 @@ def proccess_data(teams: list[str], year: int) -> pd.DataFrame:
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
-    # Rename team column
+
+    # Rename game_num column
+    final_output['gameNumber'] = final_output['game_number']
+    del final_output['game_number']
+
     final_output.to_csv('test_ra.csv')
     return final_output
 
 
-def main(division: str, year: int) -> None:
+def main(division: int) -> None:
     """
     Main function that pulls the necessary data and calls the RollingAverage
     plotting method. The plot will display a run differential rolling average for all
     teams in a single division.
 
-    :param str division: Name of division for which to generate plot.
-    :param int year: Year for which to gather data.
+    :param int division: Integer corresponding to division for which to generate plot.
     """
     divisions = {
         0: { "name": "American League East",
@@ -57,16 +58,16 @@ def main(division: str, year: int) -> None:
              "teams": ['SEA', 'HOU', 'LAA', 'TEX', 'ATH'] },
         2: { "name": "American League Central",
              "teams": ['CLE', 'DET', 'KCR', 'MIN', 'CHW'] },
-        3: { "name": "National League East", 
+        3: { "name": "National League East",
              "teams": ['MIA', 'WSN', 'ATL', 'NYM', 'PHI'] },
         4: { "name": "National League West",
              "teams": ['SDP', 'COL', 'SFG', 'LAD', 'ARI'] },
         5: { "name": "National League Central",
              "teams": ['STL', 'MIL', 'CHC', 'CIN', 'PIT'] }
     }
-    df = proccess_data(divisions[division]['teams'], year)
-    #df = pd.read_csv('test_ra.csv')
-    
+
+    df = proccess_data(divisions[division]['teams'])
+
     division_name = divisions[division]['name']
     # American League East -> AL East
     division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
@@ -96,8 +97,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--division', type=int, required=True,
                         help="Name of division for which to generate plot.")
-    parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
-                        help='Year for which to gather data, defaults to current year.')
     args = parser.parse_args()
 
-    main(division=args.division, year=args.year)
+    main(division=args.division)
