@@ -4,8 +4,9 @@ on:
     inputs:
       division:
         description: Integer corresponding to division for which to generate plot
-        type: number
-        default: 0
+        type: string
+        default: '0'
+
     outputs:
       plot_artifact_name: 
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
@@ -15,8 +16,8 @@ on:
     inputs:
       division:
         description: Integer corresponding to division for which to generate plot
-        type: number
-        default: 0
+        type: string
+        default: '0'
     
 env: 
   PLOTS_ARTIFACT_NAME: 'run_diff_rolling_avg_plot'
