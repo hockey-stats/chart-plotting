@@ -78,8 +78,9 @@ jobs:
       #
       - name: Move data artifact
         run: |
-          ls -lrt
+          mkdir data
           cp *csv ./data
+          ls -lrt
       #
       - name: Generate Charts
         env:
