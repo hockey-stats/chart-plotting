@@ -52,6 +52,7 @@ jobs:
     ###
   plot-graphs:
     runs-on: ubuntu-latest
+    needs: scrape-data
     outputs:
       plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
     ###
