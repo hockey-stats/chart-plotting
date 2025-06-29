@@ -48,7 +48,7 @@ jobs:
       #
       - name: Set output for artifact name
         id: set-output
-        run: echo "data_artifact_name=$DATA_ARTIFACT_NAME" >> "$GITHUB_OUTPUT""
+        run: echo "data_artifact_name=$DATA_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
     ###
   plot-graphs:
     runs-on: ubuntu-latest
