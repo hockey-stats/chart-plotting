@@ -165,7 +165,7 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%',
+    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%', 'xERA',
                                                            'Stuff+', 'G', 'GS']])
     p_df = p_df.rename({"Name": "name", "Team": "team"})
 
@@ -254,7 +254,7 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.batting_stats(2025, qual=20)[['Name', 'Team', 'wRC+', 'xwOBA']])
+    p_df = pl.from_pandas(pb.batting_stats(2025, qual=20)[['Name', 'Team', 'wRC+', 'xwOBA', 'HardHit%']])
     p_df = p_df.rename({"Name": "name", "Team": "team"})
 
     p_df = p_df.with_columns(pl.col('xwOBA').cast(pl.Decimal(10, 3)))
