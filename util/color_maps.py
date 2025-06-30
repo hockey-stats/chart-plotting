@@ -237,7 +237,7 @@ mlb_label_colors = {
 	},
 	"KCR": {
 		"bg": "cornflowerblue",
-		"line": "goldenrod"
+		"line": "cornflowerblue"
 	},
 	"LAA": {
 		"bg": "crimson",

@@ -152,7 +152,7 @@ class SwarmPlot(Plot):
                                                 xycoords='data', zorder=11))
             # Draw a line connect logo to the point in the swarmplot
             plt.plot([x, coord[0]], [logo_y, coord[1]], color=line_color,
-                     linewidth=3, zorder=10, alpha=0.4)
+                     linewidth=3, zorder=10, alpha=0.7)
 
 
             # Pad the metric value if it is only 2-digits
