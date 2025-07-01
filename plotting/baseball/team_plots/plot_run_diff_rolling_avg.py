@@ -90,7 +90,6 @@ def main(division: int) -> None:
     plot.make_plot()
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--division', type=int, required=True,

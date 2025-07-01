@@ -9,6 +9,7 @@ from plotting.base_plots.plot import Plot, FancyAxes
 from util.color_maps import label_colors, mlb_label_colors
 from util.font_dicts import game_report_label_text_params as label_params
 
+
 class RollingAveragePlot(Plot):
     """
     Sub-class of Plot to create rolling average line plots.
@@ -47,6 +48,7 @@ class RollingAveragePlot(Plot):
         self.fig = plt.figure(figsize=self.size)
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
+
 
     def make_plot(self):
         """
