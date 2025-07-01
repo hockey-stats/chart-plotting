@@ -76,7 +76,7 @@ def main(division: int) -> None:
 
     df = process_data(divisions[division]['teams'])
 
-    plot = CumulativeLinePlot(filename='test.png',
+    plot = CumulativeLinePlot(filename='mlb_graphical_standings.png',
                               dataframe=df,
                               sport='baseball',
                               data_disclaimer='baseballreference',
