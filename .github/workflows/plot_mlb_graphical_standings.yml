@@ -1,4 +1,4 @@
-name: Scrape and Plot Rolling Run Differential 
+name: Scrape and Plot MLB Graphical Standings by Division
 on:
   workflow_call:
     inputs:
