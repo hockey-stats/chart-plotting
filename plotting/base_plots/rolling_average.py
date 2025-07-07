@@ -99,6 +99,7 @@ class RollingAveragePlot(Plot):
             )
         else:
             self.set_title()
+
         self.save_plot()
 
 
@@ -106,6 +107,7 @@ class RollingAveragePlot(Plot):
         """
         Add the team logo to the first and last point of each line.
         """
+        logos = list()
         for team in set(self.df['team']):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
@@ -121,17 +123,22 @@ class RollingAveragePlot(Plot):
             artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
                                         xy=(x_first, y_first),
                                         frameon=False)
-            self.axis.add_artist(artist_box)
+            logo = self.axis.add_artist(artist_box)
+            logos.append(logo)
+        return logos
 
 
-    def plot_multilines(self):
+    def plot_multilines(self, alpha=1, linewidth=3, df=None):
         """
         Given a multiline_key, for each distinct value in the column corresponding to that key,
         add a single line plot for the dataframe filtered on that value.
         """
-        keys = set(self.df[self.multiline_key])
+        if df is None:
+            df = self.df
+        keys = set(df[self.multiline_key])
+        lines = list()
         for key in keys:
-            individual_df = self.df[self.df[self.multiline_key] == key]
+            individual_df = df[df[self.multiline_key] == key]
 
             # Add a bit of smoothing
             x_col = individual_df[self.x_col]
@@ -147,9 +154,11 @@ class RollingAveragePlot(Plot):
                 elif self.sport == 'baseball':
                     color = mlb_label_colors[key]['line']
             #self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color,
-            self.axis.plot(new_x, y_smooth, color=color,
-                           linewidth=3)
+            line = self.axis.plot(new_x, y_smooth, color=color, alpha=alpha,
+                                  linewidth=linewidth)
+            lines.append(line)
 
+        return lines
 
     def add_x_axis(self):
         """

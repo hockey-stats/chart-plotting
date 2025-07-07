@@ -2,8 +2,10 @@ import argparse
 
 import pandas as pd
 
-from plotting.base_plots.rolling_average import RollingAveragePlot
+from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
+# Disable annoying warning
+pd.options.mode.chained_assignment = None
 
 # Number of games over which to compute the rolling average
 WINDOW = 20
@@ -38,7 +40,6 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     final_output['gameNumber'] = final_output['game_number']
     del final_output['game_number']
 
-    final_output.to_csv('test_ra.csv')
     return final_output
 
 
@@ -74,7 +75,7 @@ def main(division: int) -> None:
     plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages"
     subtitle = f"Over the last {NUM_GAMES} games"
 
-    plot = RollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
+    plot = AnimatedRollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
                               x_column='gameNumber',
                               y_column='RDRollingAvg',
                               title=plot_title, subtitle=subtitle,
@@ -87,7 +88,7 @@ def main(division: int) -> None:
                               for_multiplot=False,
                               data_disclaimer='baseballreference')
 
-    plot.make_plot()
+    plot.make_plot_gif()
 
 
 if __name__ == '__main__':
