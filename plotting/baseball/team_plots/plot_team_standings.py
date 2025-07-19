@@ -45,8 +45,14 @@ def process_data(teams: list[str]) -> pd.DataFrame:
     for team in teams:
         df = schedule_and_record(year, team).fillna(0)
 
+        # Filter out games that haven't been played yet
+        df = df[df['Win'] != 0]
+
         # Add a column denoting if a game was a win or not
         df.loc[:, 'w'] = df.apply(lambda row: 1 if row['R'] > row['RA'] else 0, axis=1)
+
+        # Also add a game_number column
+        df.loc[:, 'game_number'] = df.index
 
         df = df.apply(lambda row: calculate_wins(df, row), axis=1)
 
