@@ -1,6 +1,9 @@
 import argparse
 
 import pandas as pd
+import pybaseball as pyb
+
+from datetime import datetime
 
 from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
@@ -43,6 +46,29 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     return final_output
 
 
+def proccess_data_v2(teams: list[str]) -> pd.DataFrame:
+    output_dfs = []
+    for team in teams:
+        df = pyb.schedule_and_record(datetime.now().year, team).fillna(0)
+        # Filter out games that haven't been played yet
+        df = df[df['Win'] != 0]
+        # Add run differential column
+        df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
+        # Add rolling average column
+        df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
+        df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
+        df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
+        output_dfs.append(df.tail(NUM_GAMES))
+
+    final_output = pd.concat(output_dfs)
+    # Rename team column
+    final_output['team'] = final_output['Tm']
+    del final_output['Tm']
+    final_output.to_csv('test_ra.csv')
+    return final_output
+
+
+
 def main(division: int) -> None:
     """
     Main function that pulls the necessary data and calls the RollingAverage
@@ -66,7 +92,8 @@ def main(division: int) -> None:
              "teams": ['STL', 'MIL', 'CHC', 'CIN', 'PIT'] }
     }
 
-    df = proccess_data(divisions[division]['teams'])
+    #df = proccess_data(divisions[division]['teams'])
+    df = proccess_data_v2(divisions[division]['teams'])
 
     division_name = divisions[division]['name']
     # American League East -> AL East

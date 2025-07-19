@@ -103,7 +103,7 @@ class RollingAveragePlot(Plot):
         self.save_plot()
 
 
-    def handle_team_logos(self):
+    def handle_team_logos(self, alpha=0.75):
         """
         Add the team logo to the first and last point of each line.
         """
