@@ -59,6 +59,11 @@ def process_data(teams: list[str]) -> pd.DataFrame:
         team_dfs.append(df)
 
     final_df = pd.concat(team_dfs)
+
+    # Rename team column
+    final_df['team'] = final_df['Tm']
+    del final_df['Tm']
+
     return final_df
 
 
