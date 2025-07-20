@@ -129,13 +129,19 @@ class RatioScatterPlot(Plot):
         if self.plot_league_average:
             start = 0.1
             end = 0.9
-            self.axis.axvline(self.plot_league_average, color='k', label='NHL Average',
-                       ymin=start, ymax=end)
-            self.axis.axhline(self.plot_league_average, color='k', label='NHL Average',
-                       xmin=start, xmax=end)
-            self.axis.text(x=self.plot_league_average, y=self.plot_league_average, s="NHL\nAvg",
-                    backgroundcolor='red', color='white', ha='center', va='center',
-                    size='small', weight='bold')
+            if self.sport == 'baseball':
+                label = 'MLB Average'
+                s = 'MLB\nAvg'
+            else: # Default to hockey
+                label = 'NHL Average'
+                s = 'NHL\nAvg'
+            self.axis.axvline(self.plot_league_average, color='k', label=label,
+                              ymin=start, ymax=end)
+            self.axis.axhline(self.plot_league_average, color='k', label=label,
+                              xmin=start, xmax=end)
+            self.axis.text(x=self.plot_league_average, y=self.plot_league_average, s=s,
+                           backgroundcolor='red', color='white', ha='center', va='center',
+                           size='small', weight='bold')
 
         if self.ratio_lines:
             # Plot diagonal lines to show each percentage breakpoint
