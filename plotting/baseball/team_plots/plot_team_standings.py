@@ -1,6 +1,8 @@
 import argparse
 
 import pandas as pd
+from datetime import datetime
+from pybaseball import schedule_and_record
 
 from plotting.base_plots.cumulative_lines import CumulativeLinePlot
 
@@ -37,21 +39,31 @@ def process_data(teams: list[str]) -> pd.DataFrame:
     :param list[str] teams: List of teams in the division.
     :return pd.DataFrame: DataFrame containing all the columns needed for the plot.
     """
-    base_df = pd.read_csv('data/team_records.csv')
     team_dfs = []
+    year = datetime.now().year
 
     for team in teams:
-        df = base_df[base_df['team'] == team]
+        df = schedule_and_record(year, team).fillna(0)
+
+        # Filter out games that haven't been played yet
+        df = df[df['Win'] != 0]
 
         # Add a column denoting if a game was a win or not
-        df.loc[:, 'w'] = df.apply(lambda row: 1 if row['runs_for'] > row['runs_against'] else 0,
-                                  axis=1)
+        df.loc[:, 'w'] = df.apply(lambda row: 1 if row['R'] > row['RA'] else 0, axis=1)
+
+        # Also add a game_number column
+        df.loc[:, 'game_number'] = df.index
 
         df = df.apply(lambda row: calculate_wins(df, row), axis=1)
 
         team_dfs.append(df)
 
     final_df = pd.concat(team_dfs)
+
+    # Rename team column
+    final_df['team'] = final_df['Tm']
+    del final_df['Tm']
+
     return final_df
 
 

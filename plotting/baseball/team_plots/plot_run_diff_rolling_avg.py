@@ -1,9 +1,8 @@
 import argparse
 
 import pandas as pd
-import pybaseball as pyb
-
 from datetime import datetime
+from pybaseball import schedule_and_record
 
 from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
@@ -18,55 +17,42 @@ NUM_GAMES = 40
 
 def proccess_data(teams: list[str]) -> pd.DataFrame:
     """
-    Loads scraped data for teams in the given division and processes
-    data to be fit for rolling average chart.
+    Queries standings data from pybaseball for each provided teams and adds columns for run
+    differential and run differential rolling averages, returning a DataFrame with these data
+    for every provided team.
 
-    :param list[str] teams: List of teams to process.
-    :param int year: Year for which to gather data.
-    :return pd.DataFrame: DataFrame fit for rolling average plot.
+    :param list[str] teams: List of teams to query.
+    :return pd.DataFrame: Final DataFrame with all combined data.
     """
-    base_df = pd.read_csv('data/team_records.csv')
     output_dfs = []
+    year = datetime.now().year
 
     for team in teams:
-        df = base_df[base_df['team'] == team]
-        # Add run differential column
-        df['RD'] = df.apply(lambda row: row['runs_for'] - row['runs_against'], 1)
-        # Add rolling average column
-        df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
-        df = df[['game_number', 'team', 'RDRollingAvg']]
-        output_dfs.append(df.tail(NUM_GAMES))
+        # Pull the schedule record data for each individual team, to process and save in a list
+        df = schedule_and_record(year, team).fillna(0)
 
-    final_output = pd.concat(output_dfs)
-
-    # Rename game_num column
-    final_output['gameNumber'] = final_output['game_number']
-    del final_output['game_number']
-
-    return final_output
-
-
-def proccess_data_v2(teams: list[str]) -> pd.DataFrame:
-    output_dfs = []
-    for team in teams:
-        df = pyb.schedule_and_record(datetime.now().year, team).fillna(0)
         # Filter out games that haven't been played yet
         df = df[df['Win'] != 0]
+
         # Add run differential column
         df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
+
         # Add rolling average column
         df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
         df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
+
+        # Filter DataFrame to only columns we need for plotting
         df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
+
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
+
     # Rename team column
     final_output['team'] = final_output['Tm']
     del final_output['Tm']
-    final_output.to_csv('test_ra.csv')
-    return final_output
 
+    return final_output
 
 
 def main(division: int) -> None:
@@ -93,7 +79,7 @@ def main(division: int) -> None:
     }
 
     #df = proccess_data(divisions[division]['teams'])
-    df = proccess_data_v2(divisions[division]['teams'])
+    df = proccess_data(divisions[division]['teams'])
 
     division_name = divisions[division]['name']
     # American League East -> AL East
