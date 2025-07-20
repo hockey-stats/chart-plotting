@@ -29,21 +29,26 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
 
     for team in teams:
         # Pull the schedule record data for each individual team, to process and save in a list
-        df = schedule_and_record(year, team).fillna(0)
+        #df = schedule_and_record(year, team).fillna(0)
 
         # Filter out games that haven't been played yet
-        df = df[df['Win'] != 0]
+        #df = df[df['Win'] != 0]
 
         # Add run differential column
-        df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
+        #df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
+
+        print("TESTING MODE!!!! MAKE SURE YOU CHANGE BACK BEFORE PUSH TO MAIN")
+        df = pd.read_csv('data/team_records.csv')
+        df = df[df['Tm'] == team]
+        df['RD'] = df.apply(lambda row: row['RF'] - row['RA'], 1)
 
         # Add rolling average column
         df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
-        df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
+        #df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
 
         # Filter DataFrame to only columns we need for plotting
         df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
-
+        print(df)
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
@@ -51,7 +56,7 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     # Rename team column
     final_output['team'] = final_output['Tm']
     del final_output['Tm']
-
+    print(final_output)
     return final_output
 
 
@@ -108,6 +113,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--division', type=int, required=True,
                         help="Name of division for which to generate plot.")
+
     args = parser.parse_args()
 
     main(division=args.division)
