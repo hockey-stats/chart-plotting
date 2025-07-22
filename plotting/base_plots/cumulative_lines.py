@@ -43,7 +43,7 @@ class CumulativeLinePlot(Plot):
         Assemble the plot object.
         """
         self.plot_lines()
-        self.add_horizontal_lines()
+        y_min, y_max = self.add_horizontal_lines()
 
         self.axis.set_xlabel(self.x_label, fontdict=label_params)
         self.axis.set_ylabel(self.y_label, fontdict=label_params)
@@ -51,8 +51,7 @@ class CumulativeLinePlot(Plot):
         x_ticks = list(range(0, self.df['game_number'].max(), 10))
         self.axis.set_xticks(x_ticks, labels=x_ticks, fontdict=label_params)
 
-        y_ticks = list(range(int(self.df[self.y_col].min()),
-                             int(self.df[self.y_col].max())))
+        y_ticks = list(range(y_min, y_max))
         y_ticks = [y for y in y_ticks if y % 2 == 0]
         self.axis.set_yticks(y_ticks, labels=y_ticks, fontdict=label_params)
 
@@ -86,6 +85,8 @@ class CumulativeLinePlot(Plot):
 
             self.axis.hlines(y=y, xmin=0, xmax=self.df['game_number'].max(), alpha=0.4,
                             colors=color, linestyles=linestyle, zorder=-10)
+
+        return y_min, y_max
 
 
     
