@@ -89,7 +89,7 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
             else_logos = self.handle_team_logos(df=else_df, alpha=0.1)
 
             self.add_x_axis()
-            self.add_dotted_h_lines(y_values=[3, 2, 1, -1, -2, -3])
+            self.add_dotted_h_lines(y_values=[5, 4, 3, 2, 1, -1, -2, -3, 4, 5])
 
             return team_line + else_lines, team_logo, else_logos
        
