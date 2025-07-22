@@ -4,13 +4,15 @@ import pandas as pd
 from datetime import datetime
 from pybaseball import schedule_and_record
 
-from plotting.base_plots.rolling_average import RollingAveragePlot
+from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
+# Disable annoying warning
+pd.options.mode.chained_assignment = None
 
 # Number of games over which to compute the rolling average
 WINDOW = 20
 # Number of games to include in plot
-NUM_GAMES = 40
+NUM_GAMES = 50
 
 
 def proccess_data(teams: list[str]) -> pd.DataFrame:
@@ -28,20 +30,21 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     for team in teams:
         # Pull the schedule record data for each individual team, to process and save in a list
         df = schedule_and_record(year, team).fillna(0)
-        
+
         # Filter out games that haven't been played yet
         df = df[df['Win'] != 0]
 
         # Add run differential column
         df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
 
+        df['RD'] = df.apply(lambda row: row['RF'] - row['RA'], 1)
+
         # Add rolling average column
         df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
         df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
-        
+
         # Filter DataFrame to only columns we need for plotting
         df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
-
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
@@ -49,8 +52,6 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     # Rename team column
     final_output['team'] = final_output['Tm']
     del final_output['Tm']
-
-    final_output.to_csv('test_ra.csv')
     return final_output
 
 
@@ -83,10 +84,10 @@ def main(division: int) -> None:
     # American League East -> AL East
     division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
 
-    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages"
+    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages (Last {NUM_GAMES} Games)"
     subtitle = f"Over the last {NUM_GAMES} games"
 
-    plot = RollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
+    plot = AnimatedRollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
                               x_column='gameNumber',
                               y_column='RDRollingAvg',
                               title=plot_title, subtitle=subtitle,
@@ -99,13 +100,14 @@ def main(division: int) -> None:
                               for_multiplot=False,
                               data_disclaimer='baseballreference')
 
-    plot.make_plot()
+    plot.make_plot_gif()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--division', type=int, required=True,
                         help="Name of division for which to generate plot.")
+
     args = parser.parse_args()
 
     main(division=args.division)

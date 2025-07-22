@@ -99,39 +99,48 @@ class RollingAveragePlot(Plot):
             )
         else:
             self.set_title()
+
         self.save_plot()
 
 
-    def handle_team_logos(self):
+    def handle_team_logos(self, df=None, alpha=0.75):
         """
         Add the team logo to the first and last point of each line.
         """
-        for team in set(self.df['team']):
-            x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
-            y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
+        if df is None:
+            df = self.df
+        logos = list()
+        for team in set(df['team']):
+            x_last = list(df[df['team'] == team][self.x_col])[-1]
+            y_last = list(df[df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_last, y_last),
                                         frameon=False)
             self.axis.add_artist(artist_box)
 
-            x_first = list(self.df[self.df['team'] == team][self.x_col])[0]
-            y_first = list(self.df[self.df['team'] == team][self.y_col])[0]
+            x_first = list(df[df['team'] == team][self.x_col])[0]
+            y_first = list(df[df['team'] == team][self.y_col])[0]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_first, y_first),
                                         frameon=False)
-            self.axis.add_artist(artist_box)
+            logo = self.axis.add_artist(artist_box)
+            logos.append(logo)
+        return logos
 
 
-    def plot_multilines(self):
+    def plot_multilines(self, alpha=1, linewidth=3, df=None):
         """
         Given a multiline_key, for each distinct value in the column corresponding to that key,
         add a single line plot for the dataframe filtered on that value.
         """
-        keys = set(self.df[self.multiline_key])
+        if df is None:
+            df = self.df
+        keys = set(df[self.multiline_key])
+        lines = list()
         for key in keys:
-            individual_df = self.df[self.df[self.multiline_key] == key]
+            individual_df = df[df[self.multiline_key] == key]
 
             # Add a bit of smoothing
             x_col = individual_df[self.x_col]
@@ -147,15 +156,25 @@ class RollingAveragePlot(Plot):
                 elif self.sport == 'baseball':
                     color = mlb_label_colors[key]['line']
             #self.axis.plot(individual_df[self.x_col], individual_df[self.y_col], color=color,
-            self.axis.plot(new_x, y_smooth, color=color,
-                           linewidth=3)
+            line = self.axis.plot(new_x, y_smooth, color=color, alpha=alpha,
+                                  linewidth=linewidth)
+            lines.append(line)
 
+        return lines
 
     def add_x_axis(self):
         """
         Draws the x-axis at the y-midpoint.
         """
         self.axis.axhline(self.y_midpoint, color='black', label='50%')
+
+
+    def add_dotted_h_lines(self, y_values: list[int]):
+        """
+        Given a list of y_values, plot dotted lines at each.
+        """
+        for y in y_values:
+            self.axis.axhline(y, color='grey', linestyle='--', alpha=0.4)
 
 
     def set_scaling(self):
