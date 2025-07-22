@@ -37,8 +37,6 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
         # Add run differential column
         df['RD'] = df.apply(lambda row: row['R'] - row['RA'], 1)
 
-        df['RD'] = df.apply(lambda row: row['RF'] - row['RA'], 1)
-
         # Add rolling average column
         df['RDRollingAvg'] = df['RD'].rolling(WINDOW).mean()
         df['gameNumber'] = df.apply(lambda row: int(row.name), 1)
