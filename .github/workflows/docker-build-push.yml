@@ -1,4 +1,4 @@
-name: Build and Push MLB Fantasy Reporter Docker Image
+name: Build and Push Chart Plotter Docker Image
 on:
   workflow_dispatch:
   push:
