@@ -103,24 +103,26 @@ class RollingAveragePlot(Plot):
         self.save_plot()
 
 
-    def handle_team_logos(self, alpha=0.75):
+    def handle_team_logos(self, df=None, alpha=0.75):
         """
         Add the team logo to the first and last point of each line.
         """
+        if df is None:
+            df = self.df
         logos = list()
-        for team in set(self.df['team']):
-            x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
-            y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
+        for team in set(df['team']):
+            x_last = list(df[df['team'] == team][self.x_col])[-1]
+            y_last = list(df[df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_last, y_last),
                                         frameon=False)
             self.axis.add_artist(artist_box)
 
-            x_first = list(self.df[self.df['team'] == team][self.x_col])[0]
-            y_first = list(self.df[self.df['team'] == team][self.y_col])[0]
+            x_first = list(df[df['team'] == team][self.x_col])[0]
+            y_first = list(df[df['team'] == team][self.y_col])[0]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_first, y_first),
                                         frameon=False)
             logo = self.axis.add_artist(artist_box)
@@ -165,6 +167,14 @@ class RollingAveragePlot(Plot):
         Draws the x-axis at the y-midpoint.
         """
         self.axis.axhline(self.y_midpoint, color='black', label='50%')
+
+
+    def add_dotted_h_lines(self, y_values: list[int]):
+        """
+        Given a list of y_values, plot dotted lines at each.
+        """
+        for y in y_values:
+            self.axis.axhline(y, color='grey', linestyle='--', alpha=0.4)
 
 
     def set_scaling(self):

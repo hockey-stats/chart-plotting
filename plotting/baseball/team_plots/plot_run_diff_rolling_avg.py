@@ -12,7 +12,7 @@ pd.options.mode.chained_assignment = None
 # Number of games over which to compute the rolling average
 WINDOW = 20
 # Number of games to include in plot
-NUM_GAMES = 40
+NUM_GAMES = 50
 
 
 def proccess_data(teams: list[str]) -> pd.DataFrame:
@@ -48,7 +48,6 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
 
         # Filter DataFrame to only columns we need for plotting
         df = df[['gameNumber', 'Tm', 'RDRollingAvg']]
-        print(df)
         output_dfs.append(df.tail(NUM_GAMES))
 
     final_output = pd.concat(output_dfs)
@@ -56,7 +55,6 @@ def proccess_data(teams: list[str]) -> pd.DataFrame:
     # Rename team column
     final_output['team'] = final_output['Tm']
     del final_output['Tm']
-    print(final_output)
     return final_output
 
 
@@ -90,7 +88,7 @@ def main(division: int) -> None:
     # American League East -> AL East
     division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
 
-    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages"
+    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages (Last {NUM_GAMES} Games)"
     subtitle = f"Over the last {NUM_GAMES} games"
 
     plot = AnimatedRollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
