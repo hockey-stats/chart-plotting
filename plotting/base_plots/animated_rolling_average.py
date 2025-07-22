@@ -1,3 +1,4 @@
+import sys
 import matplotlib
 import matplotlib.patheffects as PathEffects
 from matplotlib.animation import FuncAnimation, FFMpegWriter
@@ -8,7 +9,8 @@ from util.font_dicts import game_report_label_text_params as label_params
 from util.font_dicts import multiplot_title_params
 
 
-matplotlib.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\sohra\\Downloads\\ffmpeg-7.1.1-essentials_build\\ffmpeg-7.1.1-essentials_build\\bin\\ffmpeg.exe'
+if sys.platform == 'win32':
+    matplotlib.rcParams['animation.ffmpeg_path'] = r'C:\\Users\\sohra\\Downloads\\ffmpeg-7.1.1-essentials_build\\ffmpeg-7.1.1-essentials_build\\bin\\ffmpeg.exe'
 
 
 class AnimatedRollingAveragePlot(RollingAveragePlot):
