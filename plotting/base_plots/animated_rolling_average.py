@@ -113,5 +113,5 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
 
         self.fig.set_facecolor('#000d1a')
 
-        videowriter = FFMpegWriter(fps=0.5)
+        videowriter = FFMpegWriter(fps=1)
         ani.save('run_diff_rolling_avg.mp4', dpi=300, writer=videowriter)
