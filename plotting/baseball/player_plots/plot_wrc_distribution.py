@@ -54,6 +54,7 @@ def main(year, qual, team):
                       team_level_metric=team_wrc,
                       team_rank=team_rank,
                       y_label='wRC+',
+                      table_columns=['ABs', 'AVG', 'HRs', 'OPS'],
                       title=plot_title,
                       data_disclaimer='fangraphs',
                       subtitle=f"Plotted against league distribution, min. {qual} ABs\n"\

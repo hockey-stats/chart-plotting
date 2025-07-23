@@ -23,8 +23,10 @@ class SwarmPlot(Plot):
                  team,
                  qualifier,
                  y_label,
+                 table_columns=None,
                  team_level_metric=None,
                  team_rank=None,
+                 category_column=None,
                  title='',
                  subtitle='',
                  size=(10, 8),
@@ -42,6 +44,12 @@ class SwarmPlot(Plot):
         self.y_label = y_label
         self.team_level_metric = team_level_metric
         self.team_rank = team_rank
+        # List of columns to be included in the companion table to the plot
+        self.table_columns = table_columns
+        # If not None, category_column will refer to a boolean column which denotes whether a row
+        # member belongs to a certain category or not, for coloring the swarms differently.
+        # E.g.,  is_starter for the pitcher stuff+ plot.
+        self.category_column = category_column
         self.fig = plt.figure(figsize=self.size)
         self.data_disclaimer = data_disclaimer
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
@@ -76,6 +84,10 @@ class SwarmPlot(Plot):
 
         # And re-sort by the desired metric
         team_df = team_df.sort_values(by=[self.column], ascending=False)
+        print(team_df)
+
+        if self.column == 'Stuff+':
+            self.axis.set_yticks(list(range(50, 150, 10)))
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
                                     color=mlb_label_colors[self.team]["line"],
@@ -184,7 +196,8 @@ class SwarmPlot(Plot):
         if self.team_rank is not None:
             self.add_team_rank(label_dict, metric_dict)
 
-        self.add_table(team_df)
+        if self.table_columns is not None:
+            self.add_table(team_df)
 
 
     def make_dummy_categorical_data(self):
@@ -201,15 +214,15 @@ class SwarmPlot(Plot):
         dummy_rows = {
             'Team': [self.team] * 2, 
             'Name': [''] * 2, 
-            'AB': [0] * 2, 
-            'wRC+': [0] * 2, 
+            self.qualifier: [0] * 2, 
+            self.column: [0] * 2, 
             'day': list(range(1, 3))
         }
         df = pd.DataFrame(dummy_rows)
         dummy_df = pd.concat([self.df, df]).fillna(0)
 
         # First plot every value, including the dummy values, but without any color.
-        self.axis = sns.swarmplot(y='wRC+', x='day', data=dummy_df, color='antiquewhite')
+        self.axis = sns.swarmplot(y=self.column, x='day', data=dummy_df, color='antiquewhite')
 
 
     def draw_average_line(self, avg_value=100, league_name='MLB'):
@@ -286,13 +299,19 @@ class SwarmPlot(Plot):
 
         # Format some columns with 0 decimal places, and others with 3.
         for col in ['AB', 'HR']:
-            df[f'{col}s'] = df.apply(lambda row: "%.0f" % row[col], axis=1)
+            try:
+                df[f'{col}s'] = df.apply(lambda row: "%.0f" % row[col], axis=1)
+            except KeyError:
+                continue
 
         for col in ['AVG', 'OPS']:
-            df[col] = df.apply(lambda row: "%.3f" % row[col], axis=1)
+            try:
+                df[col] = df.apply(lambda row: "%.3f" % row[col], axis=1)
+            except KeyError:
+                continue
 
         # Isolate only the columns we want, in the order we want
-        df = df[['ABs', 'AVG', 'HRs', 'OPS']]
+        df = df[self.table_columns]
 
         table = plt.table(cellText=df.values,
                           colLabels=df.columns,
