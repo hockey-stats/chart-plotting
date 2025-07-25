@@ -38,14 +38,15 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_teamwide_stuff(year: int, team: str) -> None:
     """
-    Gets the team-level pitching data and finds the team-wide Stuff+ and rank to include in the plot.
+    Gets the team-level pitching data and finds the team-wide Stuff+ and rank to include in the
+    plot.
     :param int year: Season in question
     :param str team: Team in question
     """
-    df = pyb.team_pitching(year)[['Team', 'Stuff+']]
-    df = df.sort_values(by='Stuff+', ascending=False).reset_index()
+    df = pyb.team_pitching(year)[['Team', 'WAR']]
+    df = df.sort_values(by='WAR', ascending=False).reset_index()
     rank = int(df[df['Team'] == team].index[0]) + 1
-    stuff = int(df[df['Team'] == team]['Stuff+'].iloc[0])
+    stuff = float(df[df['Team'] == team]['WAR'].iloc[0])
 
     return rank, stuff
 
@@ -65,9 +66,12 @@ def main(year: int, qual: int, team: str) -> None:
     data['team'] = data['Team']
     del data['Team']
 
+    # Scale K-BB% up to 1-100%
+    data['K-BB%'] = data.apply(lambda x: x['K-BB%'] * 100, axis=1)
+
     team_full_name = mlb_team_full_names[team]
 
-    plot_title = f"{team_full_name} Pitchers by Stuff+"
+    plot_title = f"{team_full_name} Pitchers by WAR"
 
     team_rank, team_stuff = get_teamwide_stuff(year, team)
 
@@ -78,13 +82,13 @@ def main(year: int, qual: int, team: str) -> None:
     
     plot = SwarmPlot(dataframe=data,
                      filename=f'{team}_stuff.png',
-                     column='ERA',
+                     column='Stuff+',
                      team=team,
                      qualifier='IP',
                      team_level_metric=team_stuff,
                      team_rank=team_rank,
-                     y_label='Stuff+',
-                     table_columns=['ERA', 'xERA', 'K-BB%', 'WAR'],
+                     y_label='WAR',
+                     table_columns=['ERA', 'xERA', 'K-BB%', 'Stuff+'],
                      title=plot_title,
                      category_column='is_starter',
                      data_disclaimer='fangraphs',

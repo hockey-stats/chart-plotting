@@ -73,7 +73,14 @@ class SwarmPlot(Plot):
         self.make_dummy_categorical_data()
 
         # Now plot every player in the full sample
-        self.axis = sns.swarmplot(y=self.column, x='day', data=self.df, color='silver')
+        self.axis = sns.swarmplot(y=self.column, x='day', data=self.df, color='silver',
+                                  size=4.5)
+
+        if self.category_column:
+            sub_df = self.df[self.df[self.category_column]]
+            print(sub_df)
+            self.axis = sns.swarmplot(y=self.column, x='day', data=sub_df, color='white',
+                                      size=4.5)
 
         # Add a line denoting league average
         self.draw_average_line()
@@ -85,13 +92,13 @@ class SwarmPlot(Plot):
         # And re-sort by the desired metric
         team_df = team_df.sort_values(by=[self.column], ascending=False)
 
-        if self.column == 'Stuff+':
-            self.axis.set_yticks(list(range(80, 130, 10)))
-            self.axis.set_ylim(bottom=70, top=140)
+        if self.column == 'WAR':
+            self.axis.set_yticks(list(range(-1, 6, 1)))
+            self.axis.set_ylim(bottom=-2, top=6)
 
-        if self.column == 'ERA':
-            self.axis.set_yticks(list(range(0, 8, 1)))
-            self.axis.set_ylim(bottom=0, top=8)
+        if self.column == 'Stuff+':
+            self.axis.set_yticks(list(range(80, 120, 10)))
+            self.axis.set_ylim(bottom=70, top=140)
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
                                     color=mlb_label_colors[self.team]["line"],
@@ -105,6 +112,12 @@ class SwarmPlot(Plot):
         # Add labels for every player on team
         self.label_team_players(team_df, team_coords)
 
+        # Add huge logo as background piece
+        team_logo = self.get_logo_marker(self.team, sport='baseball', size='huge', alpha=0.2)
+        self.axis.add_artist(AnnotationBbox(team_logo, xy=(1, 0.5),
+                                            frameon=False,
+                                            box_alignment=(1, 0.5),
+                                            xycoords='axes fraction', zorder=-11))
         self.save_plot()
 
 
@@ -122,7 +135,7 @@ class SwarmPlot(Plot):
         logo_x_pos = 3
 
         # Get logo marker for team in question
-        team_logo = self.get_logo_marker(self.team, sport='baseball', size='tiny')
+        #team_logo = self.get_logo_marker(self.team, sport='baseball', size='tiny')
 
         # Define style dicts for the label and metric Bbox
         metric_dict = {
@@ -141,7 +154,7 @@ class SwarmPlot(Plot):
             'color': 'black',
             'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
             'bbox': {
-                'alpha': 0.3,
+                'alpha': 0.4,
                 'color': mlb_label_colors[self.team]['bg'],
                 'boxstyle': 'round'
             }
@@ -159,20 +172,41 @@ class SwarmPlot(Plot):
             # Not exactly sure why the x-coordinate gets inverted in the transformation process,
             # but it does
             x = -1 * x
+            
+            # Offset value to place the player label, may differ based on metric value
+            x_offset = 1.55
+
+            # Decomissioned logo stuff: TODO: Remove??
+            #################################################################################
             # Set the logo to be slightly higher so that is aligns better with the label
-            logo_y = y + 4
+            #logo_y = y + 4
 
             # Draw the logos
-            self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, logo_y),
-                                                frameon=False,
-                                                xycoords='data', zorder=11))
-            # Draw a line connect logo to the point in the swarmplot
-            plt.plot([x, coord[0]], [logo_y, coord[1]], color=line_color,
+            #self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, logo_y),
+            #                                    frameon=False,
+            #                                    xycoords='data', zorder=11))
+
+            # Draw a line connecting the logo to the point in the swarmplot
+            #plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
+            #        linewidth=2, zorder=10, alpha=0.7)
+            #################################################################################
+
+            # Draw a line connecting the metric value to the point in the swarmplot
+            plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
                      linewidth=2, zorder=10, alpha=0.7)
 
-            # Pad the metric value if it is only 2-digits
-            if 9 < int(metric) < 100:
-                metric = f" {metric} "
+            # Additional formatting conditions for wRC+/Stuff+ etc.
+            if '+' in self.column:
+                # Pad the metric value if it is only 2-digits
+                if 9 < int(metric) < 100:
+                    metric = f" {metric} "
+
+            # Additional formatting conditions for WAR
+            if self.column == 'WAR':
+                if len(str(metric)) < 4:
+                    metric = f" {metric}"
+                x_offset = 1.6
+
 
             # Determine the color of the metric text box based on the value
             ratio = float(metric) / 200.0 if float(metric) > 0.0 else 0.0
@@ -180,7 +214,7 @@ class SwarmPlot(Plot):
             metric_dict['bbox']['facecolor'] = metric_color
 
             # Draw the metric text box
-            self.axis.text(x=x*1.25, y=y, s=metric,
+            self.axis.text(x=x*1.05, y=y, s=metric,
                            transform=self.axis.transData,
                            **metric_dict)
 
@@ -189,7 +223,7 @@ class SwarmPlot(Plot):
             name = f"{' '.join(name.split(' ')[1:])}"
 
             # Draw the text box with player info
-            self.axis.text(x=x*1.75, y=y, s=f'{name}',
+            self.axis.text(x=x*x_offset, y=y, s=f'{name}',
                            transform=self.axis.transData,
                            **label_dict)
 
@@ -241,7 +275,7 @@ class SwarmPlot(Plot):
         else:
             avg_value = self.df[self.column].mean()
 
-        print(avg_value)
+        
         self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='black', alpha=0.3, zorder=8)
 
         # Create custom transform to have x-coordinates correspond to the Axes and y-coordinates
@@ -305,10 +339,22 @@ class SwarmPlot(Plot):
         # Work with a copy of the DataFrame to avoid silly issues
         df = team_df.copy()
 
-        # Format some columns with 0 decimal places, and others with 3.
+        # Format some columns with specific decimal place points
         for col in ['AB', 'HR']:
             try:
                 df[f'{col}s'] = df.apply(lambda row: "%.0f" % row[col], axis=1)
+            except KeyError:
+                continue
+
+        for col in ['K-BB%', 'WAR']:
+            try:
+                df[f'{col}'] = df.apply(lambda row: "%.1f" % row[col], axis=1)
+            except KeyError:
+                continue
+
+        for col in ['ERA', 'xERA']:
+            try:
+                df[f'{col}'] = df.apply(lambda row: "%.2f" % row[col], axis=1)
             except KeyError:
                 continue
 
@@ -326,7 +372,7 @@ class SwarmPlot(Plot):
                           cellLoc='center',
                           colLoc='center',
                           rowLoc='left',
-                          bbox=(0.68, 0.05, 0.3, 0.785),
+                          bbox=(0.65, 0.05, 0.35, 0.785),
                           edges='B'
                           )
 

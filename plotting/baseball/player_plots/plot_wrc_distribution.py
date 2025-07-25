@@ -35,7 +35,7 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
 
 def main(year, qual, team):
     data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+', 'AVG',
-                                               'HR', 'OPS', 'Barrel%', 'maxEV']]
+                                               'WAR', 'HR', 'OPS', 'Barrel%', 'maxEV']]
     data['team'] = data['Team']
     del data['Team']
 
@@ -55,7 +55,7 @@ def main(year, qual, team):
                       team_level_metric=team_wrc,
                       team_rank=team_rank,
                       y_label='wRC+',
-                      table_columns=['ABs', 'AVG', 'HRs', 'OPS'],
+                      table_columns=['ABs', 'AVG', 'HRs', 'OPS', 'WAR'],
                       title=plot_title,
                       data_disclaimer='fangraphs',
                       subtitle=f"Plotted against league distribution, min. {qual} ABs\n"\
