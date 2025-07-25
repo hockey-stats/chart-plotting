@@ -84,10 +84,14 @@ class SwarmPlot(Plot):
 
         # And re-sort by the desired metric
         team_df = team_df.sort_values(by=[self.column], ascending=False)
-        print(team_df)
 
         if self.column == 'Stuff+':
-            self.axis.set_yticks(list(range(50, 150, 10)))
+            self.axis.set_yticks(list(range(80, 130, 10)))
+            self.axis.set_ylim(bottom=70, top=140)
+
+        if self.column == 'ERA':
+            self.axis.set_yticks(list(range(0, 8, 1)))
+            self.axis.set_ylim(bottom=0, top=8)
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
                                     color=mlb_label_colors[self.team]["line"],
@@ -166,7 +170,6 @@ class SwarmPlot(Plot):
             plt.plot([x, coord[0]], [logo_y, coord[1]], color=line_color,
                      linewidth=2, zorder=10, alpha=0.7)
 
-
             # Pad the metric value if it is only 2-digits
             if 9 < int(metric) < 100:
                 metric = f" {metric} "
@@ -214,8 +217,8 @@ class SwarmPlot(Plot):
         dummy_rows = {
             'Team': [self.team] * 2, 
             'Name': [''] * 2, 
-            self.qualifier: [0] * 2, 
-            self.column: [0] * 2, 
+            self.qualifier: [0] * 2,
+            self.column: [0] * 2,
             'day': list(range(1, 3))
         }
         df = pd.DataFrame(dummy_rows)
@@ -225,21 +228,26 @@ class SwarmPlot(Plot):
         self.axis = sns.swarmplot(y=self.column, x='day', data=dummy_df, color='antiquewhite')
 
 
-    def draw_average_line(self, avg_value=100, league_name='MLB'):
+    def draw_average_line(self, league_name='MLB'):
         """
         Draws a horizontal line representing the league average value for whichever metric
         is being plotted.
 
-        :param int avg_value: The average value of the metric, defaults to 100.
         :param str league_name: Name of the league, for label.
         """
+        if '+' in self.column:  # e.g. wRC+ or Stuff+
+            avg_value = 100
+        
+        else:
+            avg_value = self.df[self.column].mean()
 
+        print(avg_value)
         self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='black', alpha=0.3, zorder=8)
 
         # Create custom transform to have x-coordinates correspond to the Axes and y-coordinates
         # correspond to the data
         trans = transforms.blended_transform_factory(self.axis.transAxes, self.axis.transData)
-        self.axis.text(x=0.04, y=99, s=f"{league_name}\nAverage", size=9, color='black',
+        self.axis.text(x=0.04, y=avg_value, s=f"{league_name}\nAverage", size=9, color='black',
                        transform=trans, ha='center', va='top')
 
 

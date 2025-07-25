@@ -71,12 +71,14 @@ def main(year: int, qual: int, team: str) -> None:
 
     team_rank, team_stuff = get_teamwide_stuff(year, team)
 
+    print(data['ERA'].mean())
+
     data['is_starter'] = data.apply(lambda x: True if x['GS'] >= 0.5 * x['G'] else False,
                                     axis=1)
     
     plot = SwarmPlot(dataframe=data,
                      filename=f'{team}_stuff.png',
-                     column='Stuff+',
+                     column='ERA',
                      team=team,
                      qualifier='IP',
                      team_level_metric=team_stuff,
@@ -96,7 +98,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year for which to get data, defaults to current year')
-    parser.add_argument('-q', '--qual', default=30, type=int,
+    parser.add_argument('-q', '--qual', default=20, type=int,
                         help='Minimum innings pitched to qualify in query, defaults to 30')
     parser.add_argument('-t', '--team', required=True, type=str,
                         help='Team for which players should be highlighted.')
