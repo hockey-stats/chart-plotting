@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 import matplotlib.transforms as transforms
 from matplotlib.offsetbox import AnnotationBbox
+from matplotlib.patches import Rectangle
 import seaborn as sns
 import pandas as pd
 
@@ -72,15 +73,31 @@ class SwarmPlot(Plot):
         # Introduce fake categories for formatting purposes
         self.make_dummy_categorical_data()
 
+        if self.column == 'WAR':
+            self.axis.set_yticks(list(range(-1, 6, 1)))
+            self.axis.set_ylim(bottom=-2, top=6)
+
+        if self.column == 'Stuff+':
+            self.axis.set_yticks(list(range(80, 120, 10)))
+            self.axis.set_ylim(bottom=70, top=140)
+
+        # Add huge logo as background piece
+        team_logo = self.get_logo_marker(self.team, sport='baseball', size='huge', alpha=0.2)
+        self.axis.add_artist(AnnotationBbox(team_logo, xy=(1, 0.5),
+                                            frameon=False,
+                                            box_alignment=(1, 0.5),
+                                            xycoords='axes fraction', zorder=-11))
+
         # Now plot every player in the full sample
         self.axis = sns.swarmplot(y=self.column, x='day', data=self.df, color='silver',
                                   size=4.5)
 
+        # If dealing with a second category of points, call a seperate method to handle
+        # the bulk of the plotting.
         if self.category_column:
-            sub_df = self.df[self.df[self.category_column]]
-            print(sub_df)
-            self.axis = sns.swarmplot(y=self.column, x='day', data=sub_df, color='white',
-                                      size=4.5)
+            self.plot_categorically()
+            self.save_plot()
+            return
 
         # Add a line denoting league average
         self.draw_average_line()
@@ -91,14 +108,6 @@ class SwarmPlot(Plot):
 
         # And re-sort by the desired metric
         team_df = team_df.sort_values(by=[self.column], ascending=False)
-
-        if self.column == 'WAR':
-            self.axis.set_yticks(list(range(-1, 6, 1)))
-            self.axis.set_ylim(bottom=-2, top=6)
-
-        if self.column == 'Stuff+':
-            self.axis.set_yticks(list(range(80, 120, 10)))
-            self.axis.set_ylim(bottom=70, top=140)
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
                                     color=mlb_label_colors[self.team]["line"],
@@ -112,16 +121,118 @@ class SwarmPlot(Plot):
         # Add labels for every player on team
         self.label_team_players(team_df, team_coords)
 
-        # Add huge logo as background piece
-        team_logo = self.get_logo_marker(self.team, sport='baseball', size='huge', alpha=0.2)
-        self.axis.add_artist(AnnotationBbox(team_logo, xy=(1, 0.5),
-                                            frameon=False,
-                                            box_alignment=(1, 0.5),
-                                            xycoords='axes fraction', zorder=-11))
+        if self.table_columns is not None:
+            self.add_table(team_df)
+
         self.save_plot()
+        
 
+    def plot_categorically(self) -> None:
+        """
+        Method used to generate the plot when dealing with an additional category for the players
+        in the dataset that want to be marked differently, e.g. starters and relievers.
 
-    def label_team_players(self, team_df, team_coords):
+        Players in the alternate category have a different color by default in the swarm plot and
+        their labels will be presented separately.
+        """
+        # df_a will contain every player in the sample set for which the category column is True
+        df_a = self.df[self.df[self.category_column]]\
+                    .sort_values(by=[self.column], ascending=False).reset_index()
+
+        # df_b will be the same but where the category column is False
+        df_b = self.df[~(self.df[self.category_column])]\
+                    .sort_values(by=[self.column], ascending=False).reset_index()
+
+        # Add columns for rank within their cohort
+        df_a['rank'] = df_a.apply(lambda row: row.name, axis=1)
+        df_b['rank'] = df_b.apply(lambda row: row.name, axis=1)
+
+        # Add all players in league from df_a to swarm plot with slightly different color
+        self.axis = sns.swarmplot(y=self.column, x='day', data=df_a, color='slategrey',
+                                  size=4.5)
+
+        # Add two lines denoting the averages for each category
+        self.draw_average_line(label='Starter\nAverage', avg_value=df_a[self.column].mean())
+        self.draw_average_line(label='Reliever\nAverage', avg_value=df_b[self.column].mean())
+
+        combined_dfs = []
+
+        for i, df in enumerate([df_a, df_b]):
+            # Show 5 players for the first category, 7 for the second
+            num_players = 5 + (i * 2)
+
+            # Filter df_a and df_b to only contain players from our team
+            team_df = df[df['team'] == self.team]\
+                           .sort_values(by=[self.qualifier], ascending=False)[0:num_players]
+
+            # Then re-sort by metric
+            team_df = team_df.sort_values(by=[self.column], ascending=False)
+
+            # And add to plot
+            team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
+                                        color=mlb_label_colors[self.team]['line'],
+                                        zorder=9)
+            team_coords = team_points.collections[-1].get_offsets()
+
+            # Then add labels
+            self.label_team_players(team_df, team_coords, vert_offset=0.3*i)
+
+            # And save to list for creating combined table
+            combined_dfs.append(team_df)
+
+        # Add labels for starters and relievers in table
+        pos_label_params = label_params.copy()
+        pos_label_params['fontsize'] = 13
+        line_a = plt.plot([1.02, 1.02], [0.77, 0.48], color='white', linewidth=2,
+                          solid_capstyle='butt',
+                          transform=self.axis.transAxes)
+        label_a = self.axis.text(1.03, 0.55, s='Starters',
+                                 transform=self.axis.transAxes,
+                                 rotation=270,
+                                 **pos_label_params)
+
+        line_b = plt.plot([1.02, 1.02], [0.46, 0.07], color='white', linewidth=2,
+                          solid_capstyle='butt',
+                          transform=self.axis.transAxes)
+        label_b = self.axis.text(1.03, 0.2, s='Relievers',
+                                 transform=self.axis.transAxes,
+                                 rotation=270,
+                                 **pos_label_params)
+
+        for thing in [line_a[0], label_a, line_b[0], label_b]:
+            thing.set_clip_on(False)
+
+        if self.table_columns is not None:
+            team_df = pd.concat(combined_dfs)
+            self.add_table(team_df)
+
+        # Add legend for different categories
+        legend_x = 0.02
+        legend_y = 0.94
+        
+        self.axis.add_patch(
+            Rectangle(xy=(legend_x-0.01, legend_y-0.05),
+                      height=0.07,
+                      width=0.12,
+                      edgecolor='steelblue',
+                      facecolor='antiquewhite',
+                      transform=self.axis.transAxes)
+        )
+
+        self.axis.plot([legend_x], [legend_y], color='slategrey',
+                       marker='o', markersize=4.5,
+                       transform=self.axis.transAxes)
+        self.axis.text(legend_x + 0.02, legend_y, s='Starters',
+                       va='center',
+                       transform=self.axis.transAxes)
+        self.axis.plot([legend_x], [legend_y-0.03], color='silver',
+                       marker='o', markersize=4.5,
+                       transform=self.axis.transAxes)
+        self.axis.text(legend_x + 0.02, legend_y-0.03, s='Relievers',
+                       va='center',
+                       transform=self.axis.transAxes)
+
+    def label_team_players(self, team_df, team_coords, vert_offset=0):
         """
         Method that adds a logo and text box to label the point in the swarmplot for every player
         on the desired team.
@@ -129,9 +240,11 @@ class SwarmPlot(Plot):
         :param DataFrame team_df: DataFrame containing data for just the team in question.
         :param list((float, float)) team_coords: List of float 2-tuple for the coordinates of each
                                                  player's point in the plot.
+        :param float vert_offset: How much to vertically offset the start of the labels. Used mostly
+                                  in categorical mode.
         """
         # Define starting x- and y-pos.
-        y_pos = 0.73
+        y_pos = 0.73 - vert_offset
         logo_x_pos = 3
 
         # Get logo marker for team in question
@@ -207,9 +320,14 @@ class SwarmPlot(Plot):
                     metric = f" {metric}"
                 x_offset = 1.6
 
-
             # Determine the color of the metric text box based on the value
-            ratio = float(metric) / 200.0 if float(metric) > 0.0 else 0.0
+            if self.category_column:
+                category_value = list(team_df[self.category_column])[0]
+                max_rank = float(len(self.df[self.df[self.category_column] == category_value]))
+                rank = list(team_df[team_df['Name'] == name]['rank'])[0]
+                ratio = 1.0 - (float(rank) / float(max_rank))
+            else:
+                ratio = float(metric) / 200.0 if float(metric) > 0.0 else 0.0
             metric_color = ratio_to_color(min(ratio, 1.0))
             metric_dict['bbox']['facecolor'] = metric_color
 
@@ -233,8 +351,6 @@ class SwarmPlot(Plot):
         if self.team_rank is not None:
             self.add_team_rank(label_dict, metric_dict)
 
-        if self.table_columns is not None:
-            self.add_table(team_df)
 
 
     def make_dummy_categorical_data(self):
@@ -262,26 +378,31 @@ class SwarmPlot(Plot):
         self.axis = sns.swarmplot(y=self.column, x='day', data=dummy_df, color='antiquewhite')
 
 
-    def draw_average_line(self, league_name='MLB'):
+    def draw_average_line(self, league_name='MLB', label=None, avg_value=None):
         """
         Draws a horizontal line representing the league average value for whichever metric
         is being plotted.
 
         :param str league_name: Name of the league, for label.
+        :param str label: Label to add to the line.
+        :param int avg_value: The y-value to plot the line at.
         """
-        if '+' in self.column:  # e.g. wRC+ or Stuff+
-            avg_value = 100
-        
-        else:
-            avg_value = self.df[self.column].mean()
+        if avg_value is None:
+            if '+' in self.column:  # e.g. wRC+ or Stuff+
+                avg_value = 100
+            
+            else:
+                avg_value = self.df[self.column].mean()
 
-        
         self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='black', alpha=0.3, zorder=8)
+
+        if label is None:
+            label = f"{league_name}\nAverage"
 
         # Create custom transform to have x-coordinates correspond to the Axes and y-coordinates
         # correspond to the data
         trans = transforms.blended_transform_factory(self.axis.transAxes, self.axis.transData)
-        self.axis.text(x=0.04, y=avg_value, s=f"{league_name}\nAverage", size=9, color='black',
+        self.axis.text(x=0.04, y=avg_value, s=label, size=9, color='black',
                        transform=trans, ha='center', va='top')
 
 
@@ -293,7 +414,8 @@ class SwarmPlot(Plot):
         :param dict metric_dict: Config info for the metrics text box.
         """
 
-        metric_ratio = min(1.0, float(self.team_level_metric) / 200.0)
+        #metric_ratio = min(1.0, float(self.team_level_metric) / 200.0)
+        metric_ratio = 1 - (float(self.team_rank) / 30.0)
         metric_color = ratio_to_color(metric_ratio)
 
         # Increase text size

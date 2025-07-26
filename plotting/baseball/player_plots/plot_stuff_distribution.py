@@ -62,7 +62,7 @@ def main(year: int, qual: int, team: str) -> None:
 
     data = pyb.pitching_stats(year, qual=qual)[['Team', 'Name', 'IP', 'G', 'GS', 'Stuff+',
                                                 'ERA', 'xERA', 'K-BB%', 'WAR']]
-    
+
     data['team'] = data['Team']
     del data['Team']
 
@@ -75,20 +75,18 @@ def main(year: int, qual: int, team: str) -> None:
 
     team_rank, team_stuff = get_teamwide_stuff(year, team)
 
-    print(data['ERA'].mean())
-
     data['is_starter'] = data.apply(lambda x: True if x['GS'] >= 0.5 * x['G'] else False,
                                     axis=1)
-    
+
     plot = SwarmPlot(dataframe=data,
                      filename=f'{team}_stuff.png',
-                     column='Stuff+',
+                     column='WAR',
                      team=team,
                      qualifier='IP',
                      team_level_metric=team_stuff,
                      team_rank=team_rank,
                      y_label='WAR',
-                     table_columns=['ERA', 'xERA', 'K-BB%', 'Stuff+'],
+                     table_columns=['IP', 'ERA', 'K-BB%', 'Stuff+'],
                      title=plot_title,
                      category_column='is_starter',
                      data_disclaimer='fangraphs',
