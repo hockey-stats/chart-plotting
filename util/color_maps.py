@@ -289,7 +289,7 @@ mlb_label_colors = {
 	},
 	"STL": {
 		"bg": "red",
-		"line": "pink"
+		"line": "palevioletred"
 	},
 	"TBR": {
 		"bg": "lightsteelblue",
