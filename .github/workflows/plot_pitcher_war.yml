@@ -1,14 +1,14 @@
-name: Scrape and Plot Batter wRC+
+name: Scrape and Plot Pitcher WAR
 on:
   workflow_call:
     inputs:
       team:
         description: Team to plot statistics for.
         type: string
-      minimum_abs:
-        description: Minimum at-bat cutoff to use on included batters
+      minimum_ips:
+        description: Minimum innings-pitched cutoff to use on included pitchers
         type: number
-        default: 20
+        default: 10
     outputs:
       plot_artifact_name: 
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
@@ -20,13 +20,13 @@ on:
         description: Team to plot statistics for.
         type: string
         default: 'TOR'
-      minimum_abs:
-        description: Minimum at-bat cutoff to use on included batters
+      minimum_ips:
+        description: Minimum innings-pitched cutoff to use on included pitchers
         type: number
-        default: 50
+        default: 10
     
 env: 
-  PLOTS_ARTIFACT_NAME: 'batter-wrc-plot'
+  PLOTS_ARTIFACT_NAME: 'pitcher-war-plot'
 
 jobs:
   plot-graphs:
@@ -52,7 +52,7 @@ jobs:
       - name: Generate Charts
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python3 plotting/baseball/player_plots/plot_wrc_distribution.py --team ${{ inputs.team }} --qual ${{ inputs.minimum_abs }}
+        run: python3 plotting/baseball/player_plots/plot_pitcher_war_distribution.py --team ${{ inputs.team }} --qual ${{ inputs.minimum_ips }}
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4

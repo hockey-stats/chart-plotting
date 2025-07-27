@@ -11,6 +11,8 @@ from util.font_dicts import game_report_label_text_params as label_params
 from util.helpers import ratio_to_color
 from util.color_maps import mlb_label_colors
 
+PRIMARY_COLOR = '#cccccc'
+SECONDARY_COLOR = '#999999'
 
 class SwarmPlot(Plot):
     """
@@ -89,7 +91,7 @@ class SwarmPlot(Plot):
                                             xycoords='axes fraction', zorder=-11))
 
         # Now plot every player in the full sample
-        self.axis = sns.swarmplot(y=self.column, x='day', data=self.df, color='silver',
+        self.axis = sns.swarmplot(y=self.column, x='day', data=self.df, color=PRIMARY_COLOR,
                                   size=4.5)
 
         # If dealing with a second category of points, call a seperate method to handle
@@ -148,7 +150,7 @@ class SwarmPlot(Plot):
         df_b['rank'] = df_b.apply(lambda row: row.name, axis=1)
 
         # Add all players in league from df_a to swarm plot with slightly different color
-        self.axis = sns.swarmplot(y=self.column, x='day', data=df_a, color='slategrey',
+        self.axis = sns.swarmplot(y=self.column, x='day', data=df_a, color=SECONDARY_COLOR,
                                   size=4.5)
 
         # Add two lines denoting the averages for each category
@@ -170,7 +172,8 @@ class SwarmPlot(Plot):
 
             # And add to plot
             team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
-                                        color=mlb_label_colors[self.team]['line'],
+                                        color='steelblue',
+                                        #color=mlb_label_colors[self.team]['line'],
                                         zorder=9)
             team_coords = team_points.collections[-1].get_offsets()
 
@@ -186,6 +189,10 @@ class SwarmPlot(Plot):
         line_a = plt.plot([1.02, 1.02], [0.77, 0.48], color='white', linewidth=2,
                           solid_capstyle='butt',
                           transform=self.axis.transAxes)
+        line_a_start = plt.plot([1.016, 1.024], [0.77, 0.77], color='white', linewidth=2,
+                                transform=self.axis.transAxes)
+        line_a_end = plt.plot([1.016, 1.024], [0.48, 0.48], color='white', linewidth=2,
+                                transform=self.axis.transAxes)
         label_a = self.axis.text(1.03, 0.55, s='Starters',
                                  transform=self.axis.transAxes,
                                  rotation=270,
@@ -194,12 +201,17 @@ class SwarmPlot(Plot):
         line_b = plt.plot([1.02, 1.02], [0.46, 0.07], color='white', linewidth=2,
                           solid_capstyle='butt',
                           transform=self.axis.transAxes)
+        line_b_start = plt.plot([1.016, 1.024], [0.46, 0.46], color='white', linewidth=2,
+                                transform=self.axis.transAxes)
+        line_b_end = plt.plot([1.016, 1.024], [0.07, 0.07], color='white', linewidth=2,
+                                transform=self.axis.transAxes)
         label_b = self.axis.text(1.03, 0.2, s='Relievers',
                                  transform=self.axis.transAxes,
                                  rotation=270,
                                  **pos_label_params)
 
-        for thing in [line_a[0], label_a, line_b[0], label_b]:
+        for thing in [line_a[0], line_a_start[0], line_a_end[0], label_a, 
+                      line_b[0], line_b_start[0], line_b_end[0] ,label_b]:
             thing.set_clip_on(False)
 
         if self.table_columns is not None:
@@ -207,29 +219,29 @@ class SwarmPlot(Plot):
             self.add_table(team_df)
 
         # Add legend for different categories
-        legend_x = 0.02
+        legend_x = 0.03
         legend_y = 0.94
         
         self.axis.add_patch(
             Rectangle(xy=(legend_x-0.01, legend_y-0.05),
                       height=0.07,
-                      width=0.12,
+                      width=0.13,
                       edgecolor='steelblue',
                       facecolor='antiquewhite',
                       transform=self.axis.transAxes)
         )
 
-        self.axis.plot([legend_x], [legend_y], color='slategrey',
+        self.axis.plot([legend_x], [legend_y], color=SECONDARY_COLOR,
                        marker='o', markersize=4.5,
                        transform=self.axis.transAxes)
         self.axis.text(legend_x + 0.02, legend_y, s='Starters',
-                       va='center',
+                       va='center', color='steelblue', weight='bold',
                        transform=self.axis.transAxes)
-        self.axis.plot([legend_x], [legend_y-0.03], color='silver',
+        self.axis.plot([legend_x], [legend_y-0.03], color=PRIMARY_COLOR,
                        marker='o', markersize=4.5,
                        transform=self.axis.transAxes)
         self.axis.text(legend_x + 0.02, legend_y-0.03, s='Relievers',
-                       va='center',
+                       va='center', color='steelblue', weight='bold',
                        transform=self.axis.transAxes)
 
     def label_team_players(self, team_df, team_coords, vert_offset=0):
@@ -254,28 +266,30 @@ class SwarmPlot(Plot):
         metric_dict = {
             'size': 14,
             'weight': 600,
-            'color': 'black',
-            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
+            'color': 'antiquewhite',
+            'path_effects': [PathEffects.withStroke(linewidth=1.3, foreground='black')],
             'bbox': {
-                'alpha': 0.8,
+                'alpha': 1,
                 'boxstyle': 'round'
             }
         }
         label_dict = {
             'size': 14,
             'weight': 600,
-            'color': 'black',
-            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='white')],
+            'color': 'antiquewhite',
+            'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='black')],
             'bbox': {
-                'alpha': 0.4,
-                'color': mlb_label_colors[self.team]['bg'],
+                'alpha': 0.85,
+                #'color': mlb_label_colors[self.team]['bg'],
+                'color': 'steelblue',
                 'boxstyle': 'round'
             }
         }
 
         for name, metric, coord in zip(team_df['Name'], team_df[self.column], team_coords):
             # Get the appropriate colors for the team
-            line_color = mlb_label_colors[self.team]["line"]
+            line_color = 'steelblue'
+            #line_color = mlb_label_colors[self.team]["line"]
 
             # Our logo x-/y-pos are in Axes coordinates, we want them in data coordinates
             # to be able to draw the line connecting them to the points in the swarm plot
@@ -285,7 +299,7 @@ class SwarmPlot(Plot):
             # Not exactly sure why the x-coordinate gets inverted in the transformation process,
             # but it does
             x = -1 * x
-            
+
             # Offset value to place the player label, may differ based on metric value
             x_offset = 1.55
 
@@ -329,7 +343,7 @@ class SwarmPlot(Plot):
             else:
                 ratio = float(metric) / 200.0 if float(metric) > 0.0 else 0.0
             metric_color = ratio_to_color(min(ratio, 1.0))
-            metric_dict['bbox']['facecolor'] = metric_color
+            metric_dict['bbox']['color'] = metric_color
 
             # Draw the metric text box
             self.axis.text(x=x*1.05, y=y, s=metric,
@@ -394,7 +408,7 @@ class SwarmPlot(Plot):
             else:
                 avg_value = self.df[self.column].mean()
 
-        self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='black', alpha=0.3, zorder=8)
+        self.axis.axhline(y=avg_value, xmin=0.02, xmax=0.25, color='steelblue', alpha=1, zorder=8)
 
         if label is None:
             label = f"{league_name}\nAverage"
@@ -402,7 +416,8 @@ class SwarmPlot(Plot):
         # Create custom transform to have x-coordinates correspond to the Axes and y-coordinates
         # correspond to the data
         trans = transforms.blended_transform_factory(self.axis.transAxes, self.axis.transData)
-        self.axis.text(x=0.04, y=avg_value, s=label, size=9, color='black',
+        self.axis.text(x=0.04, y=avg_value*0.98, s=label, size=9, color='steelblue',
+                       weight='bold',
                        transform=trans, ha='center', va='top')
 
 
@@ -425,7 +440,6 @@ class SwarmPlot(Plot):
         x = 0.4
         y = 0.94
 
-        label_dict['bbox']['facecolor'] = mlb_label_colors[self.team]['bg']
         self.axis.text(x, y, s=f'Team {self.column}', **label_dict,
                        transform=self.axis.transAxes)
 
@@ -433,7 +447,7 @@ class SwarmPlot(Plot):
         if 0 < self.team_level_metric < 100:
             metric_text = f' {metric_text} '
 
-        metric_dict['bbox']['facecolor'] = metric_color
+        metric_dict['bbox']['color'] = metric_color
         self.axis.text(x + 0.27, y, s=metric_text, **metric_dict,
                        transform=self.axis.transAxes)
 
@@ -514,6 +528,10 @@ class SwarmPlot(Plot):
 
                 # Column headers are bolded, other values less so
                 if y == 0:
-                    cells[y, x].set_text_props(weight=600)
+                    cells[y, x].set_text_props(weight=900)
                 else:
-                    cells[y, x].set_text_props(weight=300)
+                    cells[y, x].set_text_props(weight=600)
+
+                cells[y, x].set_text_props(color='steelblue',
+                                           path_effects=[PathEffects.withStroke(linewidth=0.2,
+                                                                                foreground='antiquewhite')])

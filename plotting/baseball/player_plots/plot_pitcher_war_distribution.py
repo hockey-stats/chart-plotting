@@ -78,6 +78,9 @@ def main(year: int, qual: int, team: str) -> None:
     data['is_starter'] = data.apply(lambda x: True if x['GS'] >= 0.5 * x['G'] else False,
                                     axis=1)
 
+    subtitle = f"Plotted against league distribution, min {qual} IPs\n"\
+               f"Shows top-5 starters and top-7 relievers by IP"
+
     plot = SwarmPlot(dataframe=data,
                      filename=f'{team}_stuff.png',
                      column='WAR',
@@ -90,7 +93,7 @@ def main(year: int, qual: int, team: str) -> None:
                      title=plot_title,
                      category_column='is_starter',
                      data_disclaimer='fangraphs',
-                     subtitle=f"Plotted against league distribution, min. {qual} IPs\n"
+                     subtitle=subtitle
                      )
     
     plot.make_plot()
@@ -100,11 +103,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year for which to get data, defaults to current year')
-    parser.add_argument('-q', '--qual', default=20, type=int,
+    parser.add_argument('-q', '--qual', default=10, type=int,
                         help='Minimum innings pitched to qualify in query, defaults to 30')
     parser.add_argument('-t', '--team', required=True, type=str,
                         help='Team for which players should be highlighted.')
     args = parser.parse_args()
-
     main(year=args.year, qual=args.qual, team=args.team)
-
+#    import os
+#    for x in os.listdir(path='team_logos/baseball/svg'):
+#        team = x.split('.')[0]
+#        main(year=2025, qual=10, team=team)
+#
