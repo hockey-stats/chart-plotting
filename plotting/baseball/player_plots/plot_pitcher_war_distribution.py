@@ -82,7 +82,7 @@ def main(year: int, qual: int, team: str) -> None:
                f"Shows top-5 starters and top-7 relievers by IP"
 
     plot = SwarmPlot(dataframe=data,
-                     filename=f'{team}_stuff.png',
+                     filename=f'{team}_pitcher_war.png',
                      column='WAR',
                      team=team,
                      qualifier='IP',
