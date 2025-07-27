@@ -1,6 +1,8 @@
 # Files from local testing
 data
 /*.png
+/*.mp4
+/*.gif
 .DS_Store
 */*csv
 

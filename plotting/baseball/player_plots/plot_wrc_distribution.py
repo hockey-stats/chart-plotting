@@ -23,7 +23,8 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Jonah Bride': 'MIN',
         'Leody Taveras': 'SEA',
         'LaMonte Wade Jr.': 'LAA',
-        'Josh Naylor': 'SEA'
+        'Josh Naylor': 'SEA',
+        'Ryan McMahon': 'NYY'
     }
     for name in traded_players:
         if name in traded_db:
