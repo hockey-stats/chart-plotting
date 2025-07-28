@@ -115,7 +115,7 @@ class CumulativeLinePlot(Plot):
             x_last = list(self.df[self.df['team'] == team][self.x_col])[-1]
             y_last = list(self.df[self.df['team'] == team][self.y_col])[-1]
 
-            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.75, sport=self.sport),
+            artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=0.6, sport=self.sport),
                                         xy=(x_last, y_last),
                                         frameon=False)
             self.axis.add_artist(artist_box)
