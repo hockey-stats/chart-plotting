@@ -10,6 +10,8 @@
 
 ## Batter wRC+ Chart  <a name="batterwrcchart"></a>
   
+<img src="./example_plots/TOR_wrc.png" height=400 alt='Chart showing Toronto Blue Jays Hitters by wRC+'/> 
+
 This purpose of this chart is to show the distribution of wRC+ for every player in the 
 league, highlighting players from a specific team, and then for those players display 
 some additional metrics in an accompanying table. 
@@ -43,15 +45,13 @@ metrics for each of the highlighted players to provide more context for their se
 Also included in this chart is the rank of the team as a whole. In this example, we see that the Jays
 have a wRC+ of 109 as a team, which ranks them 6th in the league.
 
-![Chart showing Toronto hitters by wRC+](https://github.com/hockey-stats/chart-plotting/blob/main/example_plots/TOR_wrc.png?raw=true)
- 
 
 
 ## Pitcher WAR Chart <a name="pitcherwarchart"></a>
 
-This chart is very similar in format to the batter wRC+ chart. The purpose of this one is to evaluate
-both the starting and relief pitchers for a given team against the rest of the league, this time
-using WAR as the metric of choice.
+<img src="./example_plots/TOR_pitcher_war.png" height=400 alt='Chart showing Toronto Blue Jays Pitchers by WAR'/> 
+
+This chart is very similar in format to the batter wRC+ chart. The purpose of this one is to evaluate both the starting and relief pitchers for a given team against the rest of the league, this timeusing WAR as the metric of choice.
 
 **WAR**, or Wins Above Replacement, is a metric designed to capture all of the value provided by a player
 relative to a theoretical 'replacement player'. The idea of a replacement player is a player that any
@@ -88,10 +88,9 @@ of 100 would be league average, 110 is 10% better than league average, etc. Once
 for a more thorough explanation, [Fangraphs is an excellent resource](https://library.fangraphs.com/pitching/stuff-location-and-pitching-primer/).
 
 
-![Chart showing Toronto pitchers by WAR ](https://github.com/hockey-stats/chart-plotting/blob/main/example_plots/TOR_pitcher_war.png?raw=true)
-
-
 ## Graphical Standings Chart <a name="graphicalstandingschart"></a>
+
+<img src="./example_plots/mlb_graphical_standings.png" height=400 alt='Chart showing graphical standings for the NL Central.'/> 
 
 The purpose of this chart is to display the standings for each division in a way that shows the journey
 they have been on throughout the season.
@@ -111,10 +110,9 @@ corresponding the Brewers has not gone down since game ~91.
 Finally, we can also see that the Reds and the Cardinals have been mostly neck-and-neck slightly above 
 .500 for most of the season.
 
-![Chart showing graphical standings for the NL Central](https://github.com/hockey-stats/chart-plotting/blob/main/example_plots/mlb_graphical_standings.png?raw=true)
-
-
 ## Rolling Run Differential Chart <a name='rollingrundiffchart'></a>
+
+<img src="./example_plots/run_diff_rolling_avg.gif" height=400 alt='Chart showing rolling run differentials for the NL East'/> 
 
 This chart is an animated one that shows, for each team in a given division, the 20-game rolling
 average for their run differential over their last 50 games.
@@ -133,10 +131,10 @@ So in this example, we can see that the Marlins have been playing quite well ove
 30ish games, the Mets have been a bit of a roller coaster, the Phillies starting a bit slow but
 turning it on recently, and the Braves and Nationals trending steadily downwards.
 
-![Chart showing rolling run differential for NL East teams](https://github.com/hockey-stats/chart-plotting/blob/main/example_plots/run_diff_rolling_avg.gif?raw=true)
-
 
 ## Total Run Differential Chart  <a name="totalrundiffchart"> </a>
+
+<img src="./example_plots/team_run_diff.png" height=400 alt='Chart showing total run differential for every team in the MLB'/> 
 
 This chart shows the runs scored plotted against the runs allowed for every team in the league, through
 the entire season. The goal of this is to compare teams run differentials against each other, and also
@@ -155,5 +153,3 @@ From here, we can also clearly see that the Texas Rangers are the best team in t
 The big red diagonal line is meant to indicate the break-even point, so that every team above the line 
 has a positive run differential, and every team below is in the negative.
 
-
-![Chart showing runs scored vs runs allowed for all teams](https://github.com/hockey-stats/chart-plotting/blob/main/example_plots/team_run_diff.png?raw=true)
