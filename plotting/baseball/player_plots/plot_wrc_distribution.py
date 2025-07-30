@@ -24,7 +24,13 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Leody Taveras': 'SEA',
         'LaMonte Wade Jr.': 'LAA',
         'Josh Naylor': 'SEA',
-        'Ryan McMahon': 'NYY'
+        'Ryan McMahon': 'NYY',
+        'Sam Brown': 'WSN',
+        'Austin Slater': 'NYY',
+        'Nick Fortes': 'TBR',
+        'Matthew Etzel': 'MIA',
+        'Danny Jansen': 'MIL',
+        'Andrew Hoffman': 'ARI',
     }
     for name in traded_players:
         if name in traded_db:
@@ -35,7 +41,7 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main(year, qual, team):
-    data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'AB', 'wRC+', 'AVG',
+    data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'PA', 'wRC+', 'AVG',
                                                'WAR', 'HR', 'OPS', 'Barrel%', 'maxEV']]
     data['team'] = data['Team']
     del data['Team']
@@ -52,15 +58,15 @@ def main(year, qual, team):
                       filename=f'{team}_wrc.png',
                       column='wRC+',
                       team=team,
-                      qualifier='AB',
+                      qualifier='PA',
                       team_level_metric=team_wrc,
                       team_rank=team_rank,
                       y_label='wRC+',
-                      table_columns=['ABs', 'AVG', 'HRs', 'OPS', 'WAR'],
+                      table_columns=['PAs', 'AVG', 'HRs', 'OPS', 'WAR'],
                       title=plot_title,
                       data_disclaimer='fangraphs',
-                      subtitle=f"Plotted against league distribution, min. {qual} ABs\n"\
-                                "Shows the team's top 12 hitters by total ABs")
+                      subtitle=f"Plotted against league distribution, min. {qual} PAs\n"\
+                                "Shows the team's top 12 hitters by total PAs")
 
     plot.make_plot()
 

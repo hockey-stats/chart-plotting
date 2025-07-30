@@ -476,7 +476,7 @@ class SwarmPlot(Plot):
         df = team_df.copy()
 
         # Format some columns with specific decimal place points
-        for col in ['AB', 'HR']:
+        for col in ['AB', 'HR', 'PA']:
             try:
                 df[f'{col}s'] = df.apply(lambda row: "%.0f" % row[col], axis=1)
             except KeyError:

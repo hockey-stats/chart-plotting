@@ -18,7 +18,6 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Jordan Hicks': 'BOS',
         'Sean Newcomb': 'ATH',
         'Tyler Alexander': 'CHW',
-        'Luis Garcia': 'WSH',
         'Aaron Civale': 'CHW',
         'Bryan Baker': 'TBR',
         'Joey Wentz': 'ATL',
@@ -26,7 +25,19 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Rafael Montero': 'ATL',
         'Jorge Alcala': 'BOS',
         'Lou Trivino': 'LAD',
-        'Scott Blewett': 'BAL'
+        'Scott Blewett': 'BAL',
+        'Luis Garcia': 'LAA',
+        'Andrew Chafin': 'LAA',
+        'Jake Eder': 'WSN',
+        'Tyler Kinley': 'ATL',
+        'Austin Smith': 'COL',
+        'Gage Ziehl': 'CWS',
+        'Seranthony Dominguez': 'TOR',
+        'Carlos Carrasco': 'ATL',
+        'Chris Paddack': 'DET',
+        'Randy Dobnak': 'DET',
+        'Amed Rosario': 'NYY',
+        'Randal Grichuk': 'KCR',
     }
     for name in traded_players:
         if name in traded_db:
