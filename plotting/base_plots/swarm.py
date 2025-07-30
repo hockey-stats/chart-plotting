@@ -84,7 +84,7 @@ class SwarmPlot(Plot):
             self.axis.set_ylim(bottom=70, top=140)
 
         # Add huge logo as background piece
-        team_logo = self.get_logo_marker(self.team, sport='baseball', size='huge', alpha=0.1)
+        team_logo = self.get_logo_marker(self.team, sport='baseball', size='huge', alpha=0.2)
         self.axis.add_artist(AnnotationBbox(team_logo, xy=(1, 0.5),
                                             frameon=False,
                                             box_alignment=(1, 0.5),
