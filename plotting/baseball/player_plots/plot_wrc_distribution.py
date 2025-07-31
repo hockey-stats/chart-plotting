@@ -31,6 +31,9 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Matthew Etzel': 'MIA',
         'Danny Jansen': 'MIL',
         'Andrew Hoffman': 'ARI',
+        "Ramon Urias": "HOU",
+        "Eugenio Suarez": "SEA",
+        
     }
     for name in traded_players:
         if name in traded_db:
