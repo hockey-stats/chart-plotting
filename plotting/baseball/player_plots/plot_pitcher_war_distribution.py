@@ -67,7 +67,7 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         "Jake Bird": "NYY",
         "David Bednar": "NYY",
         "Codei Heuer": "DET",
-        "Paul Sewald": "DET"
+        "Paul Sewald": "DET",
         "Brock Stewart": "LAD",
         "Kyle Finnegan": "DET",
         "Mason Miller": "SDP",
