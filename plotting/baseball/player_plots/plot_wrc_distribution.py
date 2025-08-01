@@ -33,7 +33,19 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         'Andrew Hoffman': 'ARI',
         "Ramon Urias": "HOU",
         "Eugenio Suarez": "SEA",
-        
+        "Mike Yastrzemski": "KCR",
+        "Miguel Andujar": "CIN",
+        "Ty France": "TOR",
+        "Alan Roden": "MIN",
+        "Jose Caballero": "NYY",
+        "Oswald Peraza": "LAA",
+        "Willi Castro": "CHC",
+        "Jesus Sanchez": "TEX",
+        "Ryan O'Hearn": "SDP",
+        "Ramon Laureano": "SDP",
+        "Carlos Correa": "HOU",
+        "Cedric Mullins": "NYM",
+        "Harrison Bader": "PHI",
     }
     for name in traded_players:
         if name in traded_db:

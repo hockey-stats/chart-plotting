@@ -52,8 +52,29 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         "Caleb Ferguson": "SEA",
         "Tyler Rogers": "NYM",
         "Taylor Rogers": "PIT",
-
-        
+        "Charlie Morton": "DET",
+        "Shelby Miller": "MIL",
+        "Jordan Montgomery": "MIL",
+        "Phil Maton": "TEX",
+        "Louis Varland": "TOR",
+        "Griffin Jax": "TBR",
+        "Camilo Doval": "NYY",
+        "Bailey Falter": "KCR",
+        "Adrian Houser": "TBR",
+        "Nestor Cortes": "SDP",
+        "Dustin May": "BOS",
+        "Merril Kelly": "TEX",
+        "Jake Bird": "NYY",
+        "David Bednar": "NYY",
+        "Codei Heuer": "DET",
+        "Paul Sewald": "DET"
+        "Brock Stewart": "LAD",
+        "Kyle Finnegan": "DET",
+        "Mason Miller": "SDP",
+        "JP Sears": "SDP",
+        "Shane Bieber": "TOR",
+        "Steven Matz": "BOS",
+        "Andrew Kittredge": "CHC",
     }
     for name in traded_players:
         if name in traded_db:
