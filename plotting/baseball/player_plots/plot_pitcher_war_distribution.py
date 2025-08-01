@@ -70,12 +70,8 @@ def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
         "Paul Sewald": "DET",
         "Brock Stewart": "LAD",
         "Kyle Finnegan": "DET",
-        "Mason Miller": "SDP",
-        "JP Sears": "SDP",
-        "Shane Bieber": "TOR",
-        "Steven Matz": "BOS",
-        "Andrew Kittredge": "CHC",
     }
+
     for name in traded_players:
         if name in traded_db:
             index = df[df['Name'] == name].index
@@ -113,6 +109,8 @@ def main(year: int, qual: int, team: str) -> None:
 
     data['team'] = data['Team']
     del data['Team']
+
+    data = fix_teams_for_traded_players(data)
 
     # Scale K-BB% up to 1-100%
     data['K-BB%'] = data.apply(lambda x: x['K-BB%'] * 100, axis=1)
