@@ -1,59 +1,11 @@
 import argparse
 from datetime import datetime
 
-import pandas as pd
 import pybaseball as pyb
 
 from plotting.base_plots.swarm import SwarmPlot
 from util.team_maps import mlb_team_full_names
-
-
-def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    For players who have played on multiple teams, fangraphs returns their 'Team' value as
-    '- - -'. Replace these values with the actual current team.
-    """
-    traded_players = list(df[df['team'] == '- - -']['Name'])
-    traded_db = {
-        'Rafael Devers': 'SFG',
-        'Kody Clemens': 'MIN',
-        'Matt Thaiss': 'TBR',
-        'Austin Wynns': 'ATH',
-        'Garret Hampson': 'STL',
-        'Jonah Bride': 'MIN',
-        'Leody Taveras': 'SEA',
-        'LaMonte Wade Jr.': 'LAA',
-        'Josh Naylor': 'SEA',
-        'Ryan McMahon': 'NYY',
-        'Sam Brown': 'WSN',
-        'Austin Slater': 'NYY',
-        'Nick Fortes': 'TBR',
-        'Matthew Etzel': 'MIA',
-        'Danny Jansen': 'MIL',
-        'Andrew Hoffman': 'ARI',
-        "Ramon Urias": "HOU",
-        "Eugenio Suarez": "SEA",
-        "Mike Yastrzemski": "KCR",
-        "Miguel Andujar": "CIN",
-        "Ty France": "TOR",
-        "Alan Roden": "MIN",
-        "Jose Caballero": "NYY",
-        "Oswald Peraza": "LAA",
-        "Willi Castro": "CHC",
-        "Jesus Sanchez": "TEX",
-        "Ryan O'Hearn": "SDP",
-        "Ramon Laureano": "SDP",
-        "Carlos Correa": "HOU",
-        "Cedric Mullins": "NYM",
-        "Harrison Bader": "PHI",
-    }
-    for name in traded_players:
-        if name in traded_db:
-            index = df[df['Name'] == name].index
-            df.loc[index, 'team'] = traded_db[name]
-
-    return df
-
+from util.fix_traded_mlb_players import fix_teams_for_traded_batters
 
 def main(year, qual, team):
     data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'PA', 'wRC+', 'AVG',
@@ -61,7 +13,7 @@ def main(year, qual, team):
     data['team'] = data['Team']
     del data['Team']
 
-    data = fix_teams_for_traded_players(data)
+    data = fix_teams_for_traded_batters(data)
 
     team_full_name = mlb_team_full_names[team]
 

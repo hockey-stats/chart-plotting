@@ -7,8 +7,7 @@ import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 from unidecode import unidecode
 
-from plotting.baseball.player_plots.plot_pitcher_war_distribution import fix_teams_for_traded_players as fix_traded_pitchers
-from plotting.baseball.player_plots.plot_wrc_distribution import fix_teams_for_traded_players as fix_traded_batters
+from util.fix_traded_mlb_players import fix_teams_for_traded_batters, fix_teams_for_traded_pitchers
 
 oauth_logger = logging.getLogger('yahoo_oauth')
 oauth_logger.disabled = True
@@ -173,7 +172,7 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
     del p_df['Team']
 
     # Update teams for traded players
-    p_df = fix_traded_pitchers(p_df)
+    p_df = fix_teams_for_traded_pitchers(p_df)
 
     # And convert back to polars
     p_df = pl.from_pandas(p_df)
@@ -269,7 +268,7 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
     del p_df['Team']
 
     # Update teams for traded players
-    p_df = fix_traded_batters(p_df)
+    p_df = fix_teams_for_traded_batters(p_df)
 
     # Now convert to polars and rename columns
     p_df = pl.from_pandas(p_df)

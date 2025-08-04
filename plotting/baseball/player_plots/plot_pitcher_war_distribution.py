@@ -6,78 +6,8 @@ import pybaseball as pyb
 
 from plotting.base_plots.swarm import SwarmPlot
 from util.team_maps import mlb_team_full_names
+from util.fix_traded_mlb_players import fix_teams_for_traded_pitchers
 
-
-def fix_teams_for_traded_players(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    For players who have played on multiple teams, fangraphs returns their 'Team' value as
-    '- - -'. Replace these values with the actual current team.
-    """
-    traded_players = list(df[df['team'] == '- - -']['Name'])
-    traded_db = {
-        'Jordan Hicks': 'BOS',
-        'Sean Newcomb': 'ATH',
-        'Tyler Alexander': 'CHW',
-        'Aaron Civale': 'CHW',
-        'Bryan Baker': 'TBR',
-        'Joey Wentz': 'ATL',
-        'Carlos Hernandez': 'DET',
-        'Jorge Alcala': 'BOS',
-        'Lou Trivino': 'LAD',
-        'Scott Blewett': 'BAL',
-        'Luis Garcia': 'LAA',
-        'Andrew Chafin': 'LAA',
-        'Jake Eder': 'WSN',
-        'Tyler Kinley': 'ATL',
-        'Austin Smith': 'COL',
-        'Gage Ziehl': 'CWS',
-        'Seranthony Dominguez': 'TOR',
-        'Carlos Carrasco': 'ATL',
-        'Chris Paddack': 'DET',
-        'Randy Dobnak': 'DET',
-        'Amed Rosario': 'NYY',
-        'Randal Grichuk': 'KCR',
-        "Ke'Byran Hayes": "CIN",
-        "Mason Miller": "SDP",
-        "JP Sears": "SDP",
-        "Shane Bieber": "TOR",
-        "Steven Matz": "BOS",
-        "Andrew Kittredge": "CHI",
-        "Zack Litell": "CIN",
-        "Rafael Montero": "DET",
-        "Michael Soroka": "CHI",
-        "Ryan Helsley": "NYM",
-        "Jhoan Duran": "PHI",
-        "Mick Abel": "MIN",
-        "Caleb Ferguson": "SEA",
-        "Tyler Rogers": "NYM",
-        "Taylor Rogers": "PIT",
-        "Charlie Morton": "DET",
-        "Shelby Miller": "MIL",
-        "Jordan Montgomery": "MIL",
-        "Phil Maton": "TEX",
-        "Louis Varland": "TOR",
-        "Griffin Jax": "TBR",
-        "Camilo Doval": "NYY",
-        "Bailey Falter": "KCR",
-        "Adrian Houser": "TBR",
-        "Nestor Cortes": "SDP",
-        "Dustin May": "BOS",
-        "Merril Kelly": "TEX",
-        "Jake Bird": "NYY",
-        "David Bednar": "NYY",
-        "Codei Heuer": "DET",
-        "Paul Sewald": "DET",
-        "Brock Stewart": "LAD",
-        "Kyle Finnegan": "DET",
-    }
-
-    for name in traded_players:
-        if name in traded_db:
-            index = df[df['Name'] == name].index
-            df.loc[index, 'team'] = traded_db[name]
-
-    return df
 
 
 def get_teamwide_stuff(year: int, team: str) -> None:
@@ -110,7 +40,7 @@ def main(year: int, qual: int, team: str) -> None:
     data['team'] = data['Team']
     del data['Team']
 
-    data = fix_teams_for_traded_players(data)
+    data = fix_teams_for_traded_pitchers(data)
 
     # Scale K-BB% up to 1-100%
     data['K-BB%'] = data.apply(lambda x: x['K-BB%'] * 100, axis=1)
