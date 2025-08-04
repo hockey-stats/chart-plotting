@@ -7,6 +7,9 @@ import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 from unidecode import unidecode
 
+from plotting.baseball.player_plots.plot_pitcher_war_distribution import fix_teams_for_traded_players as fix_traded_pitchers
+from plotting.baseball.player_plots.plot_wrc_distribution import fix_teams_for_traded_players as fix_traded_batters
+
 oauth_logger = logging.getLogger('yahoo_oauth')
 oauth_logger.disabled = True
 
@@ -165,9 +168,16 @@ def collect_pitcher_stats(player_ids: list, league: yfa.League, position: str) -
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%', 'xERA',
-                                                           'Stuff+', 'G', 'GS']])
-    p_df = p_df.rename({"Name": "name", "Team": "team"})
+    p_df = pb.pitching_stats(2025, qual=5)[['Name', 'Team', 'K-BB%', 'xERA', 'Stuff+', 'G', 'GS']]
+    p_df['team'] = p_df['Team']
+    del p_df['Team']
+
+    # Update teams for traded players
+    p_df = fix_traded_pitchers(p_df)
+
+    # And convert back to polars
+    p_df = pl.from_pandas(p_df)
+    p_df = p_df.rename({"Name": "name"})
 
     if position == 'SP':
         # If looking for starters, remove every pitcher with 0 starts
@@ -254,8 +264,16 @@ def collect_batter_stats(player_ids: list, league: yfa.League) -> pl.DataFrame:
     y_df = pl.DataFrame(p_dict)
 
     # Now get full-season stats with pybaseball
-    p_df = pl.from_pandas(pb.batting_stats(2025, qual=20)[['Name', 'Team', 'wRC+', 'xwOBA', 'HardHit%']])
-    p_df = p_df.rename({"Name": "name", "Team": "team"})
+    p_df = pb.batting_stats(2025, qual=20)[['Name', 'Team', 'wRC+', 'xwOBA', 'HardHit%']]
+    p_df['team'] = p_df['Team']
+    del p_df['Team']
+
+    # Update teams for traded players
+    p_df = fix_traded_batters(p_df)
+
+    # Now convert to polars and rename columns
+    p_df = pl.from_pandas(p_df)
+    p_df = p_df.rename({"Name": "name"})
 
     p_df = p_df.with_columns(pl.col('xwOBA').cast(pl.Decimal(10, 3)))
 
@@ -366,6 +384,10 @@ def filter_taken(df: pl.DataFrame, free_agents: list[int], my_team: list[int]) -
             .otherwise(pl.lit(False))
             .alias('on_team')
     )
+
+    
+    with pl.Config(tbl_rows=-1):
+        print(df.filter(pl.col('on_team') == True))
 
     return df
 
