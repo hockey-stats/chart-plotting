@@ -8,6 +8,7 @@ from util.team_maps import mlb_team_full_names
 from util.fix_traded_mlb_players import fix_teams_for_traded_batters
 
 def main(year, qual, team):
+    qual = 50
     data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'PA', 'wRC+', 'AVG',
                                                'WAR', 'HR', 'OPS', 'Barrel%', 'maxEV']]
     data['team'] = data['Team']
@@ -33,7 +34,7 @@ def main(year, qual, team):
                       title=plot_title,
                       data_disclaimer='fangraphs',
                       subtitle=f"Plotted against league distribution, min. {qual} PAs\n"\
-                                "Shows the team's top 12 hitters by total PAs")
+                                "Shows the team's top 12 hitters by total wRC+")
 
     plot.make_plot()
 
