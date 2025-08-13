@@ -34,6 +34,7 @@ def main(year: int, qual: int, team: str) -> None:
     :param str team: Team for which to query
     """
 
+    qual = 20
     data = pyb.pitching_stats(year, qual=qual)[['Team', 'Name', 'IP', 'G', 'GS', 'Stuff+',
                                                 'ERA', 'xERA', 'K-BB%', 'WAR']]
 

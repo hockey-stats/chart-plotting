@@ -106,13 +106,14 @@ class SwarmPlot(Plot):
 
         # Then plot top-12 qualified players
         team_df = self.df[self.df['team'] == self.team]
+        #team_df = team_df.sort_values(by=[self.column], ascending=False)[0:12]
         team_df = team_df.sort_values(by=[self.qualifier], ascending=False)[0:12]
 
         # And re-sort by the desired metric
         team_df = team_df.sort_values(by=[self.column], ascending=False)
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
-                                    color=mlb_label_colors[self.team]["line"],
+                                    color='steelblue',
                                     zorder=9)
 
         # Get the xy-coords of the point for every player on the team
@@ -123,11 +124,11 @@ class SwarmPlot(Plot):
         # Add labels for every player on team
         self.label_team_players(team_df, team_coords)
 
-        if self.table_columns is not None:
-            self.add_table(team_df)
+       # if self.table_columns is not None:
+       #     self.add_table(team_df)
 
         self.save_plot()
-        
+
 
     def plot_categorically(self) -> None:
         """
@@ -210,7 +211,7 @@ class SwarmPlot(Plot):
                                  rotation=270,
                                  **pos_label_params)
 
-        for thing in [line_a[0], line_a_start[0], line_a_end[0], label_a, 
+        for thing in [line_a[0], line_a_start[0], line_a_end[0], label_a,
                       line_b[0], line_b_start[0], line_b_end[0] ,label_b]:
             thing.set_clip_on(False)
 
@@ -221,7 +222,7 @@ class SwarmPlot(Plot):
         # Add legend for different categories
         legend_x = 0.03
         legend_y = 0.94
-        
+
         self.axis.add_patch(
             Rectangle(xy=(legend_x-0.01, legend_y-0.05),
                       height=0.07,
@@ -280,16 +281,12 @@ class SwarmPlot(Plot):
             'path_effects': [PathEffects.withStroke(linewidth=1.2, foreground='black')],
             'bbox': {
                 'alpha': 0.85,
-                #'color': mlb_label_colors[self.team]['bg'],
                 'color': 'steelblue',
                 'boxstyle': 'round'
             }
         }
 
         for name, metric, coord in zip(team_df['Name'], team_df[self.column], team_coords):
-            # Get the appropriate colors for the team
-            line_color = 'steelblue'
-            #line_color = mlb_label_colors[self.team]["line"]
 
             # Our logo x-/y-pos are in Axes coordinates, we want them in data coordinates
             # to be able to draw the line connecting them to the points in the swarm plot
@@ -303,23 +300,9 @@ class SwarmPlot(Plot):
             # Offset value to place the player label, may differ based on metric value
             x_offset = 1.55
 
-            # Decomissioned logo stuff: TODO: Remove??
-            #################################################################################
-            # Set the logo to be slightly higher so that is aligns better with the label
-            #logo_y = y + 4
-
-            # Draw the logos
-            #self.axis.add_artist(AnnotationBbox(team_logo, xy=(x, logo_y),
-            #                                    frameon=False,
-            #                                    xycoords='data', zorder=11))
-
-            # Draw a line connecting the logo to the point in the swarmplot
-            #plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
-            #        linewidth=2, zorder=10, alpha=0.7)
-            #################################################################################
-
             # Draw a line connecting the metric value to the point in the swarmplot
-            plt.plot([x, coord[0]], [y, coord[1]], color=line_color,
+            #print(coord)
+            plt.plot([x, coord[0]], [y, coord[1]], color='steelblue',
                      linewidth=2, zorder=10, alpha=0.7)
 
             # Additional formatting conditions for wRC+/Stuff+ etc.
@@ -404,7 +387,7 @@ class SwarmPlot(Plot):
         if avg_value is None:
             if '+' in self.column:  # e.g. wRC+ or Stuff+
                 avg_value = 100
-            
+
             else:
                 avg_value = self.df[self.column].mean()
 
