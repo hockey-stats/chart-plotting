@@ -106,11 +106,7 @@ class SwarmPlot(Plot):
 
         # Then plot top-12 qualified players
         team_df = self.df[self.df['team'] == self.team]
-        #team_df = team_df.sort_values(by=[self.column], ascending=False)[0:12]
-        team_df = team_df.sort_values(by=[self.qualifier], ascending=False)[0:12]
-
-        # And re-sort by the desired metric
-        team_df = team_df.sort_values(by=[self.column], ascending=False)
+        team_df = team_df.sort_values(by=[self.column], ascending=False)[0:12]
 
         team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
                                     color='steelblue',
@@ -124,8 +120,8 @@ class SwarmPlot(Plot):
         # Add labels for every player on team
         self.label_team_players(team_df, team_coords)
 
-       # if self.table_columns is not None:
-       #     self.add_table(team_df)
+        if self.table_columns is not None:
+            self.add_table(team_df)
 
         self.save_plot()
 
@@ -166,10 +162,10 @@ class SwarmPlot(Plot):
 
             # Filter df_a and df_b to only contain players from our team
             team_df = df[df['team'] == self.team]\
-                           .sort_values(by=[self.qualifier], ascending=False)[0:num_players]
+                           .sort_values(by=[self.column], ascending=False)[0:num_players]
 
             # Then re-sort by metric
-            team_df = team_df.sort_values(by=[self.column], ascending=False)
+            #team_df = team_df.sort_values(by=[self.column], ascending=False)
 
             # And add to plot
             team_points = sns.swarmplot(y=self.column, x='day', data=team_df,
@@ -301,7 +297,6 @@ class SwarmPlot(Plot):
             x_offset = 1.55
 
             # Draw a line connecting the metric value to the point in the swarmplot
-            #print(coord)
             plt.plot([x, coord[0]], [y, coord[1]], color='steelblue',
                      linewidth=2, zorder=10, alpha=0.7)
 

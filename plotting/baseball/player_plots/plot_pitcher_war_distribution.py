@@ -34,7 +34,7 @@ def main(year: int, qual: int, team: str) -> None:
     :param str team: Team for which to query
     """
 
-    qual = 20
+   # qual = 20
     data = pyb.pitching_stats(year, qual=qual)[['Team', 'Name', 'IP', 'G', 'GS', 'Stuff+',
                                                 'ERA', 'xERA', 'K-BB%', 'WAR']]
 
@@ -56,7 +56,7 @@ def main(year: int, qual: int, team: str) -> None:
                                     axis=1)
 
     subtitle = f"Plotted against league distribution, min {qual} IPs\n"\
-               f"Shows top-5 starters and top-7 relievers by IP"
+               f"Shows top-5 starters and top-7 relievers by WAR"
 
     plot = SwarmPlot(dataframe=data,
                      filename=f'{team}_pitcher_war.png',

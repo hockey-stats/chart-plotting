@@ -49,7 +49,7 @@ def fix_teams_for_traded_pitchers(df: pd.DataFrame) -> pd.DataFrame:
         "Shelby Miller": "MIL",
         "Jordan Montgomery": "MIL",
         "Phil Maton": "TEX",
-        "Louis Varland": "TOR",
+        "Louie Varland": "TOR",
         "Griffin Jax": "TBR",
         "Camilo Doval": "NYY",
         "Bailey Falter": "KCR",
