@@ -111,6 +111,7 @@ def fix_teams_for_traded_batters(df: pd.DataFrame) -> pd.DataFrame:
         "Carlos Correa": "HOU",
         "Cedric Mullins": "NYM",
         "Harrison Bader": "PHI",
+        "Andrew Vaughn": "MIL"
     }
     for name in traded_players:
         if name in traded_db:
@@ -118,4 +119,3 @@ def fix_teams_for_traded_batters(df: pd.DataFrame) -> pd.DataFrame:
             df.loc[index, 'team'] = traded_db[name]
 
     return df
-
