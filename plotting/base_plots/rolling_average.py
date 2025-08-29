@@ -194,14 +194,14 @@ class RollingAveragePlot(Plot):
 
         #y_ticks = list(range(math.floor(y_scale * -1), math.ceil(y_scale + 1)))
         y_ticks = list(range(math.floor(self.y_midpoint - y_scale),
-                             math.ceil(self.y_midpoint + y_scale)))
+                             math.ceil(self.y_midpoint + y_scale + 1)))
 
-        self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
 
         # When doing plots with big-number ranges that center around 50 (i.e. xGoal%), only
         # take multiples of 5 for the y-tick values
         if self.y_midpoint == 50:
             y_ticks = [y for y in y_ticks if y % 5 == 0] 
+            self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
 
         print(y_ticks)
         return y_ticks

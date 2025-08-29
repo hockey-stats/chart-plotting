@@ -5,6 +5,7 @@ from datetime import datetime
 
 from plotting.base_plots.rolling_average import RollingAveragePlot
 from plotting.base_plots.multiplot import MultiPlot
+from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
 
 def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
@@ -69,57 +70,78 @@ def xg_by_division_multiplot(season: int, window: int, num_games: int):
 
     df = get_xg_data(season, window, num_games)
 
-    plots = []
-    for div in [atl, met, pac, cen]:
-        div_df = df.filter(pl.col('team').is_in(div['teams']))
-        div_plot = RollingAveragePlot(dataframe=div_df, filename='',
+    df = df.filter(pl.col('team').is_in(atl['teams']))
+
+    plot_title = 'Test Title'
+    subtitle = f"Over the last {num_games} games"
+
+    plot = AnimatedRollingAveragePlot(dataframe=df,
+                                      filename="xg_rolling_avg.mp4",
                                       x_column='gameNumber',
+                                      x_label='Game #',
                                       y_column='xGoalsRollingAvg',
-                                      title=div['name'], x_label='Game #\n',
-                                      y_label='5v5 xG% - 10-Game Rolling Average',
-                                      multiline_key='team', add_team_logos=True)
+                                      y_label=f'{window}-Game Rolling Average',
+                                      title=plot_title,
+                                      sport='hockey',
+                                      y_midpoint=50,
+                                      add_team_logos=True,
+                                      for_multiplot=False,
+                                      multiline_key='team',
+                                      subtitle=subtitle)
 
-        plots.append(div_plot)
+    plot.make_plot_gif()
+
+    #plots = []
+    #for div in [atl, met, pac, cen]:
+    #    div_df = df.filter(pl.col('team').is_in(div['teams']))
+    #    div_plot = RollingAveragePlot(dataframe=div_df, filename='',
+    #                                  x_column='gameNumber',
+    #                                  y_column='xGoalsRollingAvg',
+    #                                  title=div['name'], x_label='Game #\n',
+    #                                  y_label='5v5 xG% - 10-Game Rolling Average',
+    #                                  multiline_key='team', add_team_logos=True)
+
+    #    plots.append(div_plot)
 
 
-    arrangement = {
-        "dimensions": (2, 2),
-        "plots": [
-            {
-                "plot": plots[0],
-                "y_pos": 0,
-                "start": 0,
-                "end": 1
-            },
-            {
-                "plot": plots[1],
-                "y_pos": 0,
-                "start": 1,
-                "end": 2
-            },
-            {
-                "plot": plots[2],
-                "y_pos": 1,
-                "start": 0,
-                "end": 1
-            },
-            {
-                "plot": plots[3],
-                "y_pos": 1,
-                "start": 1,
-                "end": 2
-            }
-        ],
-        "hspace": 0,
-        "wspace": 0.1
-    }
+    #arrangement = {
+    #    "dimensions": (2, 2),
+    #    "plots": [
+    #        {
+    #            "plot": plots[0],
+    #            "y_pos": 0,
+    #            "start": 0,
+    #            "end": 1
+    #        },
+    #        {
+    #            "plot": plots[1],
+    #            "y_pos": 0,
+    #            "start": 1,
+    #            "end": 2
+    #        },
+    #        {
+    #            "plot": plots[2],
+    #            "y_pos": 1,
+    #            "start": 0,
+    #            "end": 1
+    #        },
+    #        {
+    #            "plot": plots[3],
+    #            "y_pos": 1,
+    #            "start": 1,
+    #            "end": 2
+    #        }
+    #    ],
+    #    "hspace": 0,
+    #    "wspace": 0.1
+    #}
 
-    multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
-                          title='5v5 Expected Goal Share Rolling Average\n'\
-                                '10-game rolling average, over the last 25 games\n',
-                          )
+    #multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
+    #                      title='5v5 Expected Goal Share Rolling Average\n'\
+    #                            '10-game rolling average, over the last 25 games\n',
+    #                      )
 
-    multiplot.make_multiplot()
+    #multiplot.make_multiplot()
 
 
 def main(plot_type: str, season: int, window: int, num_games: int):
