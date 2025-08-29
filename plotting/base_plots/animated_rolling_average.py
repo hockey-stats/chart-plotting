@@ -1,4 +1,5 @@
 import sys
+import polars as pl
 import matplotlib
 import matplotlib.patheffects as PathEffects
 from matplotlib.animation import FuncAnimation, FFMpegWriter
@@ -6,7 +7,6 @@ from matplotlib.animation import FuncAnimation, FFMpegWriter
 from plotting.base_plots.plot import FancyAxes
 from plotting.base_plots.rolling_average import RollingAveragePlot
 from util.font_dicts import game_report_label_text_params as label_params
-from util.font_dicts import multiplot_title_params
 
 
 if sys.platform == 'win32':
@@ -80,8 +80,8 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
 
             teams = list(set(self.df['team']))
             team = teams[i % 5]
-            team_df = self.df[self.df['team'] == team]
-            else_df = self.df[self.df['team'] != team]
+            team_df = self.df.filter(pl.col('team') == team)
+            else_df = self.df.filter(pl.col('team') != team)
 
             team_line = self.plot_multilines(alpha=1, linewidth=3, df=team_df)
             else_lines = self.plot_multilines(alpha=0.2, linewidth=1, df=else_df)
