@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import polars as pl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
@@ -111,16 +112,16 @@ class RollingAveragePlot(Plot):
             df = self.df
         logos = list()
         for team in set(df['team']):
-            x_last = list(df[df['team'] == team][self.x_col])[-1]
-            y_last = list(df[df['team'] == team][self.y_col])[-1]
+            x_last = list(df.filter(pl.col('team') == team)[self.x_col])[-1]
+            y_last = list(df.filter(pl.col('team') == team)[self.y_col])[-1]
 
             artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_last, y_last),
                                         frameon=False)
             self.axis.add_artist(artist_box)
 
-            x_first = list(df[df['team'] == team][self.x_col])[0]
-            y_first = list(df[df['team'] == team][self.y_col])[0]
+            x_first = list(df.filter(pl.col('team') == team)[self.x_col])[0]
+            y_first = list(df.filter(pl.col('team') == team)[self.y_col])[0]
 
             artist_box = AnnotationBbox(self.get_logo_marker(team, alpha=alpha, sport=self.sport),
                                         xy=(x_first, y_first),
@@ -140,7 +141,7 @@ class RollingAveragePlot(Plot):
         keys = set(df[self.multiline_key])
         lines = list()
         for key in keys:
-            individual_df = df[df[self.multiline_key] == key]
+            individual_df = df.filter(pl.col(self.multiline_key) == key)
 
             # Add a bit of smoothing
             x_col = individual_df[self.x_col]
@@ -186,10 +187,22 @@ class RollingAveragePlot(Plot):
         y_min = self.df[self.y_col].min()
         y_max = self.df[self.y_col].max()
 
+        print(y_min, y_max)
+        print(self.y_midpoint)
+
         y_scale = max(abs(self.y_midpoint - y_max), abs(self.y_midpoint - y_min)) * 1.1
 
-        y_ticks = list(range(math.floor(y_scale * -1), math.ceil(y_scale + 1)))
+        #y_ticks = list(range(math.floor(y_scale * -1), math.ceil(y_scale + 1)))
+        y_ticks = list(range(math.floor(self.y_midpoint - y_scale),
+                             math.ceil(self.y_midpoint + y_scale)))
 
         self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
+
+        # When doing plots with big-number ranges that center around 50 (i.e. xGoal%), only
+        # take multiples of 5 for the y-tick values
+        if self.y_midpoint == 50:
+            y_ticks = [y for y in y_ticks if y % 5 == 0] 
+
+        print(y_ticks)
         return y_ticks
         #self.axis.set_ylim(38, 62)

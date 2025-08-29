@@ -3,9 +3,8 @@ Script used to create layered lollipop plots to demonstrate team actual vs expec
 performance on special teams.
 """
 
-import os
 import argparse
-import pandas as pd
+import duckdb
 
 from plotting.base_plots.layered_lollipop import LayeredLollipopPlot
 
@@ -48,7 +47,20 @@ def main(situation):
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    base_df = pd.read_csv(os.path.join('data', 'special_teams_ratios.csv'))
+    conn = duckdb.connect('hockey-stats.db', read_only=True)
+
+    query = f"""
+        SELECT
+            team,
+            GFph,
+            GAph,
+            xGFph,
+            xGAph
+        FROM teams
+        WHERE situation='{situation}';
+    """
+
+    base_df = conn.execute(query).pl()
 
     if situation == '5on4':
         make_5on4_plot(base_df)

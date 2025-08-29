@@ -2,9 +2,9 @@
 Script used to plot on-ice ratios for individual players.
 """
 
-import os
 import argparse
-import pandas as pd
+import duckdb
+import polars as pl
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from util.team_maps import team_full_names
@@ -14,10 +14,25 @@ def main(team, min_icetime):
     Main function to create the plot and save as a png file.
     """
 
-    base_df = pd.read_csv(os.path.join('data', 'player_ratios.csv'))
+    conn = duckdb.connect('hockey-stats.db', read_only=True)
 
-    # Apply minimum icetime
-    base_df = base_df[base_df['icetime'] >= (min_icetime * 60)]
+    query = f"""
+        SELECT
+            season,
+            name,
+            team,
+            icetime,
+            GFph,
+            GAph,
+            xGFph,
+            xGAph
+        FROM skaters
+        WHERE
+            situation='5on5' AND
+            icetime>={min_icetime};
+    """
+
+    base_df = conn.execute(query).pl()
 
     # Calculate league averages for plot
     league_avg_xg = base_df['xGFph'].mean()

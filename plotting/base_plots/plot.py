@@ -203,15 +203,6 @@ class Plot:
             else:
                 y_coord = row[y] - 0.2
 
-            if self.fantasy_mode:
-                y_coord = row[y] - 2
-                bbox = {
-                    'facecolor': 'white',
-                    'alpha': 0.4
-                }
-            else:
-                bbox = {}
-
             self.axis.text(row[x], y_coord,
                            name,
                            horizontalalignment='center',

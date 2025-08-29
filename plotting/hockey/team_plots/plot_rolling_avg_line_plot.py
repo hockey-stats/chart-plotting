@@ -1,11 +1,59 @@
 import argparse
-import pandas as pd
+import duckdb
+import polars as pl
+from datetime import datetime
 
 from plotting.base_plots.rolling_average import RollingAveragePlot
 from plotting.base_plots.multiplot import MultiPlot
 
 
-def xg_by_division_multiplot():
+def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
+    """
+    For a given season, query the relevant team data from the team_games
+    table and calculate the rolling xG%, returning the results in a 
+    polars DataFrame.
+
+    :param int season: Season for which to query data
+    :param int window: Window size for computing rolling average
+    :param int num_games: Number of games to include in dataset (i.e. last 'n' games)
+    :return pl.DataFrame: Results of the query + rolling data
+    """
+
+    conn = duckdb.connect(database='hockey-stats.db', read_only=True)
+
+    query = f"""
+        SELECT
+            team,
+            gameId,
+            xGoalsPercentage
+        FROM team_games
+        WHERE
+            season={season} AND
+            situation='5on5';
+    """
+
+    df = conn.execute(query).pl()
+
+    output_dfs = []
+
+    for team in set(df['team']):
+        team_df = df.filter(pl.col('team') == team).sort(by='gameId')
+        team_df = team_df.with_columns(
+            gameNumber=pl.col('gameId').rank('ordinal', descending=False),
+            xGoalsRollingAvg=pl.col('xGoalsPercentage').rolling_mean(window_size=window) * 100
+        ).drop_nulls()
+
+        if num_games > 0:
+            team_df = team_df.tail(num_games)
+
+        output_dfs.append(team_df)
+
+    final_df = pl.concat(output_dfs)
+
+    return final_df
+
+
+def xg_by_division_multiplot(season: int, window: int, num_games: int):
     """
     Plot each teams rolling 10-game average, in a 2x2 plot where each plot shows
     all the teams in one division.
@@ -19,15 +67,14 @@ def xg_by_division_multiplot():
     cen = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
            'name': 'Central'}
 
-    df = pd.read_csv('data/xGoalsPercentage_rolling_avg.csv')
-    df['xGoalsPercentageRollingAvg'] = df.apply(lambda row:
-                                                round(row['xGoalsPercentageRollingAvg'] * 100, 2), 1)
+    df = get_xg_data(season, window, num_games)
+
     plots = []
     for div in [atl, met, pac, cen]:
-        div_df = df[df['team'].isin(div['teams'])]
+        div_df = df.filter(pl.col('team').is_in(div['teams']))
         div_plot = RollingAveragePlot(dataframe=div_df, filename='',
                                       x_column='gameNumber',
-                                      y_column='xGoalsPercentageRollingAvg',
+                                      y_column='xGoalsRollingAvg',
                                       title=div['name'], x_label='Game #\n',
                                       y_label='5v5 xG% - 10-Game Rolling Average',
                                       multiline_key='team', add_team_logos=True)
@@ -75,20 +122,29 @@ def xg_by_division_multiplot():
     multiplot.make_multiplot()
 
 
-def main(type):
+def main(plot_type: str, season: int, window: int, num_games: int):
     """
     Main function which disambiguates the stat to be plotted, calls the plotting methods
     and saves the output.
     """
-    if type == 'xg_by_division':
-        xg_by_division_multiplot()
+    if plot_type == 'xg_by_division':
+        xg_by_division_multiplot(season, window, num_games)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--type', default='xg_by_division',
+    parser.add_argument('--plot_type', default='xg_by_division',
                         const='xg_by_division',
                         nargs='?',
                         choices=['xg_by_division'])
+    parser.add_argument('-s', '--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year)
+    parser.add_argument('-w', '--window', default=10, type=int,
+                        help='Size of window to calculate rolling averages, defaults to 10')
+    parser.add_argument('-n', '--num_games', default=0, type=int,
+                        help='`n` for last n games for which to include in plot, e.g. n=25 would'\
+                             'mean only include the last 25 games in the output.')
     args = parser.parse_args()
-    main(args.type)
+
+    main(args.plot_type, args.season, window=args.window, num_games=args.num_games)

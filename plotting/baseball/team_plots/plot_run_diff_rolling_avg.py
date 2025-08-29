@@ -1,6 +1,7 @@
 import argparse
 
 import pandas as pd
+import polars as pl
 from datetime import datetime
 from pybaseball import schedule_and_record
 
@@ -76,7 +77,7 @@ def main(division: int) -> None:
              "teams": ['STL', 'MIL', 'CHC', 'CIN', 'PIT'] }
     }
 
-    df = proccess_data(divisions[division]['teams'])
+    df = pl.from_pandas(proccess_data(divisions[division]['teams']))
 
     division_name = divisions[division]['name']
     # American League East -> AL East
