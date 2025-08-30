@@ -76,8 +76,8 @@ class SwarmPlot(Plot):
         self.make_dummy_categorical_data()
 
         if self.column == 'WAR':
-            self.axis.set_yticks(list(range(-1, 6, 1)))
-            self.axis.set_ylim(bottom=-2, top=6)
+            self.axis.set_yticks(list(range(-1, 7, 1)))
+            self.axis.set_ylim(bottom=-2, top=7)
 
         if self.column == 'Stuff+':
             self.axis.set_yticks(list(range(80, 120, 10)))
