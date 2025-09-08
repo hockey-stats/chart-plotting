@@ -74,7 +74,8 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
 
             self.axis.set_yticks([], [])
             self.axis.set_yticks(y_range,
-                                labels=[f"{y}%" for y in y_range] if self.sport == 'hockey' else y_range,
+                                labels=[f"{y}%" for y in y_range] if self.sport == 'hockey' \
+                                       else y_range,
                                 fontdict=label_params)
             self.axis.set_ylabel(self.y_label, fontdict=label_params)
 
@@ -92,7 +93,6 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
             self.add_dotted_h_lines(y_values=y_range)
 
             return team_line + else_lines, team_logo, else_logos
-       
 
         ani = FuncAnimation(self.fig, animate,
                             frames=5,

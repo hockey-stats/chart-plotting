@@ -1,10 +1,9 @@
 import argparse
-import duckdb
-import polars as pl
 from datetime import datetime
 
-from plotting.base_plots.rolling_average import RollingAveragePlot
-from plotting.base_plots.multiplot import MultiPlot
+import duckdb
+import polars as pl
+
 from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
 
 
@@ -54,25 +53,28 @@ def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
     return final_df
 
 
-def xg_by_division_multiplot(season: int, window: int, num_games: int):
+def xg_by_division_multiplot(season: int, div: int, window: int, num_games: int):
     """
     Plot each teams rolling 10-game average, in a 2x2 plot where each plot shows
     all the teams in one division.
     """
-    atl = {'teams': {'TOR', 'TBL', 'BOS', 'DET', 'MTL', 'OTT', 'FLA', 'BUF'},
-           'name': 'Atlantic'}
-    met = {'teams': {'NYR', 'NYI', 'NJD', 'CAR', 'CBJ', 'PIT', 'WSH', 'PHI'},
-           'name': 'Metropolitan'}
-    pac = {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
-           'name': 'Pacific'}
-    cen = {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
-           'name': 'Central'}
+
+    divisions = {
+    0: {'teams': {'TOR', 'TBL', 'BOS', 'DET', 'MTL', 'OTT', 'FLA', 'BUF'},
+        'name': 'Atlantic'},
+    1: {'teams': {'NYR', 'NYI', 'NJD', 'CAR', 'CBJ', 'PIT', 'WSH', 'PHI'},
+        'name': 'Metropolitan'},
+    2: {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
+        'name': 'Pacific'},
+    3: {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
+        'name': 'Central'}
+    }
 
     df = get_xg_data(season, window, num_games)
 
-    df = df.filter(pl.col('team').is_in(atl['teams']))
+    df = df.filter(pl.col('team').is_in(divisions[div]['teams']))
 
-    plot_title = 'Test Title'
+    plot_title = f'{divisions[div]['name']} Division xG% Rolling Averages'
     subtitle = f"Over the last {num_games} games"
 
     plot = AnimatedRollingAveragePlot(dataframe=df,
@@ -91,66 +93,14 @@ def xg_by_division_multiplot(season: int, window: int, num_games: int):
 
     plot.make_plot_gif()
 
-    #plots = []
-    #for div in [atl, met, pac, cen]:
-    #    div_df = df.filter(pl.col('team').is_in(div['teams']))
-    #    div_plot = RollingAveragePlot(dataframe=div_df, filename='',
-    #                                  x_column='gameNumber',
-    #                                  y_column='xGoalsRollingAvg',
-    #                                  title=div['name'], x_label='Game #\n',
-    #                                  y_label='5v5 xG% - 10-Game Rolling Average',
-    #                                  multiline_key='team', add_team_logos=True)
 
-    #    plots.append(div_plot)
-
-
-    #arrangement = {
-    #    "dimensions": (2, 2),
-    #    "plots": [
-    #        {
-    #            "plot": plots[0],
-    #            "y_pos": 0,
-    #            "start": 0,
-    #            "end": 1
-    #        },
-    #        {
-    #            "plot": plots[1],
-    #            "y_pos": 0,
-    #            "start": 1,
-    #            "end": 2
-    #        },
-    #        {
-    #            "plot": plots[2],
-    #            "y_pos": 1,
-    #            "start": 0,
-    #            "end": 1
-    #        },
-    #        {
-    #            "plot": plots[3],
-    #            "y_pos": 1,
-    #            "start": 1,
-    #            "end": 2
-    #        }
-    #    ],
-    #    "hspace": 0,
-    #    "wspace": 0.1
-    #}
-
-    #multiplot = MultiPlot(arrangement=arrangement, filename='xg_rolling_avg_by_division',
-    #                      title='5v5 Expected Goal Share Rolling Average\n'\
-    #                            '10-game rolling average, over the last 25 games\n',
-    #                      )
-
-    #multiplot.make_multiplot()
-
-
-def main(plot_type: str, season: int, window: int, num_games: int):
+def main(plot_type: str, season: int, div, window: int, num_games: int):
     """
     Main function which disambiguates the stat to be plotted, calls the plotting methods
     and saves the output.
     """
     if plot_type == 'xg_by_division':
-        xg_by_division_multiplot(season, window, num_games)
+        xg_by_division_multiplot(season, div, window, num_games)
 
 
 if __name__ == '__main__':
@@ -162,11 +112,14 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--season', type=int,
                         default=datetime.now().year - 1 if datetime.now().month < 10 \
                                 else datetime.now().year)
+    parser.add_argument('-d', '--div', type=int, required=True,
+                        help="Integer corresponding to division for which to generate plot. \n"\
+                             "0 - Atlantic\n1 - Metropolitan\n2 - Pacific\n3 - Central")
     parser.add_argument('-w', '--window', default=10, type=int,
                         help='Size of window to calculate rolling averages, defaults to 10')
     parser.add_argument('-n', '--num_games', default=0, type=int,
-                        help='`n` for last n games for which to include in plot, e.g. n=25 would'\
+                        help='`n` for last n games for which to include in plot, e.g. n=25 would '\
                              'mean only include the last 25 games in the output.')
     args = parser.parse_args()
 
-    main(args.plot_type, args.season, window=args.window, num_games=args.num_games)
+    main(args.plot_type, args.season, args.div, window=args.window, num_games=args.num_games)
