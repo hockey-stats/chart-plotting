@@ -107,7 +107,7 @@ mlb_team_full_names = {
 	"SEA": "Seattle Mariners",
 	"SFG": "San Francisco Giants",
 	"STL": "St. Louis Cardinals",
-	"TBR": "Tamba Bay Rays",
+	"TBR": "Tampa Bay Rays",
 	"TEX": "Texas Rangers",
 	"TOR": "Toronto Blue Jays",
 	"WSN": "Washington Nationals",
