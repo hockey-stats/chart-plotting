@@ -14,6 +14,7 @@ def total_toi_as_timestamp(toi):
     timestamp = f"{minutes}:{seconds}"
     return timestamp
 
+
 def handle_player_full_names(df):
     """
     Generally skater names will be displayed as just their last names. This function will be

@@ -3,7 +3,7 @@ Sub-class of Plot that created a mirrored horizontal bar chart. This was origina
 for showing icetime of players from two teams in a game report chart.
 """
 
-import pandas as pd
+import polars as pl
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
@@ -58,8 +58,12 @@ class MirroredBarPlot(Plot):
         self.set_title()
 
         # Add column for display names
-        self.df_a['display_name'] = handle_player_full_names(self.df_a)
-        self.df_b['display_name'] = handle_player_full_names(self.df_b)
+        self.df_a = self.df_a.with_columns(
+            display_name=pl.Series(handle_player_full_names(self.df_a))
+        )
+        self.df_b = self.df_b.with_columns(
+            display_name=pl.Series(handle_player_full_names(self.df_b))
+        )
 
         # Set the x-range of the plot based on the largest TOI value from both teams
         x_max = max(list(self.df_a[self.sort_value]) + list(self.df_b[self.sort_value])) + 1
@@ -67,7 +71,9 @@ class MirroredBarPlot(Plot):
 
         # The x-values used in df_a will be multiplied by -1 to create the mirror effect.
         for column in self.x_col:
-            self.df_a[column] = [value * -1 for value in self.df_a[column]]
+            self.df_a = self.df_a.with_columns(
+                pl.Series(value * -1 for value in self.df_a[column]).alias(column)
+            )
 
         y_range = list(range(0, max(len(self.df_a), len(self.df_b))))
 
@@ -83,8 +89,8 @@ class MirroredBarPlot(Plot):
 
         # df_a and df_b correspond to the two sides of the mirrored bar plot.
         if self.sort_value:
-            self.df_a = self.df_a.sort_values(by=[self.sort_value], ascending=True)
-            self.df_b = self.df_b.sort_values(by=[self.sort_value], ascending=True)
+            self.df_a = self.df_a.sort(by=[self.sort_value], descending=False)
+            self.df_b = self.df_b.sort(by=[self.sort_value], descending=False)
 
         self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']), fontdict=text_params)
         ax2.set_yticks(y_range, labels=list(self.df_b['display_name']), fontdict=text_params)
@@ -215,9 +221,10 @@ class MirroredBarPlot(Plot):
         horizontal_offset_increment = 1.7
         horizontal_offset_start = 1
         for i, df in enumerate([self.df_b, self.df_a]):
-            for index, (_, row) in enumerate(df.iterrows()):
+            for index, row in enumerate(df.iter_rows()):
                 horizontal_offset = horizontal_offset_start
-                for _ in range(0, int(row['g'])):
+                # row[7] refers to the goals column
+                for _ in range(0, int(row[7])):
                     if i == 0:
                         self.axis.text(horizontal_offset, index - vertical_offset,
                                     "G",
@@ -236,7 +243,8 @@ class MirroredBarPlot(Plot):
                                     bbox=g_bbox)
 
                     horizontal_offset += horizontal_offset_increment
-                for _ in range(0, int(row['a1']) + int(row['a2'])):
+                # row[8] and row[9] refer to the a1 and a2 columns, resp.
+                for _ in range(0, int(row[8]) + int(row[9])):
                     if i == 0:
                         self.axis.text(horizontal_offset, index - vertical_offset,
                                     "A",
@@ -279,14 +287,19 @@ class MirroredBarPlot(Plot):
             'name': [''] * diff,
             'team': [team] * diff,
             'position': [''] * diff,
+            'all': [0.0] * diff,
+            'pp': [0.0] * diff,
+            'pk': [0.0] * diff,
+            'ev': [0.0] * diff,
+            'g': [0] * diff,
+            'a1': [0] * diff,
+            'a2': [0] * diff,
             'display_name': [''] * diff
         }
 
-        df = pd.DataFrame(rows)
+        df = pl.DataFrame(rows)
 
         if a_is_more:
-            self.df_b = pd.concat([self.df_b, df]).fillna(0)
-            print(self.df_b)
+            self.df_b = pl.concat([self.df_b, df]).fill_nan(0)
         else:
-            self.df_a = pd.concat([self.df_a, df]).fillna(0)
-            print(self.df_a)
+            self.df_a = pl.concat([self.df_a, df]).fill_nan(0)
