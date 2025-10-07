@@ -3,13 +3,13 @@ on:
   workflow_call:
     inputs:
       last_game_id:
-        description: The last game reported on.
+        description: Game ID for the most recent game reported on.
         type: string
     outputs:
       plot_artifact_name:
         value: ${{ jobs.plot-graphs.outputs.plot_artifact_name }}
       game_id:
-        value: ${{ jobs.scrape-data.outputs.game_id }}
+        value: ${{ jobs.plot-graphs.outputs.game_id }}
 
 env: 
   DATA_ARTIFACT_NAME: 'game-data'
@@ -17,76 +17,21 @@ env:
   MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
-  scrape-data:
-
-    runs-on: ubuntu-latest
-
-    container:
-      image: sohraub/hockey-stats-web-scraper:main
-
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    permissions:
-      actions: write
-      contents: read
-      
-    steps: 
-      - name: Check if any new games are available
-        id: check
-        env:
-          LAST_GAME: ${{ inputs.last_game_id }}
-        run: |
-          cd /home/scraping
-          python3 check_for_new_games.py -y 2024 -g $LAST_GAME
-
-      - name: Scrape game data
-        if: steps.check.outputs.game_id != 'NONE'
-        run: |
-          cd /home/scraping
-          python3 scrape_game_data.py -y 2024 -g ${{ steps.check.outputs.game_id }}
-
-      - name: Save raw game data as artifact
-        if: steps.check.outputs.game_id != 'NONE'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.DATA_ARTIFACT_NAME }}
-          path: /home/scraping/tables/*csv
-          retention-days: 1
-
-      - name: Set output for artifact name
-        if: steps.check.outputs.game_id != 'NONE'
-        id: set-output
-        run: echo "data_artifact_name=$DATA_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-
-    outputs:
-      game_id: ${{ steps.check.outputs.game_id }}
 #############
 #############
   plot-graphs:
 
     runs-on: ubuntu-latest
-    needs: scrape-data
-
-    if: needs.scrape-data.outputs.game_id != 'NONE'
 
     env: 
-      GAME_ID: ${{ needs.scrape-data.outputs.game_id }}
+      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
+      LAST_GAME: ${{ inputs.last_game_id }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           repository: hockey-stats/chart-plotting
-
-      - name: Download data artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.DATA_ARTIFACT_NAME }}
-          
-      - name: Check file structure
-        run: |
-          ls -lrt;
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -97,19 +42,48 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
 
-      - name: Process raw data
-        env:
-          PYTHONPATH: ${{ github.workspace }}
+      - name: Check if any new games are available
+        id: check-new
+        shell: python
         run: |
-          python3 processing/for_game_report/process_game_tables.py -p ./ -g $GAME_ID
+          import os
+          import duckdb
+          import polars as pl
+
+          conn = duckdb.connect('md:')
+
+          game_ids = conn.sql("""
+              SELECT DISTINCT
+                  gameID
+              FROM skater_games
+              WHERE
+                  season = 2025;
+          """).pl()
+
+          game_ids = list(game_ids.sort(by=['gameID'], descending=False))
+
+          print(f"Last game reported: {os.env}")
+          print(game_ids)
+
+          game_to_report = 0
+          for game in game_ids:
+            if int(game) > int(os.environ['LAST_GAME']):
+              game_to_report = game
+              break
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'game_id={game_to_report}', file=fh)
 
       - name: Generate chart
+        if: ${{ steps.check-new.outputs.game_id != 0}}
         env:
           PYTHONPATH: ${{ github.workspace }}
+          GAME_ID: ${{ steps.check-new.outputs.game_id }}
         run: |
           python3 plotting/hockey/game_report/assemble_report.py -g $GAME_ID
 
       - name: Save chart as artifact
+        if: ${{ steps.check-new.outputs.game_id != 0}}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
@@ -119,3 +93,7 @@ jobs:
       - name: Set output for artifact name
         id: set-output
         run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+    outputs:
+      game_id: ${{ steps.check-new.outputs.game_id }}
+      plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}

@@ -9,9 +9,7 @@ The report will consist of many plots assembed into a multi-plot, including:
  - and we'll see what else, it's a WIP
 """
 
-import os
-import glob
-import datetime
+from datetime import datetime
 import argparse
 import polars as pl
 import duckdb
@@ -163,7 +161,7 @@ def construct_title(team_a, team_b, date):
     return title, filename
 
 
-def main(game_id, filename):
+def main(game_id, filename, season):
     """
     Given a GameID (corresponding to a game on NST), find CSVs corresponding to that game ID 
     and create the Game Report plot.
@@ -172,15 +170,17 @@ def main(game_id, filename):
     conn = duckdb.connect('md:', read_only=True)
 
     skater_df = conn.sql(f"""
-        SELECT * FROM preseason_skater_games s
-        WHERE s.gameID = {game_id}
+        SELECT * 
+        FROM skater_games 
+        WHERE gameID = {game_id} AND season = {season}
         """).pl()
     goalie_df = conn.sql(f"""
-        SELECT * FROM preseason_goalie_games g
-        WHERE g.gameID = {game_id}
+        SELECT * FROM 
+        goalie_games 
+        WHERE gameID = {game_id} AND season = {season}
         """).pl()
 
-    date = datetime.datetime.strftime(skater_df['gameDate'][0], '%d-%m-%Y')
+    date = datetime.strftime(skater_df['gameDate'][0], '%d-%m-%Y')
 
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 
@@ -200,6 +200,10 @@ if __name__ == '__main__':
                         help="Game ID (via NST) to create a game report for.")
     parser.add_argument('-f', '--filename', default=None,
                         help='Specify filename for output image. Defaults to team/date format')
+    parser.add_argument('-s', '--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year,
+                        help='Season for which we pull data')
     args = parser.parse_args()
 
-    main(args.game_id, args.filename)
+    main(args.game_id, args.filename, args.season)
