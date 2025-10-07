@@ -14,6 +14,7 @@ on:
 env: 
   DATA_ARTIFACT_NAME: 'game-data'
   PLOTS_ARTIFACT_NAME: 'game-plot'
+  MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
   scrape-data:

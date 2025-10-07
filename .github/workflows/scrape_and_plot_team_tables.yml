@@ -9,6 +9,7 @@ on:
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-plots'
+  MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
   plot-graphs:

@@ -15,6 +15,7 @@ on:
 
 env:
   PLOTS_ARTIFACT_NAME: 'special-teams-plots'
+  MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
   plot-graphs:

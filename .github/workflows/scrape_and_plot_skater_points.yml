@@ -28,6 +28,7 @@ on:
     
 env: 
   PLOTS_ARTIFACT_NAME: 'skater-point-plots'
+  MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
   plot-graphs:
