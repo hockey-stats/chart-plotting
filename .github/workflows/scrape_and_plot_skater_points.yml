@@ -41,11 +41,6 @@ jobs:
         with:
           repository: hockey-stats/chart-plotting
       #
-      - name: Download Raw Data
-        run: |
-          mkdir ./data;
-          wget -O ./data/skater_individual_stats.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/skaters.csv
-      #
       - name: Setup Python
         uses: actions/setup-python@v4
         with:

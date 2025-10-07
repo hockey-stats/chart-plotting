@@ -90,9 +90,6 @@ class LayeredLollipopPlot(Plot):
             .alias('plot_point')
         )
 
-        with pl.Config(tbl_rows=32):
-            print(self.df)
-
         self.df.select(
             pl.struct(pl.all())
             .map_elements(lambda row:

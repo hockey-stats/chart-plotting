@@ -140,9 +140,9 @@ class RatioScatterPlot(Plot):
                 p1 = (2, 2 * ((1 - x) / x))
                 p2 = (2.5, 2.5 * ((1 - x) / x))
                 color = '0.88'
-                
+
                 # For hockey ratio plots, emphasize lines at 40, 45, 55, 60, etc.
-                if round(x * 100, 0) % 5 == 0 and self.sport == 'hockey': 
+                if round(x * 100, 0) % 5 == 0 and self.sport == 'hockey':
                     color = ratio_to_color(x) if self.for_game_report else '0.6'
                     text_xy = (y_max * (x / (1 - x)), y_max - 0.02)
                     if text_xy[0] > x_max or text_xy[0] < x_min:
@@ -206,13 +206,13 @@ class RatioScatterPlot(Plot):
                                                              opacity=0.06),
                               return_dtype=pl.Struct([]))
             )
-        max_icetime = self.df['icetime'].max()
+        max_icetime = self.df['iceTime'].max()
         # Now add the desired players for the given team, with scaled opacity and name labels
         team_df = self.df.filter(pl.col('team') == self.team) if self.team != 'ALL' else self.df
         team_df.select(
             pl.struct(pl.all())
             .map_elements(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
-                                                         opacity_scale='icetime',
+                                                         opacity_scale='iceTime',
                                                          opacity_max=max_icetime),
                           return_dtype=pl.Struct([]))
 

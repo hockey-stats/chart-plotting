@@ -179,9 +179,9 @@ class ScoreBoardPlot(Plot):
                 skater_df = self.df.filter((pl.col('team') == team) & (pl.col('state') == state))
                 goalie_df = self.g_df.filter((pl.col('team') == team) & (pl.col('state') == state))
                 goals = skater_df['goals'].sum()
-                xgoals = skater_df['ixG'].sum()
+                xgoals = skater_df['individualxGoals'].sum()
                 # Can get the total ToI of each state by checking the goalie icetime.
-                toi = goalie_df['icetime'].sum()
+                toi = goalie_df['iceTime'].sum()
                 team_data[team][state] = {
                     'goals': goals, 
                     'xgoals': xgoals, 
@@ -284,9 +284,9 @@ class ScoreBoardPlot(Plot):
         g = self.g_df  # Easy alias
         team_a, team_b = set(g['team'])
         team_a_pp_toi = g.filter((pl.col('team') == team_a) & (pl.col('state') == 'pp'))\
-            ['icetime'].sum()
+            ['iceTime'].sum()
         team_b_pp_toi = g.filter((pl.col('team') == team_b) & (pl.col('state') == 'pp'))\
-            ['icetime'].sum()
+            ['iceTime'].sum()
 
         # Start the value/label lists as only containing ES info, and only add the PP toi
         # for either team if that toi is > 0
@@ -367,8 +367,8 @@ class ScoreBoardPlot(Plot):
                        weight=fontweight)
 
         for goalie in goalies:
-            ga = float(g.filter(pl.col('name') == goalie)['GA'].item(0))
-            xga = float(g.filter(pl.col('name') == goalie)['xGA'].item(0))
+            ga = float(g.filter(pl.col('name') == goalie)['goalsAgainst'].item(0))
+            xga = float(g.filter(pl.col('name') == goalie)['xGoalsAgainst'].item(0))
             gsax = round(xga - ga, 1)
 
             # Determine color of the GSAX text box based on how high/low the gsax value is.

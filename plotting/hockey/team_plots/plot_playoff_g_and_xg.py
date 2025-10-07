@@ -15,11 +15,11 @@ def make_plots(base_df):
     """
 
     # Calculate league averages for plot
-    league_avg_xg = base_df['xGFph'].mean()
-    league_avg_g = base_df['GFph'].mean()
+    league_avg_xg = base_df['xGoalsForPerHour'].mean()
+    league_avg_g = base_df['goalsForPerHour'].mean()
 
     xg_plot = RatioScatterPlot(dataframe=base_df, filename='xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
+                               x_column='xGoalsForPerHour', y_column='xGoalsAgainstPerHour',
                                title='\n\nExpected Goal Rates (5v5)',
                                scale='team',
                                x_label='Expected Goals For per hour',
@@ -30,7 +30,7 @@ def make_plots(base_df):
                                scale_to_extreme=True, plot_league_average=league_avg_xg)
 
     g_plot = RatioScatterPlot(dataframe=base_df, filename='g_ratios.png',
-                              x_column='GFph', y_column='GAph',
+                              x_column='goalsForPerHour', y_column='goalsAgainstPerHour',
                               title='\n\nActual Goal Rates (5v5)', scale='team',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)\n\n',

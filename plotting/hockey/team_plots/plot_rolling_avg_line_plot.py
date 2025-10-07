@@ -19,13 +19,13 @@ def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
     :return pl.DataFrame: Results of the query + rolling data
     """
 
-    conn = duckdb.connect(database='hockey-stats.db', read_only=True)
+    conn = duckdb.connect(database='md:', read_only=True)
 
     query = f"""
         SELECT
             team,
-            gameId,
-            xGoalsPercentage
+            gameID,
+            xGoalsShare
         FROM team_games
         WHERE
             season={season} AND
@@ -37,10 +37,10 @@ def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
     output_dfs = []
 
     for team in set(df['team']):
-        team_df = df.filter(pl.col('team') == team).sort(by='gameId')
+        team_df = df.filter(pl.col('team') == team).sort(by='gameID')
         team_df = team_df.with_columns(
-            gameNumber=pl.col('gameId').rank('ordinal', descending=False),
-            xGoalsRollingAvg=pl.col('xGoalsPercentage').rolling_mean(window_size=window) * 100
+            gameNumber=pl.col('gameID').rank('ordinal', descending=False),
+            xGoalsRollingAvg=pl.col('xGoalsShare').rolling_mean(window_size=window) * 100
         ).drop_nulls()
 
         if num_games > 0:

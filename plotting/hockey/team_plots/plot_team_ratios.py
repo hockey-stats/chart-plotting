@@ -14,11 +14,11 @@ def make_plots(base_df):
     """
 
     # Calculate league averages for plot
-    league_avg_xg = base_df['xGFph'].mean()
-    league_avg_g = base_df['GFph'].mean()
+    league_avg_xg = base_df['xGoalsForPerHour'].mean()
+    league_avg_g = base_df['goalsForPerHour'].mean()
 
     xg_plot = RatioScatterPlot(dataframe=base_df, filename='xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
+                               x_column='xGoalsForPerHour', y_column='xGoalsAgainstPerHour',
                                title='Team Expected Goal Rates',
                                subtitle='    5v5, flurry-, score-, and venue-adjusted',
                                scale='team',
@@ -31,7 +31,7 @@ def make_plots(base_df):
 
     # Plot Team Goal ratios
     g_plot = RatioScatterPlot(dataframe=base_df, filename='g_ratios.png',
-                              x_column='GFph', y_column='GAph',
+                              x_column='goalsForPerHour', y_column='goalsAgainstPerHour',
                               title='Team Goal Rates (5v5)', scale='team',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)',
@@ -46,15 +46,15 @@ def main(situation):
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    conn = duckdb.connect('hockey-stats.db', read_only=True)
+    conn = duckdb.connect('md:', read_only=True)
 
     query = f"""
         SELECT
             team,
-            xGFph,
-            xGAph,
-            GFph,
-            GAph
+            xGoalsForPerHour,
+            xGoalsAgainstPerHour,
+            goalsForPerHour,
+            goalsAgainstPerHour
         FROM teams
         WHERE situation='{situation}';
     """

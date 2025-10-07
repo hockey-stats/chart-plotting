@@ -30,7 +30,8 @@ nst_team_mapping = {
     "Anaheim Ducks": "ANA",
     "Chicago Blackhawks": "CHI",
     "Arizona Coyotes": "ARI",
-    "New York Islanders": "NYI"
+    "New York Islanders": "NYI",
+    "Utah Mammoth": "UTA"
 }
 
 eh_team_mapping = {
@@ -77,7 +78,7 @@ team_full_names = {
     'CHI': 'Chicago Blackhawks',
     'ARI': 'Arizona Coyotes',
     'NYI': 'New York Islanders',
-    'UTA': 'Utah Hockey Club'
+    'UTA': 'Utah Mammoth'
 }
 
 mlb_team_full_names = {

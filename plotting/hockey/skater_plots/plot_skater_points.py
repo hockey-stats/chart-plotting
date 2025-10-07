@@ -8,6 +8,7 @@ import duckdb
 import polars as pl
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
+from util.team_maps import team_full_names
 
 
 def construct_plot(df, team, output_filename, plot_title, subtitle):
@@ -25,7 +26,7 @@ def construct_plot(df, team, output_filename, plot_title, subtitle):
 
     pph_plot = RatioScatterPlot(dataframe=df,
                                 filename=output_filename,
-                                x_column='avgTOI',
+                                x_column='averageIceTime',
                                 y_column='pointsPerHour',
                                 title=plot_title,
                                 subtitle=subtitle,
@@ -47,7 +48,7 @@ def main(team, min_icetime_minutes, situation):
     Main function to create the plot and save as a png file.
     """
 
-    conn = duckdb.connect('hockey-stats.db', read_only=True)
+    conn = duckdb.connect('md:', read_only=True)
 
     query = f"""
         SELECT
@@ -55,9 +56,9 @@ def main(team, min_icetime_minutes, situation):
             name,
             team,
             position,
-            icetime,
-            avgTOI,
-            pph as pointsPerHour
+            iceTime,
+            averageIceTime,
+            pointsPerHour
         FROM skaters
         WHERE
             situation='{situation}' AND
@@ -71,14 +72,20 @@ def main(team, min_icetime_minutes, situation):
     df_d = df.filter(pl.col('position') == 'D')
     del df
 
+    # Format the 'team' string to be used in the title of the plot
+    if team == 'ALL':
+        display_team = 'All'
+    else:
+        display_team = team_full_names[team]
+
     construct_plot(df_f, team,
                    output_filename=f'{team}_F_{situation}_scoring_rates.png',
-                   plot_title=f'{team} Forward Scoring Rates ({situation.replace("on", "v")})',
+                   plot_title=f'{display_team} Forward Scoring Rates ({situation.replace("on", "v")})',
                    subtitle=f'min. {min_icetime_minutes} minutes')
 
     construct_plot(df_d, team,
                    output_filename=f'{team}_D_{situation}_scoring_rates.png',
-                   plot_title=f'{team} Defenseman Scoring Rates ({situation.replace("on", "v")})',
+                   plot_title=f'{display_team} Defenseman Scoring Rates ({situation.replace("on", "v")})',
                    subtitle=f'min. {min_icetime_minutes} minutes)')
 
 if __name__ == '__main__':
@@ -88,7 +95,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
     parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
-                        choices=['5on5', '4on5', '5on4', 'other'],
+                        choices=['5on5', '4on5', '5on4', 'other', 'all'],
                         help='Game state to measure points for. Defaults to 5on5.')
     args = parser.parse_args()
 

@@ -5,7 +5,7 @@ on:
       year:
         type: string
         description: Season for which to gather data
-        default: 2024
+        default: '2025'
 
     outputs:
       plot_artifact_name: 
@@ -16,7 +16,7 @@ on:
       year:
         type: string
         description: Season for which to gather data
-        default: 2024
+        default: '2025'
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-rolling-avg-plots'
@@ -31,11 +31,6 @@ jobs:
         with:
           repository: hockey-stats/chart-plotting
       #
-      - name: Download Raw Data
-        run: |
-          mkdir ./data;
-          wget -O ./data/mp_all_team_games.csv https://moneypuck.com/moneypuck/playerData/careers/gameByGame/all_teams.csv
-      #
       - name: Setup Python
         uses: actions/setup-python@v4
         with: 
@@ -45,12 +40,6 @@ jobs:
       - name: Install Requirements
         run: |
           pip install -r requirements.txt;
-      #
-      - name: Process Tables
-        env: 
-          PYTHONPATH: ${{ github.workspace }}
-        run: |
-          python3 processing/for_rolling_avg_line_plot/process_all_teams_table.py -y ${{ inputs.year }} -n 25;
       #
       - name: Generate Charts
         env: 
@@ -62,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PLOTS_ARTIFACT_NAME }}
-          path: ./*png
+          path: ./*mp4
           retention-days: 1
       #
       - name: Set Output for Artifact Name 
