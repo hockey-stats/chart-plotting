@@ -187,9 +187,6 @@ class RollingAveragePlot(Plot):
         y_min = self.df[self.y_col].min()
         y_max = self.df[self.y_col].max()
 
-        print(y_min, y_max)
-        print(self.y_midpoint)
-
         y_scale = max(abs(self.y_midpoint - y_max), abs(self.y_midpoint - y_min)) * 1.1
 
         #y_ticks = list(range(math.floor(y_scale * -1), math.ceil(y_scale + 1)))
@@ -203,6 +200,5 @@ class RollingAveragePlot(Plot):
             y_ticks = [y for y in y_ticks if y % 5 == 0] 
             self.axis.set_ylim(self.y_midpoint - y_scale, self.y_midpoint + y_scale)
 
-        print(y_ticks)
         return y_ticks
         #self.axis.set_ylim(38, 62)
