@@ -1,4 +1,4 @@
-import numpy as np
+import polars as pl
 import matplotlib.pyplot as plt
 
 from plotting.base_plots.plot import Plot, FancyAxes
@@ -37,8 +37,22 @@ class LayeredLollipopPlot(Plot):
         """
 
         self.set_title()
+
         # First add column denoting the rank of each team in the given dataframe
-        self.df['rank'] = np.arange(len(self.df.index))
+        self.df = self.df.with_columns(
+            pl.struct(self.value_a)
+            .rank('ordinal', descending=True)
+            .alias('rank')
+        )
+
+        # Want the rank to be 0-indexed, so reduce each value by 1
+        self.df = self.df.with_columns(
+            (pl.col('rank') - 1)
+            .alias('rank')
+        )
+
+        # Sort the DataFrame by rank before plotting
+        self.df = self.df.sort("rank", descending=False)
 
         # Then create the plot for value b, and then the plot of value a on top of it.
         # Then re-plot the final markers of value b so that they don't have lines going
@@ -71,11 +85,16 @@ class LayeredLollipopPlot(Plot):
 
         # Add one more column that represents a value slightly higher than max(value_a, value_b)
         # to provide a point for plotting team logos just above the head of the lollipop
-        self.df['plot_point'] = [x + 0.6 for x in
-                                 list(self.df[[self.value_a, self.value_b]].max(axis=1))]
+        self.df = self.df.with_columns(
+            (pl.max_horizontal(pl.col(self.value_a), pl.col(self.value_b)) + 0.6)
+            .alias('plot_point')
+        )
 
-        self.df.apply(lambda row:
+        self.df.select(
+            pl.struct(pl.all())
+            .map_elements(lambda row:
                       self.add_team_logo(row, 'rank', 'plot_point', opacity=0.7, size='tiny'),
-                      axis=1)
+                      return_dtype=pl.Struct([]))
+        )
 
         self.save_plot()

@@ -11,17 +11,16 @@ The report will consist of many plots assembed into a multi-plot, including:
 
 import os
 import glob
+import datetime
 import argparse
-import pandas as pd
+import polars as pl
+import duckdb
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from plotting.base_plots.mirrored_bar import MirroredBarPlot
 from plotting.base_plots.scoreboard import ScoreBoardPlot
 from plotting.base_plots.multiplot import MultiPlot
 from util.team_maps import team_full_names
-
-# Disable an annoying warning
-pd.options.mode.chained_assignment = None
 
 
 def make_xg_ratio_plot(skater_df):
@@ -30,11 +29,11 @@ def make_xg_ratio_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # DataFrame contains info for all states, so filter to 5v5
-    df = skater_df[skater_df['state'] == 'ev']
+    df = skater_df.filter(pl.col('state') == 'ev')
 
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
-                               x_column='xGF', y_column='xGA',
+                               x_column='xGoalsFor', y_column='xGoalsAgainst',
                                title='Even-Strength xGoal Share', scale='player',
                                x_label='Expected Goals For',
                                # The newlines are a hack-y way to make the spacing align with
@@ -58,37 +57,31 @@ def make_icetime_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # Pivot skater_df to have one df showing icetime broken down by state
-    icetime_df = pd.pivot_table(skater_df, values='icetime', index=['name', 'team', 'position'],
-                                columns=['state'])
-    icetime_df.reset_index(inplace=True)
+    icetime_df = skater_df.pivot('state', index=['name', 'team', 'position'], values='iceTime')
     teams = list(set(icetime_df['team']))
-    df_a = icetime_df[icetime_df['team'] == teams[0]]
-    df_b = icetime_df[icetime_df['team'] == teams[1]]
-
-    # Add column for total icetime, to have a value to sort the tables by
-    for df in df_a, df_b:
-        df['total_toi'] = df.apply(lambda row: row['ev'] + row['pp'] + row['pk'], axis=1)
+    df_a = icetime_df.filter(pl.col('team') == teams[0])
+    df_b = icetime_df.filter(pl.col('team') == teams[1])
 
     # Add columns for total goals and assists
-    df_a_scoring = skater_df[(skater_df['team'] == teams[0]) & (skater_df['state'] == 'all')]\
-                   [['name', 'goals', 'primary_assists', 'secondary_assists']]
-    df_b_scoring = skater_df[(skater_df['team'] == teams[1]) & (skater_df['state'] == 'all')]\
-                   [['name', 'goals', 'primary_assists', 'secondary_assists']]
+    df_a_scoring = skater_df.filter((pl.col('team') == teams[0]) & (pl.col('state') == 'all'))\
+                   [['name', 'goals', 'primaryAssists', 'secondaryAssists']]
+    df_b_scoring = skater_df.filter((pl.col('team') == teams[1]) & (pl.col('state') == 'all'))\
+                   [['name', 'goals', 'primaryAssists', 'secondaryAssists']]
 
     # Merge dataframe with scoring stats into icetime dataframe
-    df_a = df_a.merge(df_a_scoring, on='name')\
-            .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
-    df_b = df_b.merge(df_b_scoring, on='name')\
-            .rename(columns={'goals': 'g', 'primary_assists': 'a1', 'secondary_assists': 'a2'})
+    df_a = df_a.join(df_a_scoring, on='name')\
+            .rename({'goals': 'g', 'primaryAssists': 'a1', 'secondaryAssists': 'a2'})
+    df_b = df_b.join(df_b_scoring, on='name')\
+            .rename({'goals': 'g', 'primaryAssists': 'a1', 'secondaryAssists': 'a2'})
 
-    df_a.drop_duplicates(subset=['name', 'position'], inplace=True)
-    df_b.drop_duplicates(subset=['name', 'position'], inplace=True)
+    df_a.unique(subset=['name', 'position'], maintain_order=True)
+    df_b.unique(subset=['name', 'position'], maintain_order=True)
 
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
                                    x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
-                                   sort_value='total_toi',
+                                   sort_value='all',
                                    title='Icetime and Scoring Breakdown',
                                    # Similar hack-y thing with the newline here to give us a bit of
                                    # padding on the bottom of the report i'm still sorry
@@ -176,22 +169,18 @@ def main(game_id, filename):
     and create the Game Report plot.
     """
 
-    try:
-        skater_csv = glob.glob(os.path.join('data', f'*{game_id}_skaters.csv'))[0]
-        goalie_csv = glob.glob(os.path.join('data', f'*{game_id}_goalies.csv'))[0]
-    except IndexError as e:
-        print(f"One or more CSVs for game ID {game_id} are missing. Contents of data directory"\
-              f" are {os.listdir('data')}")
-        raise e
+    conn = duckdb.connect('md:', read_only=True)
 
-    skater_df = pd.read_csv(skater_csv, encoding='utf-8-sig')
-    goalie_df = pd.read_csv(goalie_csv, encoding='utf-8-sig')
+    skater_df = conn.sql(f"""
+        SELECT * FROM preseason_skater_games s
+        WHERE s.gameID = {game_id}
+        """).pl()
+    goalie_df = conn.sql(f"""
+        SELECT * FROM preseason_goalie_games g
+        WHERE g.gameID = {game_id}
+        """).pl()
 
-    # Get the date of the game from the CSV file handle.
-    if '/' in skater_csv:
-        date = skater_csv.split('_')[0].split('/')[1]
-    else:
-        date = skater_csv.split('_')[0].split('\\')[1]
+    date = datetime.datetime.strftime(skater_df['gameDate'][0], '%d-%m-%Y')
 
     xg_scatter_plot = make_xg_ratio_plot(skater_df)
 

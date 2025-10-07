@@ -1,6 +1,7 @@
 import argparse
 
 import pandas as pd
+import polars as pl
 from datetime import datetime
 from pybaseball import schedule_and_record
 
@@ -76,7 +77,7 @@ def main(division: int) -> None:
              "teams": ['STL', 'MIL', 'CHC', 'CIN', 'PIT'] }
     }
 
-    df = proccess_data(divisions[division]['teams'])
+    df = pl.from_pandas(proccess_data(divisions[division]['teams']))
 
     division_name = divisions[division]['name']
     # American League East -> AL East
@@ -86,17 +87,17 @@ def main(division: int) -> None:
     subtitle = f"Over the last {NUM_GAMES} games"
 
     plot = AnimatedRollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
-                              x_column='gameNumber',
-                              y_column='RDRollingAvg',
-                              title=plot_title, subtitle=subtitle,
-                              y_label=f'{WINDOW}-Game Rolling Average',
-                              x_label='Game #',
-                              multiline_key='team',
-                              sport='baseball',
-                              y_midpoint=0,
-                              add_team_logos=True,
-                              for_multiplot=False,
-                              data_disclaimer='baseballreference')
+                                      x_column='gameNumber',
+                                      y_column='RDRollingAvg',
+                                      title=plot_title, subtitle=subtitle,
+                                      y_label=f'{WINDOW}-Game Rolling Average',
+                                      x_label='Game #',
+                                      multiline_key='team',
+                                      sport='baseball',
+                                      y_midpoint=0,
+                                      add_team_logos=True,
+                                      for_multiplot=False,
+                                      data_disclaimer='baseballreference')
 
     plot.make_plot_gif()
 

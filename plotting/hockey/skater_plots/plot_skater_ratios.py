@@ -2,9 +2,9 @@
 Script used to plot on-ice ratios for individual players.
 """
 
-import os
 import argparse
-import pandas as pd
+from datetime import datetime
+import duckdb
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from util.team_maps import team_full_names
@@ -14,14 +14,29 @@ def main(team, min_icetime):
     Main function to create the plot and save as a png file.
     """
 
-    base_df = pd.read_csv(os.path.join('data', 'player_ratios.csv'))
+    conn = duckdb.connect('md:', read_only=True)
 
-    # Apply minimum icetime
-    base_df = base_df[base_df['icetime'] >= (min_icetime * 60)]
+    query = f"""
+        SELECT
+            season,
+            name,
+            team,
+            icetime,
+            goalsForPerHour,
+            goalsAgainstPerHour,
+            xGoalsForPerHour,
+            xGoalsAgainstPerHour
+        FROM skaters
+        WHERE
+            situation='5on5' AND
+            iceTime>={min_icetime};
+    """
+
+    base_df = conn.execute(query).pl()
 
     # Calculate league averages for plot
-    league_avg_xg = base_df['xGFph'].mean()
-    league_avg_g = base_df['GFph'].mean()
+    league_avg_xg = base_df['xGoalsForPerHour'].mean()
+    league_avg_g = base_df['goalsForPerHour'].mean()
 
     # Format the 'team' string to be used in the title of the plot
     if team == 'ALL':
@@ -31,7 +46,7 @@ def main(team, min_icetime):
 
     xg_plot = RatioScatterPlot(dataframe=base_df,
                                filename=f'{team}_skater_xg_ratios.png',
-                               x_column='xGFph', y_column='xGAph',
+                               x_column='xGoalsForPerHour', y_column='xGoalsAgainstPerHour',
                                title=f'{display_team} Expected Goal Rates',
                                subtitle=f'5v5, flurry-,score- and venue-adjusted\n'\
                                         f'min. {min_icetime} minutes',
@@ -48,8 +63,8 @@ def main(team, min_icetime):
 
     g_plot = RatioScatterPlot(dataframe=base_df,
                               filename=f'{team}_skater_g_ratios.png',
-                              x_column='GFph',
-                              y_column='GAph',
+                              x_column='goalsForPerHour',
+                              y_column='goalsAgainstPerHour',
                               title=f'{team} Player G Rates(5v5)\nmin. {min_icetime} minutes',
                               scale='player',
                               x_label='Goals For per hour',
@@ -71,6 +86,10 @@ if __name__ == '__main__':
                         help='Team to get stats for, defaults to ALL.')
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
+    parser.add_argument('-s', '--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year,
+                        help='Season for which we pull data')
     args = parser.parse_args()
 
     main(team=args.team, min_icetime=args.min_icetime)

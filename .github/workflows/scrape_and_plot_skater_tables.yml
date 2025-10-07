@@ -41,11 +41,6 @@ jobs:
         with:
           repository: hockey-stats/chart-plotting
       #
-      - name: Download Raw Data
-        run: |
-          mkdir ./data;
-          wget -O ./data/mp_skater_table.csv https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/skaters.csv;
-      #
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -54,11 +49,6 @@ jobs:
       # 
       - name: Install Requirements
         run: pip install -r requirements.txt
-      #
-      - name: Process Tables
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-        run: python3 processing/for_ratio_scatter_plot/process_skater_tables.py
       #
       - name: Generate Charts
         env:

@@ -1,3 +1,4 @@
+import polars as pl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
 from matplotlib.offsetbox import AnnotationBbox
@@ -175,12 +176,12 @@ class ScoreBoardPlot(Plot):
         for team in [self.team_a, self.team_b]:
             team_data[team] = {}
             for state in ['all', 'ev', 'pp', 'pk']:
-                skater_df = self.df[(self.df['team'] == team) & (self.df['state'] == state)]
-                goalie_df = self.g_df[(self.g_df['team'] == team) & (self.g_df['state'] == state)]
+                skater_df = self.df.filter((pl.col('team') == team) & (pl.col('state') == state))
+                goalie_df = self.g_df.filter((pl.col('team') == team) & (pl.col('state') == state))
                 goals = skater_df['goals'].sum()
-                xgoals = skater_df['ixG'].sum()
+                xgoals = skater_df['individualxGoals'].sum()
                 # Can get the total ToI of each state by checking the goalie icetime.
-                toi = goalie_df['icetime'].sum()
+                toi = goalie_df['iceTime'].sum()
                 team_data[team][state] = {
                     'goals': goals, 
                     'xgoals': xgoals, 
@@ -282,8 +283,10 @@ class ScoreBoardPlot(Plot):
         """
         g = self.g_df  # Easy alias
         team_a, team_b = set(g['team'])
-        team_a_pp_toi = g[(g['team'] == team_a) & (g['state'] == 'pp')]['icetime'].sum()
-        team_b_pp_toi = g[(g['team'] == team_b) & (g['state'] == 'pp')]['icetime'].sum()
+        team_a_pp_toi = g.filter((pl.col('team') == team_a) & (pl.col('state') == 'pp'))\
+            ['iceTime'].sum()
+        team_b_pp_toi = g.filter((pl.col('team') == team_b) & (pl.col('state') == 'pp'))\
+            ['iceTime'].sum()
 
         # Start the value/label lists as only containing ES info, and only add the PP toi
         # for either team if that toi is > 0
@@ -327,8 +330,8 @@ class ScoreBoardPlot(Plot):
         """
         Draw text boxes indicating goalie goals saved above expected for each goalie in the game.
         """
-        # Filtered DataFrame with just all-strength goalies tats
-        g = self.g_df[self.g_df['state'] == 'all'].sort_values(by='team')
+        # Filtered DataFrame with just all-strength goalies stats
+        g = self.g_df.filter(pl.col('state') == 'all').sort(by='team')
 
         # List of goalies in the game
         goalies = list(g['name'])
@@ -364,8 +367,8 @@ class ScoreBoardPlot(Plot):
                        weight=fontweight)
 
         for goalie in goalies:
-            ga = float(g[g['name'] == goalie]['GA'].iloc[0])
-            xga = float(g[g['name'] == goalie]['xGA'].iloc[0])
+            ga = float(g.filter(pl.col('name') == goalie)['goalsAgainst'].item(0))
+            xga = float(g.filter(pl.col('name') == goalie)['xGoalsAgainst'].item(0))
             gsax = round(xga - ga, 1)
 
             # Determine color of the GSAX text box based on how high/low the gsax value is.
@@ -386,7 +389,7 @@ class ScoreBoardPlot(Plot):
             if gsax > 0:
                 gsax = f" {gsax}"
 
-            team = str(g[g['name'] == goalie]['team'].iloc[0])
+            team = str(g.filter(pl.col('name') == goalie)['team'].item(0))
 
             # Goalie name
             self.axis.text(name_x_pos, y_pos, name,

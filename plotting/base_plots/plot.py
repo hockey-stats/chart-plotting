@@ -197,20 +197,12 @@ class Plot:
             # with different values if it's for a game report chart
             if verticalalignment == 'top':
                 if self.for_game_report:
-                    y_coord = row[y] + 0.08
+                    # This affects the label placement for the xG scatter on the game report
+                    y_coord = row[y] + 0.04
                 else:
                     y_coord = row[y] + 0.07
             else:
-                y_coord = row[y] - 0.2
-
-            if self.fantasy_mode:
-                y_coord = row[y] - 2
-                bbox = {
-                    'facecolor': 'white',
-                    'alpha': 0.4
-                }
-            else:
-                bbox = {}
+                y_coord = row[y] - 0.25
 
             self.axis.text(row[x], y_coord,
                            name,
