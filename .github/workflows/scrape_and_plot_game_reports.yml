@@ -58,7 +58,7 @@ jobs:
                   season = 2025;
           """).pl()
 
-          game_ids_list = list(game_ids.sort(by=['gameID'], descending=False))
+          game_ids_list = list(game_ids.sort(by=['gameID'], descending=False)['gameID'])
 
           print(f"Last game reported: {os.environ['LAST_GAME']}")
           print(game_ids_list)
