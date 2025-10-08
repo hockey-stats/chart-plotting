@@ -75,11 +75,19 @@ def make_icetime_plot(skater_df):
     df_a.unique(subset=['name', 'position'], maintain_order=True)
     df_b.unique(subset=['name', 'position'], maintain_order=True)
 
+    # Calculate total icetime as column for sorting (the 'all' column seems to be missing something)
+    df_a = df_a.with_columns(
+        (pl.col('ev') + pl.col('pk') + pl.col('pp')).alias('total')
+    )
+    df_b = df_b.with_columns(
+        (pl.col('ev') + pl.col('pk') + pl.col('pp')).alias('total')
+    )
+
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
                                    x_column=['ev', 'pp', 'pk'],
                                    a_label=teams[0], b_label=teams[1],
-                                   sort_value='all',
+                                   sort_value='total',
                                    title='Icetime and Scoring Breakdown',
                                    # Similar hack-y thing with the newline here to give us a bit of
                                    # padding on the bottom of the report i'm still sorry

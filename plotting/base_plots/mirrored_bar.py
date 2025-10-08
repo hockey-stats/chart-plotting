@@ -90,6 +90,11 @@ class MirroredBarPlot(Plot):
             self.df_a = self.df_a.sort(by=[self.sort_value], descending=False)
             self.df_b = self.df_b.sort(by=[self.sort_value], descending=False)
 
+        with pl.Config(tbl_rows=50, tbl_cols=20):
+            print(self.df_a)
+            print(self.df_b)
+
+
         self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']), fontdict=text_params)
         ax2.set_yticks(y_range, labels=list(self.df_b['display_name']), fontdict=text_params)
         ax2.spines[['bottom', 'top', 'left', 'right']].set_visible(False)
