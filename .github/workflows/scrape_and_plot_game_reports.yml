@@ -58,13 +58,14 @@ jobs:
                   season = 2025;
           """).pl()
 
-          game_ids = list(game_ids.sort(by=['gameID'], descending=False))
+          game_ids_list = list(game_ids.sort(by=['gameID'], descending=False))
 
           print(f"Last game reported: {os.environ['LAST_GAME']}")
-          print(game_ids)
+          print(game_ids_list)
 
           game_to_report = 0
-          for game in game_ids:
+          for game in game_ids_list:
+            print(f"value is {game} with type {type(game)}")
             if int(game) > int(os.environ['LAST_GAME']):
               game_to_report = game
               break
