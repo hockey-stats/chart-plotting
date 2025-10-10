@@ -62,15 +62,19 @@ def make_icetime_plot(skater_df):
 
     # Add columns for total goals and assists
     df_a_scoring = skater_df.filter((pl.col('team') == teams[0]) & (pl.col('state') == 'all'))\
-                   [['name', 'goals', 'primaryAssists', 'secondaryAssists']]
+                   [['name', 'position', 'goals', 'primaryAssists', 'secondaryAssists']]
     df_b_scoring = skater_df.filter((pl.col('team') == teams[1]) & (pl.col('state') == 'all'))\
-                   [['name', 'goals', 'primaryAssists', 'secondaryAssists']]
+                   [['name', 'position', 'goals', 'primaryAssists', 'secondaryAssists']]
 
     # Merge dataframe with scoring stats into icetime dataframe
-    df_a = df_a.join(df_a_scoring, on='name')\
+    df_a = df_a.join(df_a_scoring, on=['name', 'position'])\
             .rename({'goals': 'g', 'primaryAssists': 'a1', 'secondaryAssists': 'a2'})
-    df_b = df_b.join(df_b_scoring, on='name')\
+    df_b = df_b.join(df_b_scoring, on=['name', 'position'])\
             .rename({'goals': 'g', 'primaryAssists': 'a1', 'secondaryAssists': 'a2'})
+
+    with pl.Config(tbl_rows=100):
+        print(df_a)
+        print(df_b)
 
     df_a.unique(subset=['name', 'position'], maintain_order=True)
     df_b.unique(subset=['name', 'position'], maintain_order=True)

@@ -83,16 +83,15 @@ class MirroredBarPlot(Plot):
 
         if len(self.df_a['display_name']) != len(self.df_b['display_name']):
             # If one team has less players than the other, call method to adjust
+            with pl.Config(tbl_rows=50, tbl_cols=20):
+                print(self.df_a)
+                print(self.df_b)
             self.adjust_for_mismatched_player_counts()
 
         # df_a and df_b correspond to the two sides of the mirrored bar plot.
         if self.sort_value:
             self.df_a = self.df_a.sort(by=[self.sort_value], descending=False)
             self.df_b = self.df_b.sort(by=[self.sort_value], descending=False)
-
-        with pl.Config(tbl_rows=50, tbl_cols=20):
-            print(self.df_a)
-            print(self.df_b)
 
 
         self.axis.set_yticks(y_range, labels=list(self.df_a['display_name']), fontdict=text_params)
