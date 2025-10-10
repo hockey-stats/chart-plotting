@@ -72,10 +72,6 @@ def make_icetime_plot(skater_df):
     df_b = df_b.join(df_b_scoring, on=['name', 'position'])\
             .rename({'goals': 'g', 'primaryAssists': 'a1', 'secondaryAssists': 'a2'})
 
-    with pl.Config(tbl_rows=100):
-        print(df_a)
-        print(df_b)
-
     df_a.unique(subset=['name', 'position'], maintain_order=True)
     df_b.unique(subset=['name', 'position'], maintain_order=True)
 
