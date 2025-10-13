@@ -9,7 +9,7 @@ import duckdb
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from util.team_maps import team_full_names
 
-def main(team, min_icetime):
+def main(team, min_icetime, season):
     """
     Main function to create the plot and save as a png file.
     """
@@ -29,6 +29,7 @@ def main(team, min_icetime):
         FROM skaters
         WHERE
             situation='5on5' AND
+            season={season} AND
             iceTime>={min_icetime};
     """
 
@@ -92,4 +93,4 @@ if __name__ == '__main__':
                         help='Season for which we pull data')
     args = parser.parse_args()
 
-    main(team=args.team, min_icetime=args.min_icetime)
+    main(team=args.team, min_icetime=args.min_icetime, season=args.season)

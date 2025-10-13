@@ -200,7 +200,7 @@ class Plot:
                     # This affects the label placement for the xG scatter on the game report
                     y_coord = row[y] + 0.04
                 else:
-                    y_coord = row[y] + 0.07
+                    y_coord = row[y] + 0.11
             else:
                 y_coord = row[y] - 0.25
 

@@ -2,6 +2,7 @@
 Script used to plot things like xG%, Corsi%, and G% at the team-wide level on a 2D scatterplot.
 """
 
+from datetime import datetime
 import argparse
 import duckdb
 
@@ -41,7 +42,7 @@ def make_plots(base_df):
     g_plot.make_plot()
 
 
-def main(situation):
+def main(situation, season):
     """
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
@@ -56,7 +57,10 @@ def main(situation):
             goalsForPerHour,
             goalsAgainstPerHour
         FROM teams
-        WHERE situation='{situation}';
+        WHERE 
+            situation='{situation}' AND
+            season={season}
+        ;
     """
 
     base_df = conn.execute(query).pl()
@@ -66,8 +70,13 @@ def main(situation):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--situation', default='5on5',
+    parser.add_argument('-si', '--situation', default='5on5',
                         help='Given game state for which to process table.')
+    parser.add_argument('-s', '--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year,
+                        help='Season for which we pull data')
+
     args = parser.parse_args()
 
-    main(situation=args.situation)
+    main(situation=args.situation, season=args.season)

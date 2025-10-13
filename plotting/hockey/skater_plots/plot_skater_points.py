@@ -3,6 +3,7 @@ Module for plotting points against ice-time for skaters.
 """
 
 import argparse
+from datetime import datetime
 import numpy as np
 import duckdb
 import polars as pl
@@ -43,7 +44,7 @@ def construct_plot(df, team, output_filename, plot_title, subtitle):
     pph_plot.make_plot()
 
 
-def main(team, min_icetime_minutes, situation):
+def main(team, min_icetime_minutes, situation, season):
     """
     Main function to create the plot and save as a png file.
     """
@@ -62,6 +63,7 @@ def main(team, min_icetime_minutes, situation):
         FROM skaters
         WHERE
             situation='{situation}' AND
+            season={season} AND
             icetime>={min_icetime_minutes};
     """
 
@@ -94,9 +96,14 @@ if __name__ == '__main__':
                         help='Team to get stats for, defaults to ALL.')
     parser.add_argument('-i', '--min_icetime', type=int, default=0,
                         help='Minimum icetime, in minutes cuttoff for players (defaults to 0')
-    parser.add_argument('-s', '--situation', type=str, default='5on5', const='5on5', nargs='?',
+    parser.add_argument('-si', '--situation', type=str, default='5on5', const='5on5', nargs='?',
                         choices=['5on5', '4on5', '5on4', 'other', 'all'],
                         help='Game state to measure points for. Defaults to 5on5.')
+    parser.add_argument('-s', '--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year,
+                        help='Season for which we pull data')
     args = parser.parse_args()
 
-    main(team=args.team, min_icetime_minutes=args.min_icetime, situation=args.situation)
+    main(team=args.team, min_icetime_minutes=args.min_icetime, situation=args.situation,
+         season=args.season)
