@@ -304,8 +304,20 @@ class RatioScatterPlot(Plot):
             for index, value in enumerate(self.percentiles['horizontal']):
                 label_xy = (x_min * 1.01, value - 0.05)
                 self.axis.axhspan(span_start, value, alpha=0.1 * (index + 1))
-                self.axis.annotate(f'{iterator * (index + 1)}th Percentile',
-                                   xy=label_xy, color='royalblue')
+                print(index)
+                line_number_from_index = {
+                    # Map the percentile indices to the line it represents in a forward group
+                    0: '3rd',
+                    1: '2nd',
+                    2: '1st'
+                }
+                label = f"{line_number_from_index[index]} Line"\
+                        f"\n({iterator * (index + 1)}th Percentile)"
+                self.axis.annotate(label,
+                                   xy=label_xy, color='royalblue',
+                                   verticalalignment='bottom',
+                                   horizontalalignment='left')
+
                 span_start = value
             self.axis.axhspan(span_start, 100, alpha=0.4)
 

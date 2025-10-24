@@ -1,0 +1,18 @@
+[project]
+name = "chart-plotting"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "duckdb==1.3.2",
+    "matplotlib==3.8.0",
+    "numpy==1.26.0",
+    "pandas==2.1.2",
+    "polars==1.29.0",
+    "pybaseball==2.2.7",
+    "scipy==1.13.1",
+    "seaborn==0.13.2",
+    "unidecode>=1.4.0",
+    "yahoo-oauth>=2.0",
+]
