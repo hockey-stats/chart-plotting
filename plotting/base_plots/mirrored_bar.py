@@ -111,7 +111,7 @@ class MirroredBarPlot(Plot):
             'pk': 'chartreuse'
         }
 
-        # Mapping of state labels from data to labels for legend
+        # Mapping of situation labels from data to labels for legend
         label_map = {
             #'ev': 'Even Strength',
             'pp': 'Power Play',

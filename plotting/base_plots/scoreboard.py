@@ -21,7 +21,7 @@ BOX_EDGE_COLOR = 'navy'
 LOGO_HEIGHT = 0.86
 G_HEIGHT = 0.63
 XG_HEIGHT = 0.45
-STATE_LABEL_HEIGHT = 0.30
+situation_LABEL_HEIGHT = 0.30
 
 LOGO_XPOS = 0.35
 TOTAL_X_POS = 0.39
@@ -62,8 +62,8 @@ class ScoreBoardPlot(Plot):
         """
         Assembles the Plot object.
         """
-        # Dict that maps game state to corresponding plot features
-        state_map = {
+        # Dict that maps game situation to corresponding plot features
+        situation_map = {
             "total": {"x_pos": TOTAL_X_POS},
             "ev": {"color": "blue", "x_pos": ES_X_POS, 'bbox': {}},
             "pp": {"color": "green", "x_pos": PP_X_POS, 'bbox': {}},
@@ -72,9 +72,9 @@ class ScoreBoardPlot(Plot):
 
         team_data = self.organize_team_data()
 
-        self.draw_total_goals(state_map, team_data)
+        self.draw_total_goals(situation_map, team_data)
 
-        self.draw_goals_by_state(state_map, team_data)
+        self.draw_goals_by_situation(situation_map, team_data)
 
         self.draw_icetime_distribution()
 
@@ -89,7 +89,7 @@ class ScoreBoardPlot(Plot):
         self.save_plot()
 
 
-    def draw_total_goals(self, state_map, team_data):
+    def draw_total_goals(self, situation_map, team_data):
         """
         Organizer method to draw values corresponding to total goals and xgoals.
         """
@@ -131,7 +131,7 @@ class ScoreBoardPlot(Plot):
                        va='center',
                        **label_fontdict)
 
-        total_x_pos = state_map['total']['x_pos']
+        total_x_pos = situation_map['total']['x_pos']
 
         gcolor_a, gcolor_b = self.get_ratio_colors_for_teams(team_data, 'all', 'goals')
         xgcolor_a, xgcolor_b = self.get_ratio_colors_for_teams(team_data, 'all', 'xgoals')
@@ -170,19 +170,19 @@ class ScoreBoardPlot(Plot):
     def organize_team_data(self):
         """
         Assemble a dict object containing details and stats for each team, namely
-        goal and xgoal totals for each game state per team as well as ToI.
+        goal and xgoal totals for each game situation per team as well as ToI.
         """
         team_data = {}
         for team in [self.team_a, self.team_b]:
             team_data[team] = {}
-            for state in ['all', 'ev', 'pp', 'pk']:
-                skater_df = self.df.filter((pl.col('team') == team) & (pl.col('state') == state))
-                goalie_df = self.g_df.filter((pl.col('team') == team) & (pl.col('state') == state))
+            for situation in ['all', 'ev', 'pp', 'pk']:
+                skater_df = self.df.filter((pl.col('team') == team) & (pl.col('situation') == situation))
+                goalie_df = self.g_df.filter((pl.col('team') == team) & (pl.col('situation') == situation))
                 goals = skater_df['goals'].sum()
                 xgoals = skater_df['individualxGoals'].sum()
-                # Can get the total ToI of each state by checking the goalie icetime.
+                # Can get the total ToI of each situation by checking the goalie icetime.
                 toi = goalie_df['iceTime'].sum()
-                team_data[team][state] = {
+                team_data[team][situation] = {
                     'goals': goals, 
                     'xgoals': xgoals, 
                     'toi': toi
@@ -191,9 +191,9 @@ class ScoreBoardPlot(Plot):
         return team_data
 
 
-    def draw_goals_by_state(self, state_map, team_data):
+    def draw_goals_by_situation(self, situation_map, team_data):
         """
-        Organizing method to draw the goal/xgoal total for each state, for each team.
+        Organizing method to draw the goal/xgoal total for each situation, for each team.
         """
 
         fontdict = {
@@ -211,29 +211,29 @@ class ScoreBoardPlot(Plot):
         # Use a slightly smaller box width for the non-total values
         box_width = SMALL_BOX_MULT * BOX_WIDTH
 
-        for state, state_settings in state_map.items():
+        for situation, situation_settings in situation_map.items():
             # Gonna skip PK for now, seems low-value as the values are always very low
-            if state == 'total' or state == 'pk':
+            if situation == 'total' or situation == 'pk':
                 continue
-            default_x_pos = state_settings['x_pos']
+            default_x_pos = situation_settings['x_pos']
 
-            gcolor_a, gcolor_b = self.get_ratio_colors_for_teams(team_data, state, 'goals')
-            xgcolor_a, xgcolor_b = self.get_ratio_colors_for_teams(team_data, state, 'xgoals')
+            gcolor_a, gcolor_b = self.get_ratio_colors_for_teams(team_data, situation, 'goals')
+            xgcolor_a, xgcolor_b = self.get_ratio_colors_for_teams(team_data, situation, 'xgoals')
 
             # One x_pos for team a and team b
             for team, x_pos, g_color, xg_color in zip([self.team_a, self.team_b],
                                                       [default_x_pos, 1 - default_x_pos],
                                                       [gcolor_a, gcolor_b],
                                                       [xgcolor_a, xgcolor_b]):
-                # State label
-                text = f"{state.upper()}"
-                self.axis.text(x_pos, STATE_LABEL_HEIGHT, text,
+                # situation label
+                text = f"{situation.upper()}"
+                self.axis.text(x_pos, situation_LABEL_HEIGHT, text,
                                ha='center',
                                va='center',
                                **label_fontdict)
 
                 # Goal value
-                self.axis.text(x_pos, G_HEIGHT, team_data[team][state]['goals'],
+                self.axis.text(x_pos, G_HEIGHT, team_data[team][situation]['goals'],
                                ha='center',
                                va='center',
                                **fontdict)
@@ -247,7 +247,7 @@ class ScoreBoardPlot(Plot):
                 )
 
                 # xGoal value
-                self.axis.text(x_pos, XG_HEIGHT, round(team_data[team][state]['xgoals'], 1),
+                self.axis.text(x_pos, XG_HEIGHT, round(team_data[team][situation]['xgoals'], 1),
                                ha='center',
                                va='center',
                                **fontdict)
@@ -279,13 +279,13 @@ class ScoreBoardPlot(Plot):
 
     def draw_icetime_distribution(self):
         """
-        Method to embed a pie chart in the scoreboard showing the icetime breakdown by game state.
+        Method to embed a pie chart in the scoreboard showing the icetime breakdown by game situation.
         """
         g = self.g_df  # Easy alias
         team_a, team_b = set(g['team'])
-        team_a_pp_toi = g.filter((pl.col('team') == team_a) & (pl.col('state') == 'pp'))\
+        team_a_pp_toi = g.filter((pl.col('team') == team_a) & (pl.col('situation') == 'pp'))\
             ['iceTime'].sum()
-        team_b_pp_toi = g.filter((pl.col('team') == team_b) & (pl.col('state') == 'pp'))\
+        team_b_pp_toi = g.filter((pl.col('team') == team_b) & (pl.col('situation') == 'pp'))\
             ['iceTime'].sum()
 
         # Start the value/label lists as only containing ES info, and only add the PP toi
@@ -331,7 +331,7 @@ class ScoreBoardPlot(Plot):
         Draw text boxes indicating goalie goals saved above expected for each goalie in the game.
         """
         # Filtered DataFrame with just all-strength goalies stats
-        g = self.g_df.filter(pl.col('state') == 'all').sort(by='team')
+        g = self.g_df.filter(pl.col('situation') == 'all').sort(by='team')
 
         # List of goalies in the game
         goalies = list(g['name'])
@@ -416,17 +416,17 @@ class ScoreBoardPlot(Plot):
             y_pos += 0.1
 
 
-    def get_ratio_colors_for_teams(self, team_data, state, value):
+    def get_ratio_colors_for_teams(self, team_data, situation, value):
         """
-        Given a value to compare for two teams, e.g. xgoals or goals, as well as a state to compare 
+        Given a value to compare for two teams, e.g. xgoals or goals, as well as a situation to compare 
         for determine the ratio and appropriate colors to use for representing the two values.
 
         :param dict team_data: Dict containing the stats for each team
-        :param string state: The state to look for, e.g. all, ev, pp, pk
+        :param string situation: The situation to look for, e.g. all, ev, pp, pk
         :param string value: The value we're comparing, e.g. goals, xgoals, etc.
         """
-        value_a = team_data[self.team_a][state][value]
-        value_b = team_data[self.team_b][state][value]
+        value_a = team_data[self.team_a][situation][value]
+        value_b = team_data[self.team_b][situation][value]
 
         if value_a + value_b == 0:
             ratio = 0.5

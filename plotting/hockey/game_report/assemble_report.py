@@ -27,7 +27,7 @@ def make_xg_ratio_plot(skater_df):
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
     # DataFrame contains info for all states, so filter to 5v5
-    df = skater_df.filter(pl.col('state') == 'ev')
+    df = skater_df.filter(pl.col('situation') == 'ev')
 
     xg_plot = RatioScatterPlot(dataframe=df,
                                filename='',
@@ -54,16 +54,16 @@ def make_icetime_plot(skater_df):
         name | team | position | es_toi | pp_toi | pk_toi
     :param DataFrame skater_df: DataFrame containing information for all skaters in the game.
     """
-    # Pivot skater_df to have one df showing icetime broken down by state
-    icetime_df = skater_df.pivot('state', index=['name', 'team', 'position'], values='iceTime')
+    # Pivot skater_df to have one df showing icetime broken down by situation
+    icetime_df = skater_df.pivot('situation', index=['name', 'team', 'position'], values='iceTime')
     teams = list(set(icetime_df['team']))
     df_a = icetime_df.filter(pl.col('team') == teams[0])
     df_b = icetime_df.filter(pl.col('team') == teams[1])
 
     # Add columns for total goals and assists
-    df_a_scoring = skater_df.filter((pl.col('team') == teams[0]) & (pl.col('state') == 'all'))\
+    df_a_scoring = skater_df.filter((pl.col('team') == teams[0]) & (pl.col('situation') == 'all'))\
                    [['name', 'position', 'goals', 'primaryAssists', 'secondaryAssists']]
-    df_b_scoring = skater_df.filter((pl.col('team') == teams[1]) & (pl.col('state') == 'all'))\
+    df_b_scoring = skater_df.filter((pl.col('team') == teams[1]) & (pl.col('situation') == 'all'))\
                    [['name', 'position', 'goals', 'primaryAssists', 'secondaryAssists']]
 
     # Merge dataframe with scoring stats into icetime dataframe
