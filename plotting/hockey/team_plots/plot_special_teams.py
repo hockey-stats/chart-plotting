@@ -4,7 +4,9 @@ performance on special teams.
 """
 
 import argparse
-import duckdb
+from datetime import datetime
+
+import pyhockey as ph
 
 from plotting.base_plots.layered_lollipop import LayeredLollipopPlot
 
@@ -42,25 +44,12 @@ def make_4on5_plot(base_df):
     pk_plot.make_plot()
 
 
-def main(situation):
+def main(situation, season):
     """
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    conn = duckdb.connect('md:', read_only=True)
-
-    query = f"""
-        SELECT
-            team,
-            goalsForPerHour,
-            goalsAgainstPerHour,
-            xGoalsForPerHour,
-            xGoalsAgainstPerHour
-        FROM teams
-        WHERE situation='{situation}';
-    """
-
-    base_df = conn.execute(query).pl()
+    base_df = ph.team_summary(situation=situation, season=season)
 
     if situation == '5on4':
         make_5on4_plot(base_df)
@@ -76,6 +65,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--situation', default='5on4',
                         help='Given game state for which to process table, e.g. 5on4 or 4on5')
+    parser.add_argument('--season', type=int,
+                        default=datetime.now().year - 1 if datetime.now().month < 10 \
+                                else datetime.now().year,
+                        help='Season for which we pull data')
     args = parser.parse_args()
 
-    main(situation=args.situation)
+    main(situation=args.situation, season=args.season)

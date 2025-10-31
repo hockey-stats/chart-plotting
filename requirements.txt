@@ -7,4 +7,4 @@ seaborn==0.13.2
 yahoo_oauth
 polars==1.29.0
 unidecode
-duckdb==1.3.2
+pyhockey==0.1.7

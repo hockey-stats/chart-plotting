@@ -4,7 +4,8 @@ Script used to plot things like xG%, Corsi%, and G% at the team-wide level on a 
 
 from datetime import datetime
 import argparse
-import duckdb
+
+import pyhockey as ph
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 
@@ -47,23 +48,7 @@ def main(situation, season):
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    conn = duckdb.connect('md:', read_only=True)
-
-    query = f"""
-        SELECT
-            team,
-            xGoalsForPerHour,
-            xGoalsAgainstPerHour,
-            goalsForPerHour,
-            goalsAgainstPerHour
-        FROM teams
-        WHERE 
-            situation='{situation}' AND
-            season={season}
-        ;
-    """
-
-    base_df = conn.execute(query).pl()
+    base_df = ph.team_summary(season=season, situation=situation)
 
     make_plots(base_df)
 

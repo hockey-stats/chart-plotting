@@ -5,7 +5,7 @@ Module for plotting points against ice-time for skaters.
 import argparse
 from datetime import datetime
 import numpy as np
-import duckdb
+import pyhockey as ph
 import polars as pl
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
@@ -48,26 +48,8 @@ def main(team, min_icetime_minutes, situation, season):
     """
     Main function to create the plot and save as a png file.
     """
-
-    conn = duckdb.connect('md:', read_only=True)
-
-    query = f"""
-        SELECT
-            season,
-            name,
-            team,
-            position,
-            iceTime,
-            averageIceTime,
-            pointsPerHour
-        FROM skaters
-        WHERE
-            situation='{situation}' AND
-            season={season} AND
-            icetime>={min_icetime_minutes};
-    """
-
-    df = conn.execute(query).pl()
+    df = ph.skater_summary(season=season, situation=situation, min_icetime=min_icetime_minutes)
+    df = df[['season', 'name', 'team', 'position', 'iceTime', 'averageIceTime', 'pointsPerHour']]
 
     # Create separate DataFrames for forwards and defensemen
     df_f = df.filter(pl.col('position').is_in({'C', 'R', 'L'})) 
