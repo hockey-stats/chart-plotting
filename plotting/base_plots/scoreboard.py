@@ -282,7 +282,6 @@ class ScoreBoardPlot(Plot):
         Method to embed a pie chart in the scoreboard showing the icetime breakdown by game situation.
         """
         g = self.g_df  # Easy alias
-        print(g)
         team_a, team_b = set(g['team'])
         team_a_pp_toi = g.filter((pl.col('team') == team_a) & (pl.col('situation') == 'pp'))\
             ['iceTime'].sum()
