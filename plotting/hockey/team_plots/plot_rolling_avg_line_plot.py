@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
 
-import duckdb
+import pyhockey as ph
 import polars as pl
 
 from plotting.base_plots.animated_rolling_average import AnimatedRollingAveragePlot
@@ -18,21 +18,7 @@ def get_xg_data(season: int, window: int, num_games: int) -> pl.DataFrame:
     :param int num_games: Number of games to include in dataset (i.e. last 'n' games)
     :return pl.DataFrame: Results of the query + rolling data
     """
-
-    conn = duckdb.connect(database='md:', read_only=True)
-
-    query = f"""
-        SELECT
-            team,
-            gameID,
-            xGoalsShare
-        FROM team_games
-        WHERE
-            season={season} AND
-            situation='5on5';
-    """
-
-    df = conn.execute(query).pl()
+    df = ph.team_games(season=season, situation='5on5')
 
     output_dfs = []
 

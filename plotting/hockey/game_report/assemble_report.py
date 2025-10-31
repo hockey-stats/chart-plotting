@@ -12,7 +12,7 @@ The report will consist of many plots assembed into a multi-plot, including:
 from datetime import datetime
 import argparse
 import polars as pl
-import duckdb
+import pyhockey as ph
 
 from plotting.base_plots.ratio_scatter import RatioScatterPlot
 from plotting.base_plots.mirrored_bar import MirroredBarPlot
@@ -74,6 +74,7 @@ def make_icetime_plot(skater_df):
 
     df_a.unique(subset=['name', 'position'], maintain_order=True)
     df_b.unique(subset=['name', 'position'], maintain_order=True)
+
 
     # Calculate total icetime as column for sorting (the 'all' column seems to be missing something)
     df_a = df_a.with_columns(
@@ -175,18 +176,8 @@ def main(game_id, filename, season):
     and create the Game Report plot.
     """
 
-    conn = duckdb.connect('md:', read_only=True)
-
-    skater_df = conn.sql(f"""
-        SELECT * 
-        FROM skater_games 
-        WHERE gameID = {game_id} AND season = {season}
-        """).pl()
-    goalie_df = conn.sql(f"""
-        SELECT * FROM 
-        goalie_games 
-        WHERE gameID = {game_id} AND season = {season}
-        """).pl()
+    skater_df = ph.skater_games(season=season).filter(pl.col('gameID') == game_id)
+    goalie_df = ph.goalie_games(season=season).filter(pl.col('gameID') == game_id)
 
     date = datetime.strftime(skater_df['gameDate'][0], '%d-%m-%Y')
 
@@ -204,7 +195,7 @@ def main(game_id, filename, season):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--game_id',
+    parser.add_argument('-g', '--game_id', type=int,
                         help="Game ID (via NST) to create a game report for.")
     parser.add_argument('-f', '--filename', default=None,
                         help='Specify filename for output image. Defaults to team/date format')
