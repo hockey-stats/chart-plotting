@@ -41,7 +41,7 @@ def main(team: str, season: int) -> None:
                                   selector_column='name',
                                   team=team,
                                   y_max=6,
-                                  project_x_to=82,
+                                  show_average=True,
                                   x_label='Game #',
                                   y_label='Goals Saved Above Expected',
                                   title=f'Game-by-Game Goals Saved Above Expected\n for '\

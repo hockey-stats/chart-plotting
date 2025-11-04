@@ -15,6 +15,7 @@ from util.font_dicts import game_report_label_text_params as label_params
 COLORS = ['blue', 'orange', 'green', 'red', 'purple']
 
 class SequentialBarPlot(Plot):
+    """ Sub-class of plots for bar charts representing values over a time sequence. """
 
     def __init__(
             self,
@@ -24,7 +25,7 @@ class SequentialBarPlot(Plot):
             x_column='',
             y_column='',
             y_max=0,
-            project_x_to=0,
+            show_average=False,
             selector_column='',
             sort_value='',
             title='',
@@ -45,7 +46,7 @@ class SequentialBarPlot(Plot):
         self.x_col = x_column
         self.y_col = y_column
         self.y_max = y_max
-        self.project_x_to = project_x_to
+        self.show_average = show_average
         self.selector_col = selector_column
         self.sort_value = sort_value
         self.title = title
@@ -57,30 +58,21 @@ class SequentialBarPlot(Plot):
 
         self.set_title()
 
-        # If this parameter was set, create y_column values to the projected x value as a season
-        # average.
-        # E.g. if set to 82 for the GSaX chart, when we only have data until game 20, then create
-        # rows for games 21-82 where the GSaX value is the season average up to that point.
-        if self.project_x_to:
-            rows_to_add = self.project_x_to - len(self.df)
-
-            average_value = self.df[self.y_col].mean()
-
-            df_dict = {
-                self.selector_col: ['Season Average'] * rows_to_add,
-                self.x_col: [len(self.df) + i for i in range(1, rows_to_add + 1)],
-                self.y_col: [average_value] * rows_to_add,
-            }
-
-            new_rows = pl.DataFrame(df_dict)
-            self.df = pl.concat([self.df, new_rows], how='vertical_relaxed')
-
+        # Gets a list of colors that will be used to color the bars in the proper sequence
         color_list = self.get_color_sequence()
-        bar_labels = [x for x in self.df[self.selector_col]]
+
+        # Get information for the total value for each name
+        totals = {}
+        for x in set(self.df[self.selector_col]):
+            total = self.df.filter(pl.col(self.selector_col) == x)[self.y_col].sum()
+            totals[x] = round(total, 2)
+
+        # Add the total value to the label which will be used in the legend
+        bar_labels = [f"{name} (Total: {totals[name]})" for name in self.df[self.selector_col]]
 
         if self.y_max == 0:
             # If no y_max provided, set the y-range based on the most extreme value in the
-            # y-column, plus a little more 
+            # y-column, plus a little more
             y_max = max([abs(y) for y in self.df[self.y_col]]) * 1.1
             self.axis.set_ylim(y_max * -1, y_max)
         else:
@@ -92,6 +84,7 @@ class SequentialBarPlot(Plot):
         # Set the x-range to be +/-1 the values of the x-column (this will usually be something
         # like game #)
         self.axis.set_xlim(min(self.df[self.x_col]) - 1, max(self.df[self.x_col]) + 1)
+        self.axis.set_xticks(list(range(min(self.df[self.x_col]), max(self.df[self.x_col]) + 1)))
         self.axis.set_xlabel(self.x_label, fontdict=label_params)
 
         self.axis.tick_params(colors='antiquewhite', which='both')
@@ -100,6 +93,10 @@ class SequentialBarPlot(Plot):
                       alpha=0.6, label=bar_labels)
 
         self.axis.axhline(color='black')
+
+        if self.show_average:
+            average = self.df[self.y_col].mean()
+            self.axis.axhline(average, label='Season Average')
 
 
         self.legend_without_duplicates()
@@ -127,16 +124,21 @@ class SequentialBarPlot(Plot):
         for i, x in enumerate(entities):
             color_map[x] = COLORS[i]
 
-        if self.project_x_to:
-            color_map['Season Average'] = 'lightsteelblue'
-
         color_list = [color_map[x] for x in list(self.df[self.selector_col])]
 
         return color_list
 
 
     def legend_without_duplicates(self):
-        """ Creates a legend box without duplicate values for labels that appear more than once"""
+        """ Creates a legend box without duplicate values for labels that appear more than once """
         handles, labels = self.axis.get_legend_handles_labels()
         unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
-        self.axis.legend(*zip(*unique))
+        num_labels = len(unique)
+        max_length = 0
+        for x in set(labels):
+            max_length = max(max_length, len(x))
+
+        self.axis.legend(*zip(*unique),
+                         bbox_to_anchor=(0.2 + 0.012 * max_length, 0.08 + 0.06 * num_labels),
+                         bbox_transform=self.axis.transAxes,
+                         prop={'size': 18})
