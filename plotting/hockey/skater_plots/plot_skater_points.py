@@ -72,6 +72,7 @@ def main(team, min_icetime_minutes, situation, season):
                    plot_title=f'{display_team} Defenseman Scoring Rates ({situation.replace("on", "v")})',
                    subtitle=f'min. {min_icetime_minutes} minutes)')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--team', type=str, default='ALL',
