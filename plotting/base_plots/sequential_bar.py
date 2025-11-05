@@ -137,8 +137,8 @@ class SequentialBarPlot(Plot):
         # placement seems to work better so just use that for now
         #num_labels = len(unique)
         #max_length = 0
-        for x in set(labels):
-            max_length = max(max_length, len(x))
+        #for x in set(labels):
+        #    max_length = max(max_length, len(x))
 
         self.axis.legend(*zip(*unique),
                          #bbox_to_anchor=(0.2 + 0.012 * max_length, 0.08 + 0.06 * num_labels),
