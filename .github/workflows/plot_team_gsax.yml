@@ -1,0 +1,56 @@
+name: Plot Goalie Goals Saved Above Expected for a Team
+on:
+  workflow_call:
+    inputs:
+      team:
+        description: Team to plot statistics for, defaults to ALL
+        type: string
+    outputs:
+      plot_artifact_name: 
+        value: ${{ jobs.plot-graph.outputs.plot_artifact_name }}
+        description: Name of plot artifact
+
+  workflow_dispatch:
+    inputs:
+      team:
+        description: Team to plot statistics for, defaults to ALL
+        type: string
+
+env:
+  PLOTS_ARTIFACT_NAME: 'goalie-gsax-plot'
+
+jobs:
+  plot-graph:
+    runs-on: ubuntu-latest
+    outputs:
+      plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: hockey-stats/chart-plotting
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+      
+      - name: Generate Charts
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python3 plotting/hockey/goalie_plots/games_by_gsax_bar_chart.py --team ${{ inputs.team }} 
+      
+      - name: Save Charts as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLOTS_ARTIFACT_NAME }}
+          path: ./*png
+          retention-days: 1
+      
+      - name: Set Output for Artifact Name 
+        id: set-output
+        run: echo "plot_artifact_name=$PLOTS_ARTIFACT_NAME" >> "$GITHUB_OUTPUT"

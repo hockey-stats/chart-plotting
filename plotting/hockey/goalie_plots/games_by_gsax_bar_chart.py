@@ -4,8 +4,8 @@ Module for generate sequential bar chart showing goalie GSaX on a game-by-game b
 
 import argparse
 from datetime import datetime
-import pyhockey as ph
 import polars as pl
+import pyhockey as ph
 
 from plotting.base_plots.sequential_bar import SequentialBarPlot
 from util.team_maps import team_full_names
@@ -41,7 +41,6 @@ def main(team: str, season: int) -> None:
                                   selector_column='name',
                                   team=team,
                                   y_max=6,
-                                  show_average=True,
                                   x_label='Game #',
                                   y_label='Goals Saved Above Expected',
                                   title=f'Game-by-Game Goals Saved Above Expected\n for '\
@@ -54,8 +53,8 @@ def main(team: str, season: int) -> None:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--team', type=str, default='ALL',
-                        help='Team to get stats for, defaults to ALL.')
+    parser.add_argument('-t', '--team', type=str, required=True,
+                        help='Team to create plot for')
     parser.add_argument('-s', '--season', type=int,
                         default=datetime.now().year - 1 if datetime.now().month < 10 \
                                 else datetime.now().year,

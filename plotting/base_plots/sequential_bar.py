@@ -133,12 +133,14 @@ class SequentialBarPlot(Plot):
         """ Creates a legend box without duplicate values for labels that appear more than once """
         handles, labels = self.axis.get_legend_handles_labels()
         unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
-        num_labels = len(unique)
-        max_length = 0
+        # Commented out code uses the label lengths to determine legend placement. The automatic
+        # placement seems to work better so just use that for now
+        #num_labels = len(unique)
+        #max_length = 0
         for x in set(labels):
             max_length = max(max_length, len(x))
 
         self.axis.legend(*zip(*unique),
-                         bbox_to_anchor=(0.2 + 0.012 * max_length, 0.08 + 0.06 * num_labels),
-                         bbox_transform=self.axis.transAxes,
+                         #bbox_to_anchor=(0.2 + 0.012 * max_length, 0.08 + 0.06 * num_labels),
+                         #bbox_transform=self.axis.transAxes,
                          prop={'size': 18})
