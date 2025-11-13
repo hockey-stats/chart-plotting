@@ -384,10 +384,6 @@ def filter_taken(df: pl.DataFrame, free_agents: list[int], my_team: list[int]) -
             .alias('on_team')
     )
 
-    
-    with pl.Config(tbl_rows=-1):
-        print(df.filter(pl.col('on_team') == True))
-
     return df
 
 
@@ -472,9 +468,9 @@ def main() -> None:
     # Get every player that's already on a team
     taken = league.taken_players()
 
-    # Get the free agent batters, combine with taken ones, and compute rank
     batter_ids = [p['player_id'] for p in taken if p['position_type'] == 'B']
 
+    # Get the free agent batters, combine with taken ones, and compute rank
     batters = league.free_agents('Util')
     batter_ids.extend([p['player_id'] for p in batters])
 

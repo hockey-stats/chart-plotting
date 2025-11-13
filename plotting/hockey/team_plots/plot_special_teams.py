@@ -34,6 +34,7 @@ def make_4on5_plot(base_df):
 
     pk_plot = LayeredLollipopPlot(dataframe=base_df, filename='4on5_defence.png',
                                   value_a='goalsAgainstPerHour', value_b='xGoalsAgainstPerHour',
+                                  inverse_rank=True,
                                   title='4-on-5 Goals Against by Team, Actual vs Expected',
                                   y_label='4-on-5 Goals Against per hour',
                                   x_label='Teams, by Actual 4-on-5 Goals Against per hour',

@@ -10,7 +10,7 @@ class LayeredLollipopPlot(Plot):
     Class for plotting two corresponding values as a layered lollipop plot.
     """
     def __init__(self, dataframe, filename, value_a, value_b, title='', x_label='',
-                 y_label='', size=(10, 8), figure=None, axis=None,
+                 y_label='', inverse_rank=False, size=(10, 8), figure=None, axis=None,
                  value_a_label='', value_b_label='', legend_loc='upper right'):
         super().__init__(filename=filename,
                          title=title,
@@ -25,6 +25,7 @@ class LayeredLollipopPlot(Plot):
         self.value_b = value_b
         self.value_a_label = value_a_label
         self.value_b_label = value_b_label
+        self.inverse_rank = inverse_rank
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
@@ -41,7 +42,10 @@ class LayeredLollipopPlot(Plot):
         # First add column denoting the rank of each team in the given dataframe
         self.df = self.df.with_columns(
             pl.struct(self.value_a)
-            .rank('ordinal', descending=True)
+            # We want the rank to use `descending=True` if `self.inverse_rank=False`, and vice-
+            # versa. If inverse_rank is True, we want the lowest values to be ranked the highest,
+            # and so would want descending to be False.
+            .rank('ordinal', descending=not self.inverse_rank)
             .alias('rank')
         )
 
