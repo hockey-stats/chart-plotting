@@ -54,7 +54,7 @@ jobs:
       - name: Generate Charts
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python3 plotting/hockey/skater_plots/plot_skater_points.py --team ${{ inputs.team }} --min_icetime ${{ inputs.minimum_icetime }}
+        run: python3 hockey/skater_plots/plot_skater_points.py --team ${{ inputs.team }} --min_icetime ${{ inputs.minimum_icetime }}
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4

@@ -61,7 +61,7 @@ jobs:
       - name: Generate Charts
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python3 plotting/fantasy/mlb_free_agents.py -p ${{ steps.choose_pos.outputs.position }}
+        run: python3 fantasy/mlb_free_agents.py -p ${{ steps.choose_pos.outputs.position }}
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4

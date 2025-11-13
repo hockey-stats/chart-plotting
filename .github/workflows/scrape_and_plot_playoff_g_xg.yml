@@ -45,7 +45,7 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 plotting/hockey/team_plots/plot_playoff_g_and_xg.py
+          python3 hockey/team_plots/plot_playoff_g_and_xg.py
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4
