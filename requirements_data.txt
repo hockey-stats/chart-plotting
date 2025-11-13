@@ -1,6 +1,0 @@
-pandas==2.1.2
-pybaseball==2.2.7
-yahoo_fantasy_api
-yahoo_oauth
-polars==1.29.0
-unidecode
