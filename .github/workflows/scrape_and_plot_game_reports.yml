@@ -79,7 +79,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
           GAME_ID: ${{ steps.check-new.outputs.game_id }}
         run: |
-          python3 plotting/hockey/game_report/assemble_report.py -g $GAME_ID
+          python3 hockey/game_report/assemble_report.py -g $GAME_ID
 
       - name: Save chart as artifact
         if: ${{ steps.check-new.outputs.game_id != 0}}

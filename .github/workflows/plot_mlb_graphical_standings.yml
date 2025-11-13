@@ -39,7 +39,7 @@ jobs:
       - name: Generate Charts
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python3 plotting/baseball/team_plots/plot_team_standings.py --division "${{ inputs.division }}"
+        run: python3 baseball/team_plots/plot_team_standings.py --division "${{ inputs.division }}"
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4
