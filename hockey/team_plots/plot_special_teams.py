@@ -50,7 +50,7 @@ def main(situation, season):
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    base_df = ph.team_summary(situation=situation, season=season)
+    base_df = ph.team_seasons(situation=situation, season=season)
 
     if situation == '5on4':
         make_5on4_plot(base_df)

@@ -48,7 +48,7 @@ def main(team, min_icetime_minutes, situation, season):
     """
     Main function to create the plot and save as a png file.
     """
-    df = ph.skater_summary(season=season, situation=situation, min_icetime=min_icetime_minutes)
+    df = ph.skater_seasons(season=season, situation=situation, min_icetime=min_icetime_minutes)
     df = df[['season', 'name', 'team', 'position', 'iceTime', 'averageIceTime', 'pointsPerHour']]
 
     # Create separate DataFrames for forwards and defensemen

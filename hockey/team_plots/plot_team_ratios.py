@@ -48,7 +48,7 @@ def main(situation, season):
     Main function which disambiguates and calls appropriate plotting function based on provided
     situation.
     """
-    base_df = ph.team_summary(season=season, situation=situation)
+    base_df = ph.team_seasons(season=season, situation=situation)
 
     make_plots(base_df)
 

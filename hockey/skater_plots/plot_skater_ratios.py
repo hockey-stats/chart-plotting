@@ -14,7 +14,7 @@ def main(team, min_icetime, season):
     Main function to create the plot and save as a png file.
     """
 
-    base_df = ph.skater_summary(season=season, situation='5on5', min_icetime=min_icetime)
+    base_df = ph.skater_seasons(season=season, situation='5on5', min_icetime=min_icetime)
 
     # Calculate league averages for plot
     league_avg_xg = base_df['xGoalsForPerHour'].mean()
