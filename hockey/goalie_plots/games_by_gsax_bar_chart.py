@@ -19,14 +19,19 @@ def main(team: str, season: int) -> None:
         season (int): Season for which to gather data
     """
 
-    df = ph.goalie_games(season=season, team=team, situation='all').with_row_index()
+    df = ph.goalie_games(season=season, team=team, situation='all')
 
     df = df.sort(by=pl.col('gameDate'))
 
-    # Add columns for GSaX and game #
+    # Make a map of gameIDs to game number
+    sorted_game_ids = list(set(df['gameID']))
+    sorted_game_ids.sort()
+    id_map = {game_id: i + 1 for i, game_id in enumerate(sorted_game_ids)}
+
+    # Add columns for GSaX and game number
     df = df.with_columns(
         (pl.col('xGoalsAgainst') - pl.col('goalsAgainst')).alias('goalsSavedAboveExpected'),
-        (pl.col('index') + 1).alias('gameNumber')
+        (pl.col('gameID').replace_strict(id_map)).alias('gameNumber')
     )
 
     # Save only the columns used in the plot
