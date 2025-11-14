@@ -8,6 +8,7 @@ Originally designed for goalie GSaX results from game-to-game.
 import polars as pl
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnnotationBbox
+from matplotlib.container import BarContainer
 
 from plot_types.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params as label_params
@@ -89,15 +90,16 @@ class SequentialBarPlot(Plot):
 
         self.axis.tick_params(colors='antiquewhite', which='both')
 
-        self.axis.bar(self.df[self.x_col], self.df[self.y_col], color=color_list,
+        bars = self.axis.bar(self.df[self.x_col], self.df[self.y_col], color=color_list,
                       alpha=0.6, label=bar_labels)
+
+        self.adjust_for_overlapping_x_values(bars)
 
         self.axis.axhline(color='black')
 
         if self.show_average:
             average = self.df[self.y_col].mean()
             self.axis.axhline(average, label='Season Average')
-
 
         self.legend_without_duplicates()
 
@@ -144,3 +146,36 @@ class SequentialBarPlot(Plot):
                          #bbox_to_anchor=(0.2 + 0.012 * max_length, 0.08 + 0.06 * num_labels),
                          #bbox_transform=self.axis.transAxes,
                          prop={'size': 18})
+
+
+    def adjust_for_overlapping_x_values(self, bars: BarContainer) -> None:
+        """ Handles cases when a sequence has multiple values for the same date, adding a stacking 
+        effect. 
+        
+        Args:
+            bars (BarContainer): A list of the Rectangle objects that make up the bars in the bar
+                                 char
+        """
+
+        # This method works by iterating over the list of rectangles in the bar chart, comparing
+        # the x-value of each to the one previous. If one is found to have the same x as the one
+        # previous, then the y-value is adjusted so that, if necessary, it will appear stacked
+        # on top of or below the previous one
+
+        for i, _ in enumerate(bars.patches):
+            if i == 0:
+                # Skip the first rectangle because there are none previous
+                continue
+            if bars[i].get_x() == bars[i-1].get_x():
+                # Make aliases of the height of each bar, for less typing
+                h1, h2 = (bars[i-1].get_height(), bars[i].get_height())
+
+                # If the two heights have different signs, then can just leave as is since a 
+                # natural stacking effect will occur centered around y=0
+                # (Note that if they have different signs, their product will always be negative)
+                if h1 * h2 < 0:
+                    continue
+
+                # Otherwise, set the starting y of the second bar to be the height of the first,
+                # which creates the desired stacking effect
+                bars[i].set(y=h1)
