@@ -10,7 +10,7 @@ dependencies = [
     "pandas==2.1.2",
     "polars==1.29.0",
     "pybaseball==2.2.7",
-    "pyhockey>=0.1.7",
+    "pyhockey==0.2.0",
     "scipy==1.13.1",
     "seaborn==0.13.2",
     "unidecode>=1.4.0",
