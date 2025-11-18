@@ -176,7 +176,7 @@ requires-dist = [
     { name = "pandas", specifier = "==2.1.2" },
     { name = "polars", specifier = "==1.29.0" },
     { name = "pybaseball", specifier = "==2.2.7" },
-    { name = "pyhockey", specifier = ">=0.1.7" },
+    { name = "pyhockey", specifier = "==0.2.0" },
     { name = "scipy", specifier = "==1.13.1" },
     { name = "seaborn", specifier = "==0.13.2" },
     { name = "unidecode", specifier = ">=1.4.0" },
@@ -952,7 +952,7 @@ wheels = [
 
 [[package]]
 name = "pyhockey"
-version = "0.1.7"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "duckdb" },
@@ -963,9 +963,9 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/b5/4137082905876dc6b7d017caed56580dd4d29ea7574fc5d3f9b15cb8faf7/pyhockey-0.1.7.tar.gz", hash = "sha256:bd8622f479a31f8983ae486ebd96277ab946ea4cbc6329bd91c12a4851b0e211", size = 51191, upload-time = "2025-10-31T19:22:47.961Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/03/a2e3507c5c11f26aaa0967c840839905f8f139e1ba1b95dcd33f0370a8b3/pyhockey-0.2.0.tar.gz", hash = "sha256:8cbb4fc7c727fe2a1b1dd4456147f4ecac7ca8add5be83dd018248e5fd669adb", size = 51241, upload-time = "2025-11-14T20:08:26.587Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/4b/d53d857d1445101538cdffea837ab606262922c20d76a266c5729ae7a1ed/pyhockey-0.1.7-py3-none-any.whl", hash = "sha256:76cc8e581ae5778950380951175ec615b008506efc401e68a304bbdd7a685768", size = 39711, upload-time = "2025-10-31T19:22:46.998Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/03/dbdb6f438331cb74e00068f389852ec022dd20b37699b43d145af0ef8639/pyhockey-0.2.0-py3-none-any.whl", hash = "sha256:82400cfbc1b71338e146c1ecb33eb61c87dc9cb8656f805609a868c79992a472", size = 39725, upload-time = "2025-11-14T20:08:25.194Z" },
 ]
 
 [[package]]
