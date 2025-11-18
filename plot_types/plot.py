@@ -177,7 +177,7 @@ class Plot:
                 verticalalignment = 'top' if self.invert_y else 'bottom'
             except AttributeError:
                 # AttributeError here implies that the plot doesn't have the 'invert_y' attribute,
-                # i.e. it isn't a plot type that would every invert the y-axis, so set vertical
+                # i.e. it isn't a plot type that would ever invert the y-axis, so set vertical
                 # alignment to be 'bottom'
                 verticalalignment = 'bottom'
             # Split the label entry by ' ' and use last entry. Makes no difference for one-word
@@ -192,23 +192,32 @@ class Plot:
                 if name == 'Jr.':
                     name = f"{row[label].split(' ')[-2]} {name}"
 
+            # Convert the x,y-coords of the logo from corresponding to the data to corresponding
+            # to the axis space, and then place the logos slightly below them
+            x_coord, y_coord = self.axis.transLimits.transform((row[x], row[y]))
+   
+            # Get the inverse of the y_coord if we're dealing with an inverted y-axis
+            if verticalalignment == 'top':
+                y_coord = 1 - y_coord
+
             # Set the offset for the logo label based on the vertical alignment of the chart,
             # with different values if it's for a game report chart
             if verticalalignment == 'top':
                 if self.for_game_report:
                     # This affects the label placement for the xG scatter on the game report
-                    y_coord = row[y] + 0.04
+                    y_coord -= 0.04
                 else:
-                    y_coord = row[y] + 0.11
+                    y_coord -= 0.04
             else:
-                y_coord = row[y] - 0.25
+                y_coord -= 0.06
 
-            self.axis.text(row[x], y_coord,
+            self.axis.text(x_coord, y_coord,
                            name,
                            horizontalalignment='center',
                            verticalalignment=verticalalignment,
                            fontsize=10,
-                           bbox=label_bbox)
+                           bbox=label_bbox,
+                           transform=self.axis.transAxes)
 
     def get_logo_marker(self, team_name, alpha=1, size='small', sport='hockey'):
         """
