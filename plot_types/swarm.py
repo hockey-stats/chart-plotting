@@ -446,7 +446,7 @@ class SwarmPlot(Plot):
 
     def add_table(self, team_df: pd.DataFrame) -> None:
         """
-        Adds a table to the right of the swarm plot showing some basic hitting metrics
+        Adds a table to the right of the swarm plot showing some basic metrics
 
         :param pd.DataFrame team_df: DataFrame containing stats for players on the team.
         """

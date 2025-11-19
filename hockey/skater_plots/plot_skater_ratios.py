@@ -29,9 +29,10 @@ def main(team, min_icetime, season):
     xg_plot = RatioScatterPlot(dataframe=base_df,
                                filename=f'{team}_skater_xg_ratios.png',
                                x_column='xGoalsForPerHour', y_column='xGoalsAgainstPerHour',
-                               title=f'{display_team} Expected Goal Rates',
-                               subtitle=f'5v5, flurry-,score- and venue-adjusted\n'\
-                                        f'min. {min_icetime} minutes',
+                               title=f'{display_team} - Expected Goal Rates',
+                               subtitle=f'5v5, '\
+                                        f'minimum {min_icetime} minutes, logo opacity'\
+                                         ' represents icetime',
                                scale='player', x_label='Expected Goals For per hour',
                                y_label='Expected Goals Against per hour (inverted)',
                                team=team,
@@ -47,7 +48,8 @@ def main(team, min_icetime, season):
                               filename=f'{team}_skater_g_ratios.png',
                               x_column='goalsForPerHour',
                               y_column='goalsAgainstPerHour',
-                              title=f'{team} Player G Rates(5v5)\nmin. {min_icetime} minutes',
+                              title=f'{team} Player Goal Rates',
+                              subtitle=f'5v5, min. {min_icetime} minutes',
                               scale='player',
                               x_label='Goals For per hour',
                               y_label='Goals Against per hour (inverted)',

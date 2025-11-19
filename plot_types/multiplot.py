@@ -71,4 +71,5 @@ class MultiPlot(Plot):
             plot["plot"].make_plot()
 
         self.fig.suptitle(self.title, **multiplot_title_params)
+        #self.set_title()
         self.save_plot()
