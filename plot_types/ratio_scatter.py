@@ -3,7 +3,7 @@ import polars as pl
 import matplotlib.pyplot as plt
 
 from plot_types.plot import Plot, FancyAxes
-from util.font_dicts import game_report_label_text_params as label_params
+from util.font_dicts import game_report_label_text_params, label_text_params
 from util.helpers import ratio_to_color
 
 
@@ -84,14 +84,18 @@ class RatioScatterPlot(Plot):
 
         self.set_title()
 
-        self.axis.set_xlabel(self.x_label, fontdict=label_params)
+        self.axis.set_xlabel(self.x_label,
+                             fontdict=game_report_label_text_params if self.for_game_report \
+                                else label_text_params)
 
         # Have the y-axis labels on the right in the game report
         if self.for_game_report:
             self.axis.yaxis.set_label_position("right")
             self.axis.yaxis.tick_right()
 
-        self.axis.set_ylabel(self.y_label, fontdict=label_params)
+        self.axis.set_ylabel(self.y_label,
+                             fontdict=game_report_label_text_params if self.for_game_report \
+                                else label_text_params)
         if self.for_game_report:
             self.axis.set_xticks([])
             self.axis.set_yticks([])

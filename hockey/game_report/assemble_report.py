@@ -94,7 +94,8 @@ def make_icetime_plot(skater_df):
                                    # padding on the bottom of the report i'm still sorry
                                    x_label="Icetime in Minutes\n",
                                    filename='',
-                                   data_disclaimer=None)
+                                   data_disclaimer=None,
+                                   for_game_report=True)
 
     return icetime_plot
 

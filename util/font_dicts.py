@@ -10,7 +10,15 @@ game_report_label_text_params = {
     "fontsize": 15,
     "family": "sans-serif",
     "fontweight": 800,
-    "path_effects": [PathEffects.withStroke(linewidth=1.5, foreground='black')]
+    "path_effects": [PathEffects.withStroke(linewidth=1.2, foreground='black')]
+}
+
+label_text_params = {
+    "color": "antiquewhite",
+    "fontsize": 15,
+    "family": "sans-serif",
+    "fontweight": 800,
+    "path_effects": [PathEffects.withStroke(linewidth=1.5, foreground='maroon')]
 }
 
 title_params = {
@@ -18,15 +26,15 @@ title_params = {
     "fontsize": 20,
     "family": "sans-serif",
     "fontweight": 800,
-    "path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='black')]
+    "path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='maroon')]
 }
 
 subtitle_params = {
     "color": "antiquewhite",
-    "size": 14,
+    "size": 25,
     "family": "sans-serif",
     "fontweight": 700,
-    #"path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='black')]
+    "path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='maroon')]
 }
 
 multiplot_title_params = {
@@ -34,5 +42,5 @@ multiplot_title_params = {
     "size": 35.0,
     "family": "sans-serif",
     "weight": 800,
-    "path_effects": [PathEffects.withStroke(linewidth=4.5, foreground='black')]
+    "path_effects": [PathEffects.withStroke(linewidth=4.5, foreground='maroon')]
 }

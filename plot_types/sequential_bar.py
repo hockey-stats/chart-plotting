@@ -30,6 +30,7 @@ class SequentialBarPlot(Plot):
             selector_column='',
             sort_value='',
             title='',
+            subtitle='',
             y_label='',
             x_label='',
             size=(12, 8),
@@ -37,7 +38,8 @@ class SequentialBarPlot(Plot):
             axis=None,
             data_disclaimer='nst'):
 
-        super().__init__(title=title, filename=filename, size=size, data_disclaimer=data_disclaimer)
+        super().__init__(title=title, subtitle=subtitle, filename=filename, size=size,
+                         data_disclaimer=data_disclaimer)
 
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis
@@ -79,6 +81,7 @@ class SequentialBarPlot(Plot):
         else:
             # Otherwise use the provided value
             self.axis.set_ylim(self.y_max * -1, self.y_max)
+            self.axis.set_yticks(range(-1 * (self.y_max) + 1, self.y_max))
 
         self.axis.set_ylabel(self.y_label, fontdict=label_params)
 

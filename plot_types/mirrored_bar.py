@@ -31,9 +31,11 @@ class MirroredBarPlot(Plot):
                  size=(10, 8),
                  figure=None,
                  axis=None,
-                 data_disclaimer='moneypuck'):
+                 data_disclaimer='moneypuck',
+                 for_game_report=False):
 
-        super().__init__(title=title, filename=filename, size=size, data_disclaimer=data_disclaimer)
+        super().__init__(title=title, filename=filename, size=size, data_disclaimer=data_disclaimer,
+                         for_game_report=for_game_report)
 
         self.fig = plt.figure(figsize=self.size) if figure is None else figure
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes) if axis is None else axis

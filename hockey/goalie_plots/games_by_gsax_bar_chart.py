@@ -31,7 +31,10 @@ def main(team: str, season: int) -> None:
     # Add columns for GSaX and game number
     df = df.with_columns(
         (pl.col('xGoalsAgainst') - pl.col('goalsAgainst')).alias('goalsSavedAboveExpected'),
-        (pl.col('gameID').replace_strict(id_map)).alias('gameNumber')
+        (pl.col('gameID').replace_strict(id_map)).alias('gameNumber'),
+        # Map name from, e.g., Joseph Woll -> J. Woll
+        pl.col('name').map_elements(lambda x: f"{x[0]}. {' '.join(x.split(' ')[1:])}",
+                                    return_dtype=pl.String)
     )
 
     # Save only the columns used in the plot
@@ -48,8 +51,8 @@ def main(team: str, season: int) -> None:
                                   y_max=6,
                                   x_label='Game #',
                                   y_label='Goals Saved Above Expected',
-                                  title=f'Game-by-Game Goals Saved Above Expected\n for '\
-                                        f'{team_name} Goalies',
+                                  title=f'{team_name} - Goals Saved Above Expected',
+                                  subtitle='Goalie performances for each game so far this season',
                                   data_disclaimer='nst')
 
     gsax_plot.make_plot()

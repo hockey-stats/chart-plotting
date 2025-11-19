@@ -79,9 +79,13 @@ class Plot:
         Set the title of the plot.
         """
         if self.subtitle:
-            self.title += '\n\n'
-            plt.suptitle(self.subtitle, y=0.95, **subtitle_params)
-        plt.title(self.title, fontdict=title_params)
+            #self.title += '\n\n'
+            #plt.suptitle(self.subtitle, y=0.95, **subtitle_params)
+            plt.figtext(0.08, 0.92, self.subtitle, fontdict=subtitle_params)
+        if self.for_game_report:
+            plt.title(self.title, fontdict=subtitle_params)
+        else:
+            plt.figtext(0.08, 0.95, self.title, fontdict=title_params)
 
 
     def set_styling(self):
@@ -116,9 +120,9 @@ class Plot:
             text = "All data from MoneyPuck.com"
             textcolor = 'black'
             facecolor = 'cyan'
-        
+
         size = 20 if self.for_game_report else 10
-        plt.figtext(0.5, 0.01, text, ha="center", color=textcolor, size=size,
+        plt.figtext(0.995, 0.01, text, ha="right", color=textcolor, size=size,
                     bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
 
     def save_plot(self):
@@ -171,53 +175,67 @@ class Plot:
         self.axis.add_artist(artist_box)
 
         if label:
-            # Check if plot is using an inverted y-axis. If so, add label to top of logo.
-            # Else, add label to the bottom.
-            try:
-                verticalalignment = 'top' if self.invert_y else 'bottom'
-            except AttributeError:
-                # AttributeError here implies that the plot doesn't have the 'invert_y' attribute,
-                # i.e. it isn't a plot type that would ever invert the y-axis, so set vertical
-                # alignment to be 'bottom'
-                verticalalignment = 'bottom'
-            # Split the label entry by ' ' and use last entry. Makes no difference for one-word
-            # labels, but for names uses last name only.
-            # If data is from naturalstattrick, the encoding they use has `\xa0` as a whitespace
-            # instead of a regular space, so check for that as well.
-            if '\xa0' in row[label]:
-                name = row[label].split('\xa0')[-1]
+            self.add_label_to_logo(row, x, y, label, label_bbox)
+
+      
+    def add_label_to_logo(self, row, x, y, label, label_bbox):
+        """ Adds a text label to a logo in a plot, slightly under the logo
+
+        Args:
+            row (pd.Series): The row of the DataFrame passed to the logo-adding method
+            x (str): The name of the column corresponding to the x-value in the data
+            y (str): The name of the column corresponding to the y-value in the data
+            label (str): The name of the column in the DataFrame corresponding to the label value
+            label_bbox (dict[str, str]): Dict object with styling parameters for the label textbox
+        """
+        # Check if plot is using an inverted y-axis. If so, add label to top of logo.
+        # Else, add label to the bottom.
+        try:
+            verticalalignment = 'top' if self.invert_y else 'bottom'
+        except AttributeError:
+            # AttributeError here implies that the plot doesn't have the 'invert_y' attribute,
+            # i.e. it isn't a plot type that would ever invert the y-axis, so set vertical
+            # alignment to be 'bottom'
+            verticalalignment = 'bottom'
+        # Split the label entry by ' ' and use last entry. Makes no difference for one-word
+        # labels, but for names uses last name only.
+        # If data is from naturalstattrick, the encoding they use has `\xa0` as a whitespace
+        # instead of a regular space, so check for that as well.
+        if '\xa0' in row[label]:
+            name = row[label].split('\xa0')[-1]
+        else:
+            name = row[label].split(' ')[-1]
+            # If the last word is Jr., add the 2nd-last word as well
+            if name == 'Jr.':
+                name = f"{row[label].split(' ')[-2]} {name}"
+
+        # Convert the x,y-coords of the logo from corresponding to the data to corresponding
+        # to the axis space, and then place the logos slightly below them
+        x_coord, y_coord = self.axis.transLimits.transform((row[x], row[y]))
+
+        # Get the inverse of the y_coord if we're dealing with an inverted y-axis
+        if verticalalignment == 'top':
+            y_coord = 1 - y_coord
+
+        # Set the offset for the logo label based on the vertical alignment of the chart,
+        # with different values if it's for a game report chart
+        if verticalalignment == 'top':
+            if self.for_game_report:
+                # This affects the label placement for the xG scatter on the game report
+                y_coord -= 0.04
             else:
-                name = row[label].split(' ')[-1]
-                # If the last word is Jr., add the 2nd-last word as well
-                if name == 'Jr.':
-                    name = f"{row[label].split(' ')[-2]} {name}"
+                y_coord -= 0.04
+        else:
+            y_coord -= 0.06
 
-            # Convert the x,y-coords of the logo from corresponding to the data to corresponding
-            # to the axis space, and then place the logos slightly below them
-            x_coord, y_coord = self.axis.transLimits.transform((row[x], row[y]))
-   
-            # Get the inverse of the y_coord if we're dealing with an inverted y-axis
-            if verticalalignment == 'top':
-                y_coord = 1 - y_coord
+        self.axis.text(x_coord, y_coord,
+                        name,
+                        horizontalalignment='center',
+                        verticalalignment=verticalalignment,
+                        fontsize=10,
+                        bbox=label_bbox,
+                        transform=self.axis.transAxes)
 
-            # Set the offset for the logo label based on the vertical alignment of the chart,
-            # with different values if it's for a game report chart
-            if verticalalignment == 'top':
-                if self.for_game_report:
-                    # This affects the label placement for the xG scatter on the game report
-                    y_coord -= 0.04
-                else:
-                    y_coord -= 0.04
-            else:
-                y_coord -= 0.06
-
-            self.axis.text(x_coord, y_coord,
-                           name,
-                           horizontalalignment='center',
-                           verticalalignment=verticalalignment,
-                           fontsize=10,
-                           bbox=label_bbox,
-                           transform=self.axis.transAxes)
 
     def get_logo_marker(self, team_name, alpha=1, size='small', sport='hockey'):
         """
