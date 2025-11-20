@@ -4,7 +4,7 @@ from matplotlib import axes
 from matplotlib import patches
 from PIL import Image
 
-from util.font_dicts import title_params, subtitle_params
+from util.font_dicts import title_params, subtitle_params, multiplot_subtitle_params
 
 
 class StaticColorAxisBbox(patches.FancyBboxPatch):
@@ -83,7 +83,7 @@ class Plot:
             #plt.suptitle(self.subtitle, y=0.95, **subtitle_params)
             plt.figtext(0.08, 0.92, self.subtitle, fontdict=subtitle_params)
         if self.for_game_report:
-            plt.title(self.title, fontdict=subtitle_params)
+            plt.title(self.title, fontdict=multiplot_subtitle_params)
         else:
             plt.figtext(0.08, 0.95, self.title, fontdict=title_params)
 
