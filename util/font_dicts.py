@@ -31,7 +31,7 @@ title_params = {
 
 subtitle_params = {
     "color": "antiquewhite",
-    "size": 25,
+    "size": 15,
     "family": "sans-serif",
     "fontweight": 700,
     "path_effects": [PathEffects.withStroke(linewidth=2.5, foreground='maroon')]
