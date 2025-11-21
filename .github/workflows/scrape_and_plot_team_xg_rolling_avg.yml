@@ -20,7 +20,6 @@ on:
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-rolling-avg-plots'
-  MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN_READ_ONLY }}
 
 jobs:
   plot-graphs:
