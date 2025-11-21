@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation, FFMpegWriter
 
 from plot_types.plot import FancyAxes
 from plot_types.rolling_average import RollingAveragePlot
-from util.font_dicts import game_report_label_text_params as label_params
+from util.font_dicts import label_text_params, tick_params
 
 
 if sys.platform == 'win32':
@@ -53,6 +53,7 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
 
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
+        print('hello')
         #plt.axis('off')
 
     def make_plot_gif(self):
@@ -69,18 +70,18 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
             self.axis.clear()
 
             self.axis.set_xticks([], [])
-            self.axis.set_xticks(x_ticks, labels=x_ticks, fontdict=label_params)
-            self.axis.set_xlabel(self.x_label, fontdict=label_params)
+            self.axis.set_xticks(x_ticks, labels=x_ticks, fontdict=tick_params)
+            self.axis.set_xlabel(self.x_label, fontdict=label_text_params, labelpad=16.0)
 
             self.axis.set_yticks([], [])
             self.axis.set_yticks(y_range,
                                 labels=[f"{y}%" for y in y_range] if self.sport == 'hockey' \
                                        else y_range,
-                                fontdict=label_params)
-            self.axis.set_ylabel(self.y_label, fontdict=label_params)
+                                fontdict=tick_params)
+            self.axis.set_ylabel(self.y_label, fontdict=label_text_params, labelpad=16.0)
 
             teams = list(set(self.df['team']))
-            team = teams[i % 5]
+            team = teams[i % 8]
             team_df = self.df.filter(pl.col('team') == team)
             else_df = self.df.filter(pl.col('team') != team)
 
@@ -102,14 +103,6 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
         self.add_data_disclaimer()
         self.set_styling()
         self.set_title()
-        title_params = {
-            "color": "antiquewhite",
-            "size": 20.0,
-            "family": "sans-serif",
-            "weight": 800,
-            "path_effects": [PathEffects.withStroke(linewidth=4.5, foreground='black')]
-        }
-        self.fig.suptitle(self.title, **title_params)
 
         self.fig.set_facecolor('#000d1a')
 

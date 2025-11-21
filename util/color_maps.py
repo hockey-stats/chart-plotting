@@ -152,7 +152,7 @@ label_colors = {
   "BOS": {
 		"bg": "dimgray",
 		"text": "yellow",
-		"line": "palegoldenrod",
+		"line": "darkgoldenrod",
   },
   "NSH": {
 		"bg": "khaki",

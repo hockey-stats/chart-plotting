@@ -5,6 +5,14 @@ Module to store dicts used for different font sets that may be used in multiple 
 import matplotlib.patheffects as PathEffects
 
 
+tick_params = {
+    "color": "antiquewhite",
+    "fontsize": 8,
+    "family": "sans-serif",
+    "fontweight": 800,
+    #"path_effects": [PathEffects.withStroke(linewidth=1.5, foreground='maroon')]
+}
+
 label_text_params = {
     "color": "antiquewhite",
     "fontsize": 15,

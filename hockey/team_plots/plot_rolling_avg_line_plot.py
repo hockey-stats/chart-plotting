@@ -60,6 +60,7 @@ def xg_by_division_multiplot(season: int, div: int, window: int, num_games: int)
 
     df = df.filter(pl.col('team').is_in(divisions[div]['teams']))
 
+
     plot_title = f'{divisions[div]['name']} Division xG% Rolling Averages'
     subtitle = f"Over the last {num_games} games"
 
