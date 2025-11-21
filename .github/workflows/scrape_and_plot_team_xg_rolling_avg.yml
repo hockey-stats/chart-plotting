@@ -2,10 +2,10 @@ name: Scrape and Plot Team xG Rolling Average
 on:
   workflow_call:
     inputs:
-      year:
+      division:
+        description: Integer corresponding to division for which to generate plot
         type: string
-        description: Season for which to gather data
-        default: '2025'
+        default: '0'
 
     outputs:
       plot_artifact_name: 
@@ -13,10 +13,10 @@ on:
 
   workflow_dispatch:
     inputs:
-      year:
+      division:
+        description: Integer corresponding to division for which to generate plot
         type: string
-        description: Season for which to gather data
-        default: '2025'
+        default: '0'
 
 env:
   PLOTS_ARTIFACT_NAME: 'team-rolling-avg-plots'
@@ -48,7 +48,7 @@ jobs:
         env: 
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          python3 hockey/team_plots/plot_rolling_avg_line_plot.py -n 10
+          python3 hockey/team_plots/plot_rolling_avg_line_plot.py -n 10 -d ${{ inputs.division }}
       #
       - name: Save Charts as Artifacts
         uses: actions/upload-artifact@v4
