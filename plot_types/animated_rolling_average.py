@@ -53,7 +53,6 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
 
         self.axis = self.fig.add_subplot(111, axes_class=FancyAxes, ar=2.0)
         self.axis.spines[['bottom', 'left', 'right', 'top']].set_visible(False)
-        print('hello')
         #plt.axis('off')
 
     def make_plot_gif(self):
@@ -96,7 +95,7 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
             return team_line + else_lines, team_logo, else_logos
 
         ani = FuncAnimation(self.fig, animate,
-                            frames=5,
+                            frames=8,
                             blit=False,
                             repeat=True)
 
