@@ -52,7 +52,7 @@ def xg_by_division_multiplot(season: int, div: int, window: int, num_games: int)
         'name': 'Metropolitan'},
     2: {'teams': {'VAN', 'CGY', 'EDM', 'ANA', 'VGK', 'SJS', 'LAK', 'SEA'},
         'name': 'Pacific'},
-    3: {'teams': {'COL', 'DAL', 'WPG', 'STL', 'ARI', 'MIN', 'CHI', 'NSH'},
+    3: {'teams': {'COL', 'DAL', 'WPG', 'STL', 'UTA', 'MIN', 'CHI', 'NSH'},
         'name': 'Central'}
     }
 
@@ -62,7 +62,8 @@ def xg_by_division_multiplot(season: int, div: int, window: int, num_games: int)
 
 
     plot_title = f'{divisions[div]['name']} Division xG% Rolling Averages'
-    subtitle = f"Over the last {num_games} games"
+    subtitle = f"Over the last {num_games} games" if num_games > 0 else \
+               f"Over the {season} season"
 
     plot = AnimatedRollingAveragePlot(dataframe=df,
                                       filename="xg_rolling_avg.mp4",
@@ -101,7 +102,7 @@ if __name__ == '__main__':
                                 else datetime.now().year)
     parser.add_argument('-d', '--div', type=int, required=True,
                         help="Integer corresponding to division for which to generate plot. \n"\
-                             "0 - Atlantic\n1 - Metropolitan\n2 - Pacific\n3 - Central")
+                             "0 - Atlantic,\n1 - Metropolitan,\n2 - Pacific,\n3 - Central")
     parser.add_argument('-w', '--window', default=10, type=int,
                         help='Size of window to calculate rolling averages, defaults to 10')
     parser.add_argument('-n', '--num_games', default=0, type=int,
