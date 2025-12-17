@@ -98,6 +98,7 @@ class Plot:
             self.axis.set_facecolor('antiquewhite')
         self.fig.set_facecolor('steelblue')
 
+
     def add_data_disclaimer(self):
         """
         Adds a disclaimer indicating the source of the data being used in the plot.
@@ -124,6 +125,7 @@ class Plot:
         size = 20 if self.for_game_report else 10
         plt.figtext(0.995, 0.01, text, ha="right", color=textcolor, size=size,
                     bbox={"facecolor": facecolor, "alpha": 0.8, "pad": 5})
+
 
     def save_plot(self):
         """

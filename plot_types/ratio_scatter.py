@@ -6,6 +6,7 @@ from plot_types.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params, label_text_params
 from util.helpers import ratio_to_color
 
+AXIS_LABEL_PAD = 15
 
 class RatioScatterPlot(Plot):
     """
@@ -84,7 +85,7 @@ class RatioScatterPlot(Plot):
 
         self.set_title()
 
-        self.axis.set_xlabel(self.x_label,
+        self.axis.set_xlabel(self.x_label, labelpad=AXIS_LABEL_PAD,
                              fontdict=game_report_label_text_params if self.for_game_report \
                                 else label_text_params)
 
@@ -93,7 +94,7 @@ class RatioScatterPlot(Plot):
             self.axis.yaxis.set_label_position("right")
             self.axis.yaxis.tick_right()
 
-        self.axis.set_ylabel(self.y_label,
+        self.axis.set_ylabel(self.y_label, labelpad=AXIS_LABEL_PAD,
                              fontdict=game_report_label_text_params if self.for_game_report \
                                 else label_text_params)
         if self.for_game_report:
