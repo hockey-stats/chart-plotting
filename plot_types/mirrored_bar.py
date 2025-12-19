@@ -288,24 +288,26 @@ class MirroredBarPlot(Plot):
             'name': [''] * diff,
             'team': [team] * diff,
             'position': [''] * diff,
-            'all': [0.0] * diff,
             'ev': [0.0] * diff,
-            'pk': [0.0] * diff,
             'pp': [0.0] * diff,
+            'pk': [0.0] * diff,
+            'all': [0.0] * diff,
             'g': [0] * diff,
             'a1': [0] * diff,
             'a2': [0] * diff,
+            'total': [0.0] * diff,
             'display_name': [''] * diff
         }
 
         df = pl.DataFrame(rows).cast({
-            'all': pl.Float32,
             'ev': pl.Float64,
             'pp': pl.Float64,
             'pk': pl.Float64,
+            'all': pl.Float64,
             'g': pl.Int32,
             'a1': pl.Int32,
-            'a2': pl.Int32
+            'a2': pl.Int32,
+            'total': pl.Float64,
         })
 
         if a_is_more:

@@ -84,6 +84,9 @@ def make_icetime_plot(skater_df):
         (pl.col('ev') + pl.col('pk') + pl.col('pp')).alias('total')
     )
 
+    df_a = df_a[['name', 'team', 'position', 'ev', 'pp', 'pk', 'all', 'g', 'a1', 'a2', 'total']]
+    df_b = df_b[['name', 'team', 'position', 'ev', 'pp', 'pk', 'all', 'g', 'a1', 'a2', 'total']]
+
     icetime_plot = MirroredBarPlot(dataframe_a=df_a,
                                    dataframe_b=df_b,
                                    x_column=['ev', 'pp', 'pk'],
