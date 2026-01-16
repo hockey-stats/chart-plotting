@@ -211,17 +211,33 @@ class RatioScatterPlot(Plot):
                                                              opacity=0.06),
                               return_dtype=pl.Struct([]))
             )
-        max_icetime = self.df['iceTime'].max()
-        # Now add the desired players for the given team, with scaled opacity and name labels
-        team_df = self.df.filter(pl.col('team') == self.team) if self.team != 'ALL' else self.df
-        team_df.select(
-            pl.struct(pl.all())
-            .map_elements(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
-                                                         opacity_scale='iceTime',
-                                                         opacity_max=max_icetime),
-                          return_dtype=pl.Struct([]))
 
-        )
+        team_df = self.df.filter(pl.col('team') == self.team) if self.team != 'ALL' else self.df
+
+        # If iceTime is a column, scale logo opcaity by icetime
+        if 'iceTime' in self.df.columns:
+            max_icetime = self.df['iceTime'].max()
+            # Now add the desired players for the given team, with scaled opacity and name labels
+            team_df.select(
+                pl.struct(pl.all())
+                .map_elements(lambda row: self.add_team_logo(row, self.x_col, self.y_col, label='name',
+                                                            opacity_scale='iceTime',
+                                                            opacity_max=max_icetime),
+                            return_dtype=pl.Struct([]))
+
+            )
+        else:
+            team_df.select(
+                pl.struct(pl.all())
+                .map_elements(lambda row: self.add_team_logo(
+                    row,
+                    self.x_col,
+                    self.y_col,
+                    label='name',
+                    opacity_scale=None
+                ), return_dtype=pl.Struct([]))
+            )
+            
 
 
     def set_scaling(self):
