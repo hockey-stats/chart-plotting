@@ -32,7 +32,7 @@ def main(team, min_icetime, season):
                                title=f'{display_team} - Expected Goal Rates',
                                subtitle=f'5v5, '\
                                         f'minimum {min_icetime} minutes, logo opacity'\
-                                         ' represents icetime',
+                                         ' represents total icetime',
                                scale='player', x_label='Expected Goals For per hour',
                                y_label='Expected Goals Against per hour (inverted)',
                                team=team,

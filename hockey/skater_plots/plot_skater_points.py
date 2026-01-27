@@ -65,7 +65,8 @@ def main(team, min_icetime_minutes, situation, season):
     construct_plot(df_f, team,
                    output_filename=f'{team}_F_{situation}_scoring_rates.png',
                    plot_title=f'{display_team} - Forward Scoring Rates ',
-                   subtitle=f'{situation.replace("on", "v")}, minimum {min_icetime_minutes} minutes')
+                   subtitle=f'{situation.replace("on", "v")}, minimum {min_icetime_minutes} minutes, '\
+													  f'logo opacity represents total icetime')
 
     construct_plot(df_d, team,
                    output_filename=f'{team}_D_{situation}_scoring_rates.png',
