@@ -88,7 +88,11 @@ class SequentialBarPlot(Plot):
         # Set the x-range to be +/-1 the values of the x-column (this will usually be something
         # like game #)
         self.axis.set_xlim(min(self.df[self.x_col]) - 1, max(self.df[self.x_col]) + 1)
-        self.axis.set_xticks(list(range(min(self.df[self.x_col]), max(self.df[self.x_col]) + 1)))
+				
+				# xticks will start from 0 and go up by `xticks_step_size`. Remove the first element from the list
+				# to not show 0
+        xticks_step_size = 5
+        self.axis.set_xticks(list(range(0, max(self.df[self.x_col]) + 1, xticks_step_size))[1:])
         self.axis.set_xlabel(self.x_label, fontdict=label_params)
 
         self.axis.tick_params(colors='antiquewhite', which='both')
