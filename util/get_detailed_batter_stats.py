@@ -1,10 +1,15 @@
 import pybaseball as pyb
 import polars as pl
-from unidecode import unidecode
+from typing import Dict, Tuple, Any
 
-def get_park_factor(team):
+def get_park_factor(team: str) -> float:
+    """
+    Returns the park factor for a specific team, normalized to a 1.0 baseline.
 
-    mapping= {
+    :param str team: The nickname of the MLB team (e.g., 'Astros').
+    :return float: The park factor as a decimal (e.g., 0.994).
+    """
+    mapping: Dict[str, float] = {
         'Angels': 101.23049020767212,
         'Astros': 99.48140382766724,
         'Athletics': 102.86766290664673,
@@ -40,18 +45,24 @@ def get_park_factor(team):
     return mapping[team] / 100
 
 
-def get_team_name(lev, tm):
-    # Handle multi-team strings like 'Chicago,Houston' by taking the final team
-    current_city = tm.split(',')[-1].strip()
+def get_team_name(lev: str, tm: str) -> str:
+    """
+    Maps Baseball-Reference league and city strings to the team's nickname.
 
-    mapping = {
+    :param str lev: The league level string (e.g., 'Maj-AL').
+    :param str tm: The team city or list of cities (e.g., 'Chicago').
+    :return str: The mapped team nickname (e.g., 'White Sox').
+    """
+    # Handle multi-team strings like 'Chicago,Houston' by taking the final team
+    current_city: str = tm.split(',')[-1].strip()
+
+    mapping: Dict[Tuple[str, str], str] = {
         ("Maj-AL", "Chicago"): "White Sox",
         ("Maj-NL", "Chicago"): "Cubs",
         ("Maj-AL", "New York"): "Yankees",
         ("Maj-NL", "New York"): "Mets",
         ("Maj-AL", "Los Angeles"): "Angels",
         ("Maj-NL", "Los Angeles"): "Dodgers",
-        # Standard City -> Nickname mappings
         ("Maj-AL", "Houston"): "Astros",
         ("Maj-AL", "Detroit"): "Tigers",
         ("Maj-NL", "Philadelphia"): "Phillies",
@@ -78,28 +89,27 @@ def get_team_name(lev, tm):
         ("Maj-NL", "St. Louis"): "Cardinals",
     }
 
-    # Return the mapped name, or the city name if no mapping exists
     return mapping.get((lev, current_city), current_city)
 
 
-def get_fg_abbreviation(row):
+def get_fg_abbreviation(row: Dict[str, Any]) -> str:
     """
     Maps Baseball-Reference 'Lev' and 'Tm' to FanGraphs 3-letter abbreviations.
     Handles multi-team cities using the League (Lev) as a differentiator.
+
+    :param Dict[str, Any] row: A dictionary representing a DataFrame row.
+    :return str: The 3-letter FanGraphs team abbreviation.
     """
     # Clean the team name (handles 'Chicago,Houston' by taking the last team)
-    city = row['Tm'].split(',')[-1].strip()
+    city: str = row['Tm'].split(',')[-1].strip()
 
-    mapping = {
-        # Multi-team Cities
+    mapping: Dict[Tuple[str, str], str] = {
         ("Maj-AL", "Chicago"): "CHW",
         ("Maj-NL", "Chicago"): "CHC",
         ("Maj-AL", "New York"): "NYY",
         ("Maj-NL", "New York"): "NYM",
         ("Maj-AL", "Los Angeles"): "LAA",
         ("Maj-NL", "Los Angeles"): "LAD",
-        
-        # Standard American League
         ("Maj-AL", "Baltimore"): "BAL",
         ("Maj-AL", "Boston"): "BOS",
         ("Maj-AL", "Cleveland"): "CLE",
@@ -113,8 +123,6 @@ def get_fg_abbreviation(row):
         ("Maj-AL", "Tampa Bay"): "TBR",
         ("Maj-AL", "Texas"): "TEX",
         ("Maj-AL", "Toronto"): "TOR",
-        
-        # Standard National League
         ("Maj-NL", "Arizona"): "ARI",
         ("Maj-NL", "Atlanta"): "ATL",
         ("Maj-NL", "Cincinnati"): "CIN",
@@ -129,64 +137,66 @@ def get_fg_abbreviation(row):
         ("Maj-NL", "Washington"): "WSN"
     }
 
-    # Return the 3-letter code, or the original city name if not found
     return mapping.get((row['Lev'], city), city)
 
 
-def calculate_woba(row):
-    ubb = row['BB'] - row['IBB']
-    singles = row['H'] - row['2B'] - row['3B'] - row['HR']
+def calculate_woba(row: Dict[str, Any]) -> float:
+    """
+    Calculates the Weighted On-Base Average (wOBA) for a given hitter.
+
+    :param Dict[str, Any] row: A dictionary representing a DataFrame row with counting stats.
+    :return float: The calculated wOBA value.
+    """
+    ubb: float = row['BB'] - row['IBB']
+    singles: float = row['H'] - row['2B'] - row['3B'] - row['HR']
     
     # Constants
-    wBB = 0.709
-    wHBP = 0.740
-    w1B = 0.904
-    w2B = 1.281
-    w3B = 1.620
-    wHR = 2.080
+    wBB: float = 0.709
+    wHBP: float = 0.740
+    w1B: float = 0.904
+    w2B: float = 1.281
+    w3B: float = 1.620
+    wHR: float = 2.080
 
-    wOBA = ((wBB * ubb) + (wHBP * row['HBP']) + (w1B * singles) + (w2B * row['2B']) + \
+    wOBA: float = ((wBB * ubb) + (wHBP * row['HBP']) + (w1B * singles) + (w2B * row['2B']) + \
             (w3B * row['3B']) + (wHR * row['HR'])) / (row['AB'] + ubb + row['SF'] + row['HBP'])
 
     return wOBA
 
 
-def calculate_wrcplus(row: pl.DataFrame.row) -> float:
+def calculate_wrcplus(row: Dict[str, Any]) -> float:
     """
-    Row-wise function which caulculates wRC+ for each hitter. 
+    Row-wise function which calculates wRC+ for each hitter. 
 
-    :param pl.DataFrame.row row: Each row of the DataFrame containing hitter info
+    :param Dict[str, Any] row: Each row of the DataFrame containing hitter info.
     :return float: The calculated wRC+.
     """
-
     # Constants supplied from Fangraphs Guts
-    wOBAScale = 1.275
-    avgwOBA = 0.320
-    runsPerPA = 0.118
-    runsPerWin = 9.851
+    wOBAScale: float = 1.275
+    avgwOBA: float = 0.320
+    runsPerPA: float = 0.118
+    runsPerWin: float = 9.851
 
-    wRAA = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
+    wRAA: float = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
 
-    player_team = get_team_name(row['Lev'], row['Tm'])
-    parkFactor = get_park_factor(player_team)
+    player_team: str = get_team_name(row['Lev'], row['Tm'])
+    parkFactor: float = get_park_factor(player_team)
 
-    wRC = wRAA + (runsPerPA * row['PA'])
+    wRC: float = wRAA + (runsPerPA * row['PA'])
 
-    wRC_p = (((wRC / row['PA']) / runsPerPA) / parkFactor * 100)
+    wRC_p: float = (((wRC / row['PA']) / runsPerPA) / parkFactor * 100)
 
     return wRC_p
-
 
 
 def get_detailed_batter_stats(year: int) -> pl.DataFrame:
     """
     Gets basic hitting stats from bref and calculates wRC+, also adds xWOBA from statcast.
     
-    :param int year: The year for which to compute data
+    :param int year: The year for which to compute data.
     :return pl.DataFrame: DataFrame with robust data for each hitter.
     """
-
-    df = pl.from_pandas(pyb.batting_stats_bref(year))
+    df: pl.DataFrame = pl.from_pandas(pyb.batting_stats_bref(year))
 
     # Ignore players with 0 plate appearances
     df = df.filter(pl.col('PA') > 0)
@@ -203,33 +213,12 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
                 return_dtype=pl.Float64).alias('wRC+')
         )
 
-
-    xdf = pl.from_pandas(pyb.statcast_batter_expected_stats(year=2026, minPA=1))
+    xdf: pl.DataFrame = pl.from_pandas(pyb.statcast_batter_expected_stats(year=year, minPA=1))
     xdf = xdf[['player_id', 'est_woba']]
 
     df = df.rename({'mlbID': 'player_id'})
 
-    final_df = df.join(xdf, how='inner', on='player_id')
+    final_df: pl.DataFrame = df.join(xdf, how='inner', on='player_id')
 
     final_df = final_df.with_columns(
-            pl.struct(pl.all()).map_elements(get_fg_abbreviation, return_dtype=pl.String).alias('Team'),
-            pl.col('wRC+').round_sig_figs(3).cast(pl.Int32),
-            pl.col('Name').map_elements(
-                lambda x: x.encode('latin-1').decode('unicode_escape').encode('latin-1').decode('utf-8'), 
-                return_dtype=pl.String).alias('Name')
-        )
-
-    final_df = final_df.rename({
-        "est_woba": "xWOBA",
-        "player_id": "playerID",
-        "BA": "AVG"
-        })
-
-    final_df = final_df[['Name', 'playerID', 'Team', 'PA', 'AB', 'R', 'H', '2B', '3B', 'HR', 'RBI', 'BB', 'SO', 'SB', 'AVG', 'OBP', 'OPS', 'wRC+', 'xWOBA']]
-
-    return final_df
-
-
-if __name__ == '__main__':
-    df = get_detailed_batter_stats(2026)
-    print(df)
+            pl.struct(pl.
