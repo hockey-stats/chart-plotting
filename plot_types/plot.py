@@ -81,7 +81,13 @@ class Plot:
         if self.subtitle:
             #self.title += '\n\n'
             #plt.suptitle(self.subtitle, y=0.95, **subtitle_params)
-            plt.figtext(0.08, 0.92, self.subtitle, fontdict=subtitle_params)
+            # If there is a newline in the subtitle, place it a bit lower with a smaller fontsize
+            if '\n' in self.subtitle:
+                params = subtitle_params
+                params['size'] = 10
+                plt.figtext(0.09, 0.90, self.subtitle, fontdict=params)
+            else:
+                plt.figtext(0.09, 0.92, self.subtitle, fontdict=subtitle_params)
         if self.for_game_report:
             plt.title(self.title, fontdict=multiplot_subtitle_params)
         else:
