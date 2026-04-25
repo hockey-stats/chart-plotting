@@ -5,6 +5,7 @@ from matplotlib.offsetbox import AnnotationBbox
 from matplotlib.patches import Rectangle
 import seaborn as sns
 import pandas as pd
+import polars as pl
 
 from plot_types.plot import Plot, FancyAxes
 from util.font_dicts import game_report_label_text_params as label_params
@@ -487,10 +488,12 @@ class SwarmPlot(Plot):
                           colLoc='center',
                           rowLoc='left',
                           bbox=(0.65, 0.05, 0.35, 0.785),
-                          edges='B'
+                          edges='B',
                           )
 
-        table.set_fontsize(12)
+        table.auto_set_font_size(False)
+
+        table.set_fontsize(9)
 
         # Apply some specific formatting to the cells
         cells = table.properties()['celld']
@@ -513,3 +516,4 @@ class SwarmPlot(Plot):
                 cells[y, x].set_text_props(color='steelblue',
                                            path_effects=[PathEffects.withStroke(linewidth=0.2,
                                                                                 foreground='antiquewhite')])
+

@@ -117,8 +117,8 @@ def get_fg_abbreviation(row: Dict[str, Any]) -> str:
         ("Maj-AL", "Houston"): "HOU",
         ("Maj-AL", "Kansas City"): "KCR",
         ("Maj-AL", "Minnesota"): "MIN",
-        ("Maj-AL", "Oakland"): "OAK",
-        ("Maj-AL", "Athletics"): "OAK",
+        ("Maj-AL", "Oakland"): "ATH",
+        ("Maj-AL", "Athletics"): "ATH",
         ("Maj-AL", "Seattle"): "SEA",
         ("Maj-AL", "Tampa Bay"): "TBR",
         ("Maj-AL", "Texas"): "TEX",
@@ -241,4 +241,4 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
 
 if __name__ == '__main__':
     results_df: pl.DataFrame = get_detailed_batter_stats(2026)
-    print(results_df)
+    print(results_df.sort(by=pl.col('wRC+')))
