@@ -221,4 +221,24 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
     final_df: pl.DataFrame = df.join(xdf, how='inner', on='player_id')
 
     final_df = final_df.with_columns(
-            pl.struct(pl.
+            pl.struct(pl.all()).map_elements(get_fg_abbreviation, return_dtype=pl.String).alias('Team'),
+            pl.col('wRC+').round_sig_figs(3).cast(pl.Int32),
+            pl.col('Name').map_elements(
+                lambda x: x.encode('latin-1').decode('unicode_escape').encode('latin-1').decode('utf-8'), 
+                return_dtype=pl.String).alias('Name')
+        )
+
+    final_df = final_df.rename({
+        "est_woba": "xWOBA",
+        "player_id": "playerID",
+        "BA": "AVG"
+        })
+
+    final_df = final_df[['Name', 'playerID', 'Team', 'PA', 'AB', 'R', 'H', '2B', '3B', 'HR', 'RBI', 'BB', 'SO', 'SB', 'AVG', 'OBP', 'OPS', 'wRC+', 'xWOBA']]
+
+    return final_df
+
+
+if __name__ == '__main__':
+    results_df: pl.DataFrame = get_detailed_batter_stats(2026)
+    print(results_df)
