@@ -12,8 +12,6 @@ from util.get_detailed_batter_stats import get_detailed_batter_stats
 
 def main(year, qual, team):
     qual = 20
-    #data = pyb.batting_stats(year, qual=qual)[['Team', 'Name', 'PA', 'wRC+', 'AVG',
-    #                                           'WAR', 'HR', 'OPS', 'Barrel%', 'maxEV']]
     data = get_detailed_batter_stats(year)
     data = data.rename({"Team": 'team'})
 
