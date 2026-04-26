@@ -31,6 +31,8 @@ env:
 jobs:
   plot-graphs:
     runs-on: ubuntu-latest
+    container:
+      image: sohraub/chart-plotter:main
     outputs:
       plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
     ###
