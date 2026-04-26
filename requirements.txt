@@ -8,3 +8,4 @@ yahoo_oauth
 polars==1.29.0
 unidecode
 pyhockey==0.2.0
+yahoo-fantasy-api
