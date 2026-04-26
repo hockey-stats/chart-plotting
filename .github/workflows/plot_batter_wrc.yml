@@ -32,7 +32,7 @@ jobs:
   plot-graphs:
     runs-on: ubuntu-latest
     container:
-      image: sohraub/hockey-stats-web-scraper:main
+      image: sohraub/chart-plotter:main
     outputs:
       plot_artifact_name: ${{ steps.set-output.outputs.plot_artifact_name }}
     ###
