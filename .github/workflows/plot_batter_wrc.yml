@@ -42,9 +42,6 @@ jobs:
         with:
           repository: hockey-stats/chart-plotting
       #
-      - name: Install Requirements
-        run: pip install -r requirements.txt
-      #
       - name: Generate Charts
         env:
           PYTHONPATH: ${{ github.workspace }}
