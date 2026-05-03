@@ -39,7 +39,7 @@ def get_park_factor(team: str) -> float:
         'Tigers': 100.30543804168701,
         'Twins': 100.81133842468262,
         'White Sox': 100.31185150146484,
-        'Yankees': 98.9298939704895
+        'Yankees': 98.9298939704895,
     }
 
     return mapping[team] / 100
@@ -55,6 +55,9 @@ def get_team_name(lev: str, tm: str) -> str:
     """
     # Handle multi-team strings like 'Chicago,Houston' by taking the final team
     current_city: str = tm.split(',')[-1].strip()
+
+    # Do the same with mult-league strings
+    lev: str = lev.split(',')[-1].strip()
 
     mapping: Dict[Tuple[str, str], str] = {
         ("Maj-AL", "Chicago"): "White Sox",
@@ -242,3 +245,4 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
 if __name__ == '__main__':
     results_df: pl.DataFrame = get_detailed_batter_stats(2026)
     print(results_df.sort(by=pl.col('wRC+')))
+
