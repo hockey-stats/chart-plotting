@@ -15,9 +15,6 @@ def main(year, qual, team):
     data = get_detailed_batter_stats(year)
     data = data.rename({"Team": 'team'})
 
-    with pl.Config(tbl_rows=100):
-        print(data.filter(pl.col("team") == 'TOR'))
-
     data = data.filter(pl.col('PA') >= qual)
 
     #data = fix_teams_for_traded_batters(data)
@@ -66,6 +63,9 @@ def get_teamwide_wrc(df: pl.DataFrame, team_name: str) -> Tuple[int, int]:
             pl.col("Team_wRC+").rank(method="min", descending=True).cast(pl.Int32).alias("Rank")
         )
     )
+
+    with pl.Config(tbl_rows=40):
+        print(team_standings)
 
     # 4. Extract the specific team's values
     team_data = team_standings.filter(pl.col("team") == team_name)

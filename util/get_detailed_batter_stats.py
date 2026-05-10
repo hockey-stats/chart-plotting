@@ -106,6 +106,9 @@ def get_fg_abbreviation(row: Dict[str, Any]) -> str:
     # Clean the team name (handles 'Chicago,Houston' by taking the last team)
     city: str = row['Tm'].split(',')[-1].strip()
 
+    # Do the same with mult-league strings
+    lev: str = row['Lev'].split(',')[-1].strip()
+
     mapping: Dict[Tuple[str, str], str] = {
         ("Maj-AL", "Chicago"): "CHW",
         ("Maj-NL", "Chicago"): "CHC",
@@ -140,7 +143,7 @@ def get_fg_abbreviation(row: Dict[str, Any]) -> str:
         ("Maj-NL", "Washington"): "WSN"
     }
 
-    return mapping.get((row['Lev'], city), city)
+    return mapping.get((lev, city), city)
 
 
 def calculate_woba(row: Dict[str, Any]) -> float:
@@ -152,7 +155,7 @@ def calculate_woba(row: Dict[str, Any]) -> float:
     """
     ubb: float = row['BB'] - row['IBB']
     singles: float = row['H'] - row['2B'] - row['3B'] - row['HR']
-    
+
     # Constants
     wBB: float = 0.709
     wHBP: float = 0.740
@@ -178,7 +181,6 @@ def calculate_wrcplus(row: Dict[str, Any]) -> float:
     wOBAScale: float = 1.275
     avgwOBA: float = 0.320
     runsPerPA: float = 0.118
-    runsPerWin: float = 9.851
 
     wRAA: float = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
 
@@ -187,7 +189,7 @@ def calculate_wrcplus(row: Dict[str, Any]) -> float:
 
     wRC: float = wRAA + (runsPerPA * row['PA'])
 
-    wRC_p: float = (((wRC / row['PA']) / runsPerPA) / parkFactor * 100)
+    wRC_p: float = ((wRC / row['PA']) / runsPerPA) / parkFactor * 100
 
     return wRC_p
 
@@ -211,9 +213,8 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
     pl.Config(tbl_rows=100, tbl_cols=40)
 
     df = df.with_columns(
-            pl.struct(pl.all()).map_elements(
-                lambda row: calculate_wrcplus(row),
-                return_dtype=pl.Float64).alias('wRC+')
+            pl.struct(pl.all()).map_elements(calculate_wrcplus, return_dtype=pl.Float64)\
+                .alias('wRC+')
         )
 
     xdf: pl.DataFrame = pl.from_pandas(pyb.statcast_batter_expected_stats(year=year, minPA=1))
@@ -224,10 +225,14 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
     final_df: pl.DataFrame = df.join(xdf, how='inner', on='player_id')
 
     final_df = final_df.with_columns(
-            pl.struct(pl.all()).map_elements(get_fg_abbreviation, return_dtype=pl.String).alias('Team'),
+            pl.struct(pl.all()).map_elements(get_fg_abbreviation, 
+                                             return_dtype=pl.String).alias('Team'),
             pl.col('wRC+').round_sig_figs(3).cast(pl.Int32),
             pl.col('Name').map_elements(
-                lambda x: x.encode('latin-1').decode('unicode_escape').encode('latin-1').decode('utf-8'), 
+                lambda x: x.encode('latin-1')\
+                    .decode('unicode_escape')\
+                    .encode('latin-1')\
+                    .decode('utf-8'), 
                 return_dtype=pl.String).alias('Name')
         )
 
@@ -237,7 +242,8 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
         "BA": "AVG"
         })
 
-    final_df = final_df[['Name', 'playerID', 'Team', 'PA', 'AB', 'R', 'H', '2B', '3B', 'HR', 'RBI', 'BB', 'SO', 'SB', 'AVG', 'OBP', 'OPS', 'wRC+', 'xWOBA']]
+    final_df = final_df[['Name', 'playerID', 'Team', 'PA', 'AB', 'R', 'H', '2B', '3B', 'HR', 
+                         'RBI', 'BB', 'SO', 'SB', 'AVG', 'OBP', 'OPS', 'wRC+', 'xWOBA']]
 
     return final_df
 
@@ -245,4 +251,3 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
 if __name__ == '__main__':
     results_df: pl.DataFrame = get_detailed_batter_stats(2026)
     print(results_df.sort(by=pl.col('wRC+')))
-
