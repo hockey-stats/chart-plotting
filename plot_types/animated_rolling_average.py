@@ -80,7 +80,7 @@ class AnimatedRollingAveragePlot(RollingAveragePlot):
             self.axis.set_ylabel(self.y_label, fontdict=label_text_params, labelpad=16.0)
 
             teams = list(set(self.df['team']))
-            team = teams[i % 8]
+            team = teams[i % 5]
             team_df = self.df.filter(pl.col('team') == team)
             else_df = self.df.filter(pl.col('team') != team)
 
