@@ -409,6 +409,7 @@ class SwarmPlot(Plot):
         """
 
         #metric_ratio = min(1.0, float(self.team_level_metric) / 200.0)
+        print(self.team_rank)
         metric_ratio = 1 - (float(self.team_rank) / 30.0)
         metric_color = ratio_to_color(metric_ratio)
 
