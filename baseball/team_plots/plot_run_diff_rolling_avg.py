@@ -83,8 +83,8 @@ def main(division: int) -> None:
     # American League East -> AL East
     division_name_shorthand = f"{division_name[0]}L {division_name.split(' ')[-1]}"
 
-    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages (Last {NUM_GAMES} Games)"
-    subtitle = f"Over the last {NUM_GAMES} games"
+    plot_title = f"{division_name_shorthand} Run Differential - Rolling Averages"
+    subtitle = f"Shows rolling run differentrial over the last {NUM_GAMES} games"
 
     plot = AnimatedRollingAveragePlot(dataframe=df, filename="run_diff_rolling_avg.png",
                                       x_column='gameNumber',
