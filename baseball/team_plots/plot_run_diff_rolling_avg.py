@@ -11,7 +11,7 @@ from plot_types.animated_rolling_average import AnimatedRollingAveragePlot
 pd.options.mode.chained_assignment = None
 
 # Number of games over which to compute the rolling average
-WINDOW = 15
+WINDOW = 10
 # Number of games to include in plot
 NUM_GAMES = 30
 
