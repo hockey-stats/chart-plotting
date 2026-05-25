@@ -157,12 +157,12 @@ def calculate_woba(row: Dict[str, Any]) -> float:
     singles: float = row['H'] - row['2B'] - row['3B'] - row['HR']
 
     # Constants
-    wBB: float = 0.709
-    wHBP: float = 0.740
-    w1B: float = 0.904
+    wBB: float = 0.703
+    wHBP: float = 0.734
+    w1B: float = 0.900
     w2B: float = 1.281
-    w3B: float = 1.620
-    wHR: float = 2.080
+    w3B: float = 1.625
+    wHR: float = 2.097
 
     wOBA: float = ((wBB * ubb) + (wHBP * row['HBP']) + (w1B * singles) + (w2B * row['2B']) + \
             (w3B * row['3B']) + (wHR * row['HR'])) / (row['AB'] + ubb + row['SF'] + row['HBP'])
@@ -178,9 +178,9 @@ def calculate_wrcplus(row: Dict[str, Any]) -> float:
     :return float: The calculated wRC+.
     """
     # Constants supplied from Fangraphs Guts
-    wOBAScale: float = 1.275
-    avgwOBA: float = 0.320
-    runsPerPA: float = 0.118
+    wOBAScale: float = 1.272
+    avgwOBA: float = 0.316
+    runsPerPA: float = 0.116
 
     wRAA: float = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
 
@@ -251,3 +251,4 @@ def get_detailed_batter_stats(year: int) -> pl.DataFrame:
 if __name__ == '__main__':
     results_df: pl.DataFrame = get_detailed_batter_stats(2026)
     print(results_df.sort(by=pl.col('wRC+')))
+
