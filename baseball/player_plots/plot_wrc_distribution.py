@@ -11,7 +11,6 @@ from util.fix_traded_mlb_players import fix_teams_for_traded_batters
 from util.get_detailed_batter_stats import get_detailed_batter_stats
 
 def main(year, qual, team):
-    qual = 20
     data = get_detailed_batter_stats(year)
     data = data.rename({"Team": 'team'})
 
@@ -90,3 +89,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(year=args.year, qual=args.qual, team=args.team)
+
