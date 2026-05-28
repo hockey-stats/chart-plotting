@@ -57,7 +57,7 @@ def get_team_name(lev: str, tm: str) -> str:
     current_city: str = tm.split(',')[-1].strip()
 
     # Do the same with mult-league strings
-    lev: str = lev.split(',')[-1].strip()
+    current_lev: str = lev.split(',')[-1].strip()
 
     mapping: Dict[Tuple[str, str], str] = {
         ("Maj-AL", "Chicago"): "White Sox",
@@ -92,7 +92,24 @@ def get_team_name(lev: str, tm: str) -> str:
         ("Maj-NL", "St. Louis"): "Cardinals",
     }
 
-    return mapping.get((lev, current_city), current_city)
+    try:
+        team_name = mapping[(current_lev, current_city)]
+
+    except KeyError as e:
+        # In cases where a player was traded between leagues, the index of their new team might not
+        # match the index of their new league. So we check if the mapping entry exists in the other
+        # league as well, and return that if found.
+        print(f"lev: {lev}, tm: {tm}")
+        if current_lev == 'Maj-NL':
+            current_lev = 'Maj-AL'
+        else:
+            current_lev = 'Maj-NL'
+        team_name = mapping.get((current_lev, current_city), "")
+        if team_name == "":
+            raise e
+
+    return team_name
+
 
 
 def get_fg_abbreviation(row: Dict[str, Any]) -> str:
@@ -184,7 +201,7 @@ def calculate_wrcplus(row: Dict[str, Any]) -> float:
 
     wRAA: float = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
 
-    player_team: str = get_team_name(row['Lev'], row['Tm'])
+    player_team: str = get_team_name(row['Lev'], row['Tm'], row)
     parkFactor: float = get_park_factor(player_team)
 
     wRC: float = wRAA + (runsPerPA * row['PA'])
