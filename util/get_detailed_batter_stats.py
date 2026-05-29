@@ -201,7 +201,7 @@ def calculate_wrcplus(row: Dict[str, Any]) -> float:
 
     wRAA: float = ((row['wOBA'] - avgwOBA) / wOBAScale) * row['PA']
 
-    player_team: str = get_team_name(row['Lev'], row['Tm'], row)
+    player_team: str = get_team_name(row['Lev'], row['Tm'])
     parkFactor: float = get_park_factor(player_team)
 
     wRC: float = wRAA + (runsPerPA * row['PA'])
