@@ -4,11 +4,11 @@ from typing import Tuple
 
 import pybaseball as pyb
 import polars as pl
+from mlb_stats_util import get_detailed_batter_stats
 
 from plot_types.swarm import SwarmPlot
 from util.team_maps import mlb_team_full_names
 from util.fix_traded_mlb_players import fix_teams_for_traded_batters
-from util.get_detailed_batter_stats import get_detailed_batter_stats
 
 def main(year, qual, team):
     data = get_detailed_batter_stats(year)
@@ -32,7 +32,7 @@ def main(year, qual, team):
                       team_level_metric=team_wrc,
                       team_rank=team_rank,
                       y_label='wRC+',
-                      table_columns=['PAs', 'AVG', 'HRs', 'OPS', 'xWOBA'],
+                      table_columns=['PAs', 'AVG', 'HRs', 'OPS', 'xwOBA'],
                       title=plot_title,
                       data_disclaimer='baseballreference',
                       subtitle=f"Plotted against league distribution, min. {qual} PAs\n"\
