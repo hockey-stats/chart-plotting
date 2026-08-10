@@ -173,7 +173,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "matplotlib", specifier = "==3.8.0" },
-    { name = "mlb-stats-util", specifier = ">=0.1.1" },
+    { name = "mlb-stats-util", specifier = ">=0.3.0" },
     { name = "numpy", specifier = "==1.26.0" },
     { name = "pandas", specifier = "==2.1.2" },
     { name = "polars", specifier = ">=1.39.0" },
@@ -669,15 +669,15 @@ wheels = [
 
 [[package]]
 name = "mlb-stats-util"
-version = "0.1.1"
+version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "polars" },
     { name = "pybaseball" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/22/a9/28840b5dba6b2e872ebeb6d287a46b4fa3410488a7df7218e9d9bb64e8bd/mlb_stats_util-0.1.1.tar.gz", hash = "sha256:1d62aea675a6460ef87f575998b672763f7a9b8739de6258b86c8f510f3d43fa", size = 4987, upload-time = "2026-05-29T15:43:00.931Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/bf/6f0d4f2a6a11d002da282b5e0080dbf1b4d78891438a1a59ed382224b49c/mlb_stats_util-0.3.0.tar.gz", hash = "sha256:3144103159e4aee1e03a8b9ac15d06f700830f7dda97e2e75d9d285d898382af", size = 7080, upload-time = "2026-08-10T14:52:21.019Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/b3/b0656d05328ce51c07e8e4b478b5a19a554468fe1ef346b4b302b11704f3/mlb_stats_util-0.1.1-py3-none-any.whl", hash = "sha256:e52e9c46e8a343e973c8a12100382a400d3b47f692cbc72a3fa54df3014d7f86", size = 6873, upload-time = "2026-05-29T15:43:00.048Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/89/bb772015483315b75e2642fd2440dc9e2291172c85dc4909200e6bf22c7b/mlb_stats_util-0.3.0-py3-none-any.whl", hash = "sha256:96053a3b81f03df02f6ba7d6cd6cf438befe635dc63d74a5d4fa5d370223e185", size = 10577, upload-time = "2026-08-10T14:52:20.019Z" },
 ]
 
 [[package]]
