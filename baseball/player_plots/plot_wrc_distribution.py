@@ -14,10 +14,9 @@ from util.fix_traded_mlb_players import fix_teams_for_traded_batters
 def main(year, qual, team):
     data = get_detailed_batter_stats(year)
     data = data.rename({"Team": "team"})
-
     data = data.filter(pl.col("PAs") >= qual)
 
-    # data = fix_teams_for_traded_batters(data)
+    data = fix_teams_for_traded_batters(data)
 
     team_full_name = mlb_team_full_names[team]
 

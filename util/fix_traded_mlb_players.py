@@ -1,121 +1,123 @@
+import polars as pl
 import pandas as pd
 
 
-def fix_teams_for_traded_pitchers(df: pd.DataFrame) -> pd.DataFrame:
+def fix_teams_for_traded_pitchers(df):
     """
-    For players who have played on multiple teams, fangraphs returns their 'Team' value as
-    '- - -'. Replace these values with the actual current team.
+    For players who have played on multiple teams, replace their team abbreviation
+    with the actual current team.
+    Supports both pandas and polars DataFrames.
     """
-    traded_players = list(df[df['team'] == '- - -']['Name'])
+    is_pandas = isinstance(df, pd.DataFrame)
+    if is_pandas:
+        ldf = pl.from_pandas(df)
+    else:
+        ldf = df
+
     traded_db = {
-        'Jordan Hicks': 'BOS',
-        'Sean Newcomb': 'ATH',
-        'Tyler Alexander': 'CHW',
-        'Aaron Civale': 'CHW',
-        'Bryan Baker': 'TBR',
-        'Joey Wentz': 'ATL',
-        'Carlos Hernandez': 'DET',
-        'Jorge Alcala': 'BOS',
-        'Lou Trivino': 'LAD',
-        'Scott Blewett': 'BAL',
-        'Luis Garcia': 'LAA',
-        'Andrew Chafin': 'LAA',
-        'Jake Eder': 'WSN',
-        'Tyler Kinley': 'ATL',
-        'Austin Smith': 'COL',
-        'Gage Ziehl': 'CWS',
-        'Seranthony Dominguez': 'TOR',
-        'Carlos Carrasco': 'ATL',
-        'Chris Paddack': 'DET',
-        'Randy Dobnak': 'DET',
-        'Amed Rosario': 'NYY',
-        'Randal Grichuk': 'KCR',
-        "Ke'Byran Hayes": "CIN",
-        "Mason Miller": "SDP",
-        "JP Sears": "SDP",
-        "Shane Bieber": "TOR",
-        "Steven Matz": "BOS",
-        "Andrew Kittredge": "CHI",
-        "Zack Litell": "CIN",
-        "Rafael Montero": "DET",
-        "Michael Soroka": "CHI",
-        "Ryan Helsley": "NYM",
-        "Jhoan Duran": "PHI",
-        "Mick Abel": "MIN",
-        "Caleb Ferguson": "SEA",
-        "Tyler Rogers": "NYM",
-        "Taylor Rogers": "PIT",
-        "Charlie Morton": "DET",
-        "Shelby Miller": "MIL",
-        "Jordan Montgomery": "MIL",
-        "Phil Maton": "TEX",
-        "Louie Varland": "TOR",
-        "Griffin Jax": "TBR",
-        "Camilo Doval": "NYY",
-        "Bailey Falter": "KCR",
-        "Adrian Houser": "TBR",
-        "Nestor Cortes": "SDP",
-        "Dustin May": "BOS",
-        "Merril Kelly": "TEX",
-        "Jake Bird": "NYY",
-        "David Bednar": "NYY",
-        "Codei Heuer": "DET",
-        "Paul Sewald": "DET",
-        "Brock Stewart": "LAD",
-        "Kyle Finnegan": "DET",
+        "Tarik Skubal": "LAD",
+        "Freddy Peralta": "TBR",
+        "Kevin Gausman": "CHC",
+        "Tyler Mahle": "ATL",
+        "Huascar Brazoban": "CHW",
+        "Camilo Doval": "PIT",
+        "Bailey Falter": "ATL",
+        "Dean Kremer": "MIN",
+        "A.J. Minter": "MIN",
+        "Chase Silseth": "TEX",
+        "Jameson Taillon": "TOR",
+        "Aaron Civale": "CHC",
+        "Codi Heuer": "MIL",
+        "Craig Yoho": "CLE",
+        "Casey Mize": "SDP",
+        "Foster Griffin": "CLE",
+        "Clay Holmes": "CHC",
+        "Dustin May": "MIL",
+        "JoJo Romero": "MIL",
+        "Luke Weaver": "PIT",
+        "Kris Bubic": "LAD",
+        "Robbie Ray": "SDP",
+        "Tyler Wells": "TBR",
+        "Ryan Zeferjahn": "CHC",
+        "Braxton Garrett": "CHC",
+        "Antonio Senzatela": "MIL",
+        "Jeff Hoffman": "MIN",
+        "Erik Miller": "BOS",
+        "Brooks Raley": "PHI",
+        "Brent Suter": "ATL",
+        "Jose Soriano": "TOR",
+        "Caleb Kilian": "PHI",
+        "Luis Castillo": "CHW",
+        "Kirby Yates": "PIT",
+        "Hunter Stratton": "SDP",
+        "Lake Bachar": "PIT",
+        "Caleb Ferguson": "STL",
+        "Seranthony Dominguez": "CHW",
+        "Jose Urquidy": "CHW",
+        "Seth Halvorsen": "LAD",
+        "Nick Frasso": "COL",
+        "Landyn Vidourek": "COL",
+        "Anthony Molina": "SFG",
+        "Victor Vodnik": "MIA",
     }
 
-    for name in traded_players:
-        if name in traded_db:
-            index = df[df['Name'] == name].index
-            df.loc[index, 'team'] = traded_db[name]
+    ldf = ldf.with_columns(
+        pl.col("Name").replace(traded_db, default=pl.col("team")).alias("team")
+    )
 
-    return df
+    if is_pandas:
+        return ldf.to_pandas()
+    return ldf
 
 
-def fix_teams_for_traded_batters(df: pd.DataFrame) -> pd.DataFrame:
+def fix_teams_for_traded_batters(df):
     """
-    For players who have played on multiple teams, fangraphs returns their 'Team' value as
-    '- - -'. Replace these values with the actual current team.
+    For players who have played on multiple teams, replace their team abbreviation
+    with the actual current team.
+    Supports both pandas and polars DataFrames.
     """
-    traded_players = list(df[df['team'] == '- - -']['Name'])
+    is_pandas = isinstance(df, pd.DataFrame)
+    if is_pandas:
+        ldf = pl.from_pandas(df)
+    else:
+        ldf = df
+
     traded_db = {
-        'Rafael Devers': 'SFG',
-        'Kody Clemens': 'MIN',
-        'Matt Thaiss': 'TBR',
-        'Austin Wynns': 'ATH',
-        'Garret Hampson': 'STL',
-        'Jonah Bride': 'MIN',
-        'Leody Taveras': 'SEA',
-        'LaMonte Wade Jr.': 'LAA',
-        'Josh Naylor': 'SEA',
-        'Ryan McMahon': 'NYY',
-        'Sam Brown': 'WSN',
-        'Austin Slater': 'NYY',
-        'Nick Fortes': 'TBR',
-        'Matthew Etzel': 'MIA',
-        'Danny Jansen': 'MIL',
-        'Andrew Hoffman': 'ARI',
-        "Ramon Urias": "HOU",
-        "Eugenio Suarez": "SEA",
-        "Mike Yastrzemski": "KCR",
-        "Miguel Andujar": "CIN",
-        "Ty France": "TOR",
-        "Alan Roden": "MIN",
-        "Jose Caballero": "NYY",
-        "Oswald Peraza": "LAA",
-        "Willi Castro": "CHC",
-        "Jesus Sanchez": "TEX",
-        "Ryan O'Hearn": "SDP",
-        "Ramon Laureano": "SDP",
-        "Carlos Correa": "HOU",
-        "Cedric Mullins": "NYM",
-        "Harrison Bader": "PHI",
-        "Andrew Vaughn": "MIL"
+        "Adley Rutschman": "BOS",
+        "Luis Arraez": "PHI",
+        "Heliot Ramos": "NYY",
+        "Daulton Varsho": "HOU",
+        "Lane Thomas": "ATL",
+        "Blake Perkins": "CLE",
+        "Bo Naylor": "MIL",
+        "Logan O'Hoppe": "TEX",
+        "Luis Garcia Jr.": "NYY",
+        "Lars Nootbaar": "ARI",
+        "Nathaniel Lowe": "CLE",
+        "Ben Rortvedt": "LAD",
+        "Eli White": "BOS",
+        "Joey Bart": "CHW",
+        "Liam Hicks": "TBR",
+        "Taylor Ward": "SEA",
+        "Jo Adell": "CLE",
+        "Brenton Doyle": "CHW",
+        "Josh Smith": "TOR",
+        "Curtis Mead": "BOS",
+        "Marcelo Mayer": "SFG",
+        "Tyrone Taylor": "CHC",
+        "Juan Brito": "CIN",
+        "Colby Thomas": "PHI",
+        "Rece Hinds": "BAL",
+        "Jack Suwinski": "TBR",
+        "Christian Franklin": "BAL",
+        "Nolan Jones": "CHW",
+        "Jake Rogers": "BOS",
     }
-    for name in traded_players:
-        if name in traded_db:
-            index = df[df['Name'] == name].index
-            df.loc[index, 'team'] = traded_db[name]
 
-    return df
+    ldf = ldf.with_columns(
+        pl.col("Name").replace(traded_db, default=pl.col("team")).alias("team")
+    )
+
+    if is_pandas:
+        return ldf.to_pandas()
+    return ldf
